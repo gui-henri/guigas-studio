@@ -32,8 +32,12 @@ func NewAuthInterceptor(verifyToken VerifyToken, runnerToken string) connect.Int
 	return connect.UnaryInterceptorFunc(func(next connect.UnaryFunc) connect.UnaryFunc {
 		return connect.UnaryFunc(func(ctx context.Context, req connect.AnyRequest) (connect.AnyResponse, error) {
 			if _, isPublic := PublicProcedures[req.Spec().Procedure]; !isPublic {
-				if !authorized(req.Header().Get("Authorization"), verifyToken, runnerToken) {
+				claims, ok := authorized(req.Header().Get("Authorization"), verifyToken, runnerToken)
+				if !ok {
 					return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("missing or invalid bearer token"))
+				}
+				if claims != nil {
+					ctx = auth.WithClaims(ctx, claims)
 				}
 			}
 			return next(ctx, req)
@@ -41,19 +45,19 @@ func NewAuthInterceptor(verifyToken VerifyToken, runnerToken string) connect.Int
 	})
 }
 
-func authorized(authorization string, verifyToken VerifyToken, runnerToken string) bool {
+func authorized(authorization string, verifyToken VerifyToken, runnerToken string) (claims *auth.Claims, ok bool) {
 	if !strings.HasPrefix(authorization, bearerPrefix) {
-		return false
+		return nil, false
 	}
 	raw := strings.TrimSpace(strings.TrimPrefix(authorization, bearerPrefix))
 	if raw == "" {
-		return false
+		return nil, false
 	}
-	if _, err := verifyToken(raw); err == nil {
-		return true
+	if c, err := verifyToken(raw); err == nil {
+		return c, true
 	}
 	if runnerToken != "" && subtle.ConstantTimeCompare([]byte(raw), []byte(runnerToken)) == 1 {
-		return true
+		return nil, true // PAT: authenticated as the runner, no user claims
 	}
-	return false
+	return nil, false
 }

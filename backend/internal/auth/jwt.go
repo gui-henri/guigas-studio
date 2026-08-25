@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"context"
 	"errors"
 	"time"
 
@@ -14,6 +15,28 @@ const DefaultTTL = 12 * time.Hour
 type Claims struct {
 	UserID string `json:"uid,omitempty"`
 	jwt.RegisteredClaims
+}
+
+// claimsKey is the context key for authenticated user claims.
+type claimsKey struct{}
+
+// WithClaims stores authenticated claims in ctx (used by the auth interceptor).
+func WithClaims(ctx context.Context, claims *Claims) context.Context {
+	return context.WithValue(ctx, claimsKey{}, claims)
+}
+
+// ActorFromContext returns the acting identity: the JWT subject, "runner" for
+// PAT requests, or "anonymous" when nothing is present (public procedures).
+func ActorFromContext(ctx context.Context) string {
+	if claims, ok := ctx.Value(claimsKey{}).(*Claims); ok && claims != nil {
+		if claims.UserID != "" {
+			return claims.UserID
+		}
+		if claims.Subject != "" {
+			return claims.Subject
+		}
+	}
+	return "runner"
 }
 
 // IssueToken signs a HS256 JWT for the user with the given TTL.

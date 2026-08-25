@@ -6,6 +6,19 @@ RETURNING *;
 -- name: UpdateVideoStatus :exec
 UPDATE videos SET status = $2, updated_at = now() WHERE id = $1;
 
+-- name: SetOriginalScript :execrows
+UPDATE videos SET original_script = $2 WHERE id = $1 AND original_script IS NULL;
+
+-- name: GetOriginalScript :one
+SELECT original_script FROM videos WHERE id = $1;
+
+-- name: InsertStatusChange :exec
+INSERT INTO video_status_history (video_id, status, reason, actor)
+VALUES ($1, $2, $3, $4);
+
+-- name: ListStatusHistoryByVideo :many
+SELECT * FROM video_status_history WHERE video_id = $1 ORDER BY created_at ASC;
+
 -- name: InsertRssItem :execrows
 INSERT INTO rss_items (guid, video_id)
 VALUES ($1, $2)

@@ -25,13 +25,14 @@ type User struct {
 }
 
 type Video struct {
-	ID        uuid.UUID `json:"id"`
-	Slug      string    `json:"slug"`
-	Title     string    `json:"title"`
-	SourceUrl string    `json:"source_url"`
-	Status    string    `json:"status"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID             uuid.UUID `json:"id"`
+	Slug           string    `json:"slug"`
+	Title          string    `json:"title"`
+	SourceUrl      string    `json:"source_url"`
+	Status         string    `json:"status"`
+	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
+	OriginalScript []byte    `json:"original_script"`
 }
 
 type VideoArtifactParse struct {
@@ -40,5 +41,14 @@ type VideoArtifactParse struct {
 	Artifact  string    `json:"artifact"`
 	Valid     bool      `json:"valid"`
 	Errors    []byte    `json:"errors"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+type VideoStatusHistory struct {
+	ID        uuid.UUID `json:"id"`
+	VideoID   uuid.UUID `json:"video_id"`
+	Status    string    `json:"status"`
+	Reason    string    `json:"reason"`
+	Actor     string    `json:"actor"`
 	CreatedAt time.Time `json:"created_at"`
 }

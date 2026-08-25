@@ -18,3 +18,18 @@ export const getVideo = VideoService.method.getVideo;
  * @generated from rpc app.studio.v1.VideoService.CreateVideo
  */
 export const createVideo = VideoService.method.createVideo;
+
+/**
+ * @generated from rpc app.studio.v1.VideoService.UpdateScript
+ */
+export const updateScript = VideoService.method.updateScript;
+
+/**
+ * @generated from rpc app.studio.v1.VideoService.ApproveScript
+ */
+export const approveScript = VideoService.method.approveScript;
+
+/**
+ * @generated from rpc app.studio.v1.VideoService.RejectScript
+ */
+export const rejectScript = VideoService.method.rejectScript;

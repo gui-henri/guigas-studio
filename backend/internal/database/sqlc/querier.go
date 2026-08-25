@@ -14,13 +14,17 @@ type Querier interface {
 	CountRssItems(ctx context.Context) (int64, error)
 	CreateUserIfNotExists(ctx context.Context, arg CreateUserIfNotExistsParams) (int64, error)
 	CreateVideo(ctx context.Context, arg CreateVideoParams) (Video, error)
+	GetOriginalScript(ctx context.Context, id uuid.UUID) ([]byte, error)
 	GetUserByUsername(ctx context.Context, username string) (User, error)
 	GetVideo(ctx context.Context, id uuid.UUID) (Video, error)
 	GetVideoBySlug(ctx context.Context, slug string) (Video, error)
 	InsertArtifactParse(ctx context.Context, arg InsertArtifactParseParams) (VideoArtifactParse, error)
 	InsertRssItem(ctx context.Context, arg InsertRssItemParams) (int64, error)
+	InsertStatusChange(ctx context.Context, arg InsertStatusChangeParams) error
 	ListParsesByVideo(ctx context.Context, videoID uuid.UUID) ([]VideoArtifactParse, error)
+	ListStatusHistoryByVideo(ctx context.Context, videoID uuid.UUID) ([]VideoStatusHistory, error)
 	ListVideos(ctx context.Context) ([]Video, error)
+	SetOriginalScript(ctx context.Context, arg SetOriginalScriptParams) (int64, error)
 	SetRssItemVideo(ctx context.Context, arg SetRssItemVideoParams) error
 	UpdateVideoStatus(ctx context.Context, arg UpdateVideoStatusParams) error
 }

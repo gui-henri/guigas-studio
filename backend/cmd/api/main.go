@@ -45,7 +45,7 @@ func newHandler(cfg config.Config, db *database.DB) http.Handler {
 	}
 	mux.Handle(studiov1connect.NewHealthServiceHandler(services.NewHealthService(), connect.WithInterceptors(interceptors...)))
 	mux.Handle(studiov1connect.NewAuthServiceHandler(services.NewAuthService(db.Pool, cfg.Auth.JWTSecret), connect.WithInterceptors(interceptors...)))
-	mux.Handle(studiov1connect.NewVideoServiceHandler(services.NewVideoService(db), connect.WithInterceptors(interceptors...)))
+	mux.Handle(studiov1connect.NewVideoServiceHandler(services.NewVideoService(db.Queries, cfg.DataDir), connect.WithInterceptors(interceptors...)))
 
 	return h2c.NewHandler(mux, &http2.Server{})
 }

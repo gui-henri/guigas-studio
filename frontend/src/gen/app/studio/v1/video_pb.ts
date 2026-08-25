@@ -4,13 +4,15 @@
 
 import type { GenEnum, GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
 import { enumDesc, fileDesc, messageDesc, serviceDesc } from "@bufbuild/protobuf/codegenv2";
+import type { StudioScript } from "./script_pb";
+import { file_app_studio_v1_script } from "./script_pb";
 import type { Message } from "@bufbuild/protobuf";
 
 /**
  * Describes the file app/studio/v1/video.proto.
  */
 export const file_app_studio_v1_video: GenFile = /*@__PURE__*/
-  fileDesc("ChlhcHAvc3R1ZGlvL3YxL3ZpZGVvLnByb3RvEg1hcHAuc3R1ZGlvLnYxIpgBCgVWaWRlbxIKCgJpZBgBIAEoCRIMCgRzbHVnGAIgASgJEg0KBXRpdGxlGAMgASgJEhIKCnNvdXJjZV91cmwYBCABKAkSKgoGc3RhdHVzGAUgASgOMhouYXBwLnN0dWRpby52MS5WaWRlb1N0YXR1cxISCgpjcmVhdGVkX2F0GAYgASgJEhIKCnVwZGF0ZWRfYXQYByABKAkiEwoRTGlzdFZpZGVvc1JlcXVlc3QiOgoSTGlzdFZpZGVvc1Jlc3BvbnNlEiQKBnZpZGVvcxgBIAMoCzIULmFwcC5zdHVkaW8udjEuVmlkZW8iHQoPR2V0VmlkZW9SZXF1ZXN0EgoKAmlkGAEgASgJIjcKEEdldFZpZGVvUmVzcG9uc2USIwoFdmlkZW8YASABKAsyFC5hcHAuc3R1ZGlvLnYxLlZpZGVvIkUKEkNyZWF0ZVZpZGVvUmVxdWVzdBIMCgRzbHVnGAEgASgJEg0KBXRpdGxlGAIgASgJEhIKCnNvdXJjZV91cmwYAyABKAkiOgoTQ3JlYXRlVmlkZW9SZXNwb25zZRIjCgV2aWRlbxgBIAEoCzIULmFwcC5zdHVkaW8udjEuVmlkZW8qrQMKC1ZpZGVvU3RhdHVzEhwKGFZJREVPX1NUQVRVU19VTlNQRUNJRklFRBAAEhQKEFZJREVPX1NUQVRVU19ORVcQARIfChtWSURFT19TVEFUVVNfU0NSSVBUX1BFTkRJTkcQAhIeChpWSURFT19TVEFUVVNfU0NSSVBUX1JFVklFVxADEiAKHFZJREVPX1NUQVRVU19TQ1JJUFRfQVBQUk9WRUQQBBIaChZWSURFT19TVEFUVVNfUkVDT1JESU5HEAUSIQodVklERU9fU1RBVFVTX1ZPSUNFX1BST0NFU1NJTkcQBhIfChtWSURFT19TVEFUVVNfU0NFTkVTX1BFTkRJTkcQBxIeChpWSURFT19TVEFUVVNfU0NFTkVTX1JFVklFVxAIEhcKE1ZJREVPX1NUQVRVU19RVUVVRUQQCRIaChZWSURFT19TVEFUVVNfUkVOREVSSU5HEAoSHQoZVklERU9fU1RBVFVTX0ZJTkFMX1JFVklFVxALEhkKFVZJREVPX1NUQVRVU19SRUxFQVNFRBAMEhgKFFZJREVPX1NUQVRVU19CTE9DS0VEEA0yhAIKDFZpZGVvU2VydmljZRJRCgpMaXN0VmlkZW9zEiAuYXBwLnN0dWRpby52MS5MaXN0VmlkZW9zUmVxdWVzdBohLmFwcC5zdHVkaW8udjEuTGlzdFZpZGVvc1Jlc3BvbnNlEksKCEdldFZpZGVvEh4uYXBwLnN0dWRpby52MS5HZXRWaWRlb1JlcXVlc3QaHy5hcHAuc3R1ZGlvLnYxLkdldFZpZGVvUmVzcG9uc2USVAoLQ3JlYXRlVmlkZW8SIS5hcHAuc3R1ZGlvLnYxLkNyZWF0ZVZpZGVvUmVxdWVzdBoiLmFwcC5zdHVkaW8udjEuQ3JlYXRlVmlkZW9SZXNwb25zZUJHWkVnaXRodWIuY29tL2d1aS1oZW5yaS9ndWlnYXMtc3R1ZGlvL2JhY2tlbmQvZ2VuL2FwcC9zdHVkaW8vdjE7c3R1ZGlvdjFiBnByb3RvMw");
+  fileDesc("ChlhcHAvc3R1ZGlvL3YxL3ZpZGVvLnByb3RvEg1hcHAuc3R1ZGlvLnYxIpgBCgVWaWRlbxIKCgJpZBgBIAEoCRIMCgRzbHVnGAIgASgJEg0KBXRpdGxlGAMgASgJEhIKCnNvdXJjZV91cmwYBCABKAkSKgoGc3RhdHVzGAUgASgOMhouYXBwLnN0dWRpby52MS5WaWRlb1N0YXR1cxISCgpjcmVhdGVkX2F0GAYgASgJEhIKCnVwZGF0ZWRfYXQYByABKAkiUwoOVmlkZW9BcnRpZmFjdHMSDgoGc2NyaXB0GAEgASgIEg0KBWF1ZGlvGAIgASgIEhEKCXRpbWVsaW5lcxgDIAEoCBIPCgdyZW5kZXJzGAQgASgIIlEKDFN0YXR1c0NoYW5nZRIOCgZzdGF0dXMYASABKAkSDgoGcmVhc29uGAIgASgJEg0KBWFjdG9yGAMgASgJEhIKCmNoYW5nZWRfYXQYBCABKAkiEwoRTGlzdFZpZGVvc1JlcXVlc3QiOgoSTGlzdFZpZGVvc1Jlc3BvbnNlEiQKBnZpZGVvcxgBIAMoCzIULmFwcC5zdHVkaW8udjEuVmlkZW8iHQoPR2V0VmlkZW9SZXF1ZXN0EgoKAmlkGAEgASgJIoECChBHZXRWaWRlb1Jlc3BvbnNlEiMKBXZpZGVvGAEgASgLMhQuYXBwLnN0dWRpby52MS5WaWRlbxIrCgZzY3JpcHQYAiABKAsyGy5hcHAuc3R1ZGlvLnYxLlN0dWRpb1NjcmlwdBI0Cg9vcmlnaW5hbF9zY3JpcHQYAyABKAsyGy5hcHAuc3R1ZGlvLnYxLlN0dWRpb1NjcmlwdBIwCglhcnRpZmFjdHMYBCABKAsyHS5hcHAuc3R1ZGlvLnYxLlZpZGVvQXJ0aWZhY3RzEjMKDnN0YXR1c19oaXN0b3J5GAUgAygLMhsuYXBwLnN0dWRpby52MS5TdGF0dXNDaGFuZ2UiRQoSQ3JlYXRlVmlkZW9SZXF1ZXN0EgwKBHNsdWcYASABKAkSDQoFdGl0bGUYAiABKAkSEgoKc291cmNlX3VybBgDIAEoCSI6ChNDcmVhdGVWaWRlb1Jlc3BvbnNlEiMKBXZpZGVvGAEgASgLMhQuYXBwLnN0dWRpby52MS5WaWRlbyJUChNVcGRhdGVTY3JpcHRSZXF1ZXN0EhAKCHZpZGVvX2lkGAEgASgJEisKBnNjcmlwdBgCIAEoCzIbLmFwcC5zdHVkaW8udjEuU3R1ZGlvU2NyaXB0IlMKFFVwZGF0ZVNjcmlwdFJlc3BvbnNlEg4KBmVycm9ycxgBIAMoCRIrCgZzY3JpcHQYAiABKAsyGy5hcHAuc3R1ZGlvLnYxLlN0dWRpb1NjcmlwdCIoChRBcHByb3ZlU2NyaXB0UmVxdWVzdBIQCgh2aWRlb19pZBgBIAEoCSI8ChVBcHByb3ZlU2NyaXB0UmVzcG9uc2USIwoFdmlkZW8YASABKAsyFC5hcHAuc3R1ZGlvLnYxLlZpZGVvIjgKE1JlamVjdFNjcmlwdFJlcXVlc3QSEAoIdmlkZW9faWQYASABKAkSDwoHY29tbWVudBgCIAEoCSI7ChRSZWplY3RTY3JpcHRSZXNwb25zZRIjCgV2aWRlbxgBIAEoCzIULmFwcC5zdHVkaW8udjEuVmlkZW8qrQMKC1ZpZGVvU3RhdHVzEhwKGFZJREVPX1NUQVRVU19VTlNQRUNJRklFRBAAEhQKEFZJREVPX1NUQVRVU19ORVcQARIfChtWSURFT19TVEFUVVNfU0NSSVBUX1BFTkRJTkcQAhIeChpWSURFT19TVEFUVVNfU0NSSVBUX1JFVklFVxADEiAKHFZJREVPX1NUQVRVU19TQ1JJUFRfQVBQUk9WRUQQBBIaChZWSURFT19TVEFUVVNfUkVDT1JESU5HEAUSIQodVklERU9fU1RBVFVTX1ZPSUNFX1BST0NFU1NJTkcQBhIfChtWSURFT19TVEFUVVNfU0NFTkVTX1BFTkRJTkcQBxIeChpWSURFT19TVEFUVVNfU0NFTkVTX1JFVklFVxAIEhcKE1ZJREVPX1NUQVRVU19RVUVVRUQQCRIaChZWSURFT19TVEFUVVNfUkVOREVSSU5HEAoSHQoZVklERU9fU1RBVFVTX0ZJTkFMX1JFVklFVxALEhkKFVZJREVPX1NUQVRVU19SRUxFQVNFRBAMEhgKFFZJREVPX1NUQVRVU19CTE9DS0VEEA0ykgQKDFZpZGVvU2VydmljZRJRCgpMaXN0VmlkZW9zEiAuYXBwLnN0dWRpby52MS5MaXN0VmlkZW9zUmVxdWVzdBohLmFwcC5zdHVkaW8udjEuTGlzdFZpZGVvc1Jlc3BvbnNlEksKCEdldFZpZGVvEh4uYXBwLnN0dWRpby52MS5HZXRWaWRlb1JlcXVlc3QaHy5hcHAuc3R1ZGlvLnYxLkdldFZpZGVvUmVzcG9uc2USVAoLQ3JlYXRlVmlkZW8SIS5hcHAuc3R1ZGlvLnYxLkNyZWF0ZVZpZGVvUmVxdWVzdBoiLmFwcC5zdHVkaW8udjEuQ3JlYXRlVmlkZW9SZXNwb25zZRJXCgxVcGRhdGVTY3JpcHQSIi5hcHAuc3R1ZGlvLnYxLlVwZGF0ZVNjcmlwdFJlcXVlc3QaIy5hcHAuc3R1ZGlvLnYxLlVwZGF0ZVNjcmlwdFJlc3BvbnNlEloKDUFwcHJvdmVTY3JpcHQSIy5hcHAuc3R1ZGlvLnYxLkFwcHJvdmVTY3JpcHRSZXF1ZXN0GiQuYXBwLnN0dWRpby52MS5BcHByb3ZlU2NyaXB0UmVzcG9uc2USVwoMUmVqZWN0U2NyaXB0EiIuYXBwLnN0dWRpby52MS5SZWplY3RTY3JpcHRSZXF1ZXN0GiMuYXBwLnN0dWRpby52MS5SZWplY3RTY3JpcHRSZXNwb25zZUJHWkVnaXRodWIuY29tL2d1aS1oZW5yaS9ndWlnYXMtc3R1ZGlvL2JhY2tlbmQvZ2VuL2FwcC9zdHVkaW8vdjE7c3R1ZGlvdjFiBnByb3RvMw", [file_app_studio_v1_script]);
 
 /**
  * Video is the pipeline index entry kept in Postgres (D-02); heavy artifacts live on disk.
@@ -62,6 +64,74 @@ export const VideoSchema: GenMessage<Video> = /*@__PURE__*/
   messageDesc(file_app_studio_v1_video, 0);
 
 /**
+ * VideoArtifacts reports which workspace artifacts already exist on disk.
+ *
+ * @generated from message app.studio.v1.VideoArtifacts
+ */
+export type VideoArtifacts = Message<"app.studio.v1.VideoArtifacts"> & {
+  /**
+   * @generated from field: bool script = 1;
+   */
+  script: boolean;
+
+  /**
+   * @generated from field: bool audio = 2;
+   */
+  audio: boolean;
+
+  /**
+   * @generated from field: bool timelines = 3;
+   */
+  timelines: boolean;
+
+  /**
+   * @generated from field: bool renders = 4;
+   */
+  renders: boolean;
+};
+
+/**
+ * Describes the message app.studio.v1.VideoArtifacts.
+ * Use `create(VideoArtifactsSchema)` to create a new message.
+ */
+export const VideoArtifactsSchema: GenMessage<VideoArtifacts> = /*@__PURE__*/
+  messageDesc(file_app_studio_v1_video, 1);
+
+/**
+ * StatusChange is one entry of the audited state history.
+ *
+ * @generated from message app.studio.v1.StatusChange
+ */
+export type StatusChange = Message<"app.studio.v1.StatusChange"> & {
+  /**
+   * @generated from field: string status = 1;
+   */
+  status: string;
+
+  /**
+   * @generated from field: string reason = 2;
+   */
+  reason: string;
+
+  /**
+   * @generated from field: string actor = 3;
+   */
+  actor: string;
+
+  /**
+   * @generated from field: string changed_at = 4;
+   */
+  changedAt: string;
+};
+
+/**
+ * Describes the message app.studio.v1.StatusChange.
+ * Use `create(StatusChangeSchema)` to create a new message.
+ */
+export const StatusChangeSchema: GenMessage<StatusChange> = /*@__PURE__*/
+  messageDesc(file_app_studio_v1_video, 2);
+
+/**
  * @generated from message app.studio.v1.ListVideosRequest
  */
 export type ListVideosRequest = Message<"app.studio.v1.ListVideosRequest"> & {
@@ -72,7 +142,7 @@ export type ListVideosRequest = Message<"app.studio.v1.ListVideosRequest"> & {
  * Use `create(ListVideosRequestSchema)` to create a new message.
  */
 export const ListVideosRequestSchema: GenMessage<ListVideosRequest> = /*@__PURE__*/
-  messageDesc(file_app_studio_v1_video, 1);
+  messageDesc(file_app_studio_v1_video, 3);
 
 /**
  * @generated from message app.studio.v1.ListVideosResponse
@@ -89,7 +159,7 @@ export type ListVideosResponse = Message<"app.studio.v1.ListVideosResponse"> & {
  * Use `create(ListVideosResponseSchema)` to create a new message.
  */
 export const ListVideosResponseSchema: GenMessage<ListVideosResponse> = /*@__PURE__*/
-  messageDesc(file_app_studio_v1_video, 2);
+  messageDesc(file_app_studio_v1_video, 4);
 
 /**
  * @generated from message app.studio.v1.GetVideoRequest
@@ -106,7 +176,7 @@ export type GetVideoRequest = Message<"app.studio.v1.GetVideoRequest"> & {
  * Use `create(GetVideoRequestSchema)` to create a new message.
  */
 export const GetVideoRequestSchema: GenMessage<GetVideoRequest> = /*@__PURE__*/
-  messageDesc(file_app_studio_v1_video, 3);
+  messageDesc(file_app_studio_v1_video, 5);
 
 /**
  * @generated from message app.studio.v1.GetVideoResponse
@@ -116,6 +186,30 @@ export type GetVideoResponse = Message<"app.studio.v1.GetVideoResponse"> & {
    * @generated from field: app.studio.v1.Video video = 1;
    */
   video?: Video | undefined;
+
+  /**
+   * Parsed current script (present when script.json exists and validates).
+   *
+   * @generated from field: app.studio.v1.StudioScript script = 2;
+   */
+  script?: StudioScript | undefined;
+
+  /**
+   * First successfully validated version — diff base for the review UI (S1-06).
+   *
+   * @generated from field: app.studio.v1.StudioScript original_script = 3;
+   */
+  originalScript?: StudioScript | undefined;
+
+  /**
+   * @generated from field: app.studio.v1.VideoArtifacts artifacts = 4;
+   */
+  artifacts?: VideoArtifacts | undefined;
+
+  /**
+   * @generated from field: repeated app.studio.v1.StatusChange status_history = 5;
+   */
+  statusHistory: StatusChange[];
 };
 
 /**
@@ -123,7 +217,7 @@ export type GetVideoResponse = Message<"app.studio.v1.GetVideoResponse"> & {
  * Use `create(GetVideoResponseSchema)` to create a new message.
  */
 export const GetVideoResponseSchema: GenMessage<GetVideoResponse> = /*@__PURE__*/
-  messageDesc(file_app_studio_v1_video, 4);
+  messageDesc(file_app_studio_v1_video, 6);
 
 /**
  * @generated from message app.studio.v1.CreateVideoRequest
@@ -150,7 +244,7 @@ export type CreateVideoRequest = Message<"app.studio.v1.CreateVideoRequest"> & {
  * Use `create(CreateVideoRequestSchema)` to create a new message.
  */
 export const CreateVideoRequestSchema: GenMessage<CreateVideoRequest> = /*@__PURE__*/
-  messageDesc(file_app_studio_v1_video, 5);
+  messageDesc(file_app_studio_v1_video, 7);
 
 /**
  * @generated from message app.studio.v1.CreateVideoResponse
@@ -167,7 +261,126 @@ export type CreateVideoResponse = Message<"app.studio.v1.CreateVideoResponse"> &
  * Use `create(CreateVideoResponseSchema)` to create a new message.
  */
 export const CreateVideoResponseSchema: GenMessage<CreateVideoResponse> = /*@__PURE__*/
-  messageDesc(file_app_studio_v1_video, 6);
+  messageDesc(file_app_studio_v1_video, 8);
+
+/**
+ * @generated from message app.studio.v1.UpdateScriptRequest
+ */
+export type UpdateScriptRequest = Message<"app.studio.v1.UpdateScriptRequest"> & {
+  /**
+   * @generated from field: string video_id = 1;
+   */
+  videoId: string;
+
+  /**
+   * @generated from field: app.studio.v1.StudioScript script = 2;
+   */
+  script?: StudioScript | undefined;
+};
+
+/**
+ * Describes the message app.studio.v1.UpdateScriptRequest.
+ * Use `create(UpdateScriptRequestSchema)` to create a new message.
+ */
+export const UpdateScriptRequestSchema: GenMessage<UpdateScriptRequest> = /*@__PURE__*/
+  messageDesc(file_app_studio_v1_video, 9);
+
+/**
+ * @generated from message app.studio.v1.UpdateScriptResponse
+ */
+export type UpdateScriptResponse = Message<"app.studio.v1.UpdateScriptResponse"> & {
+  /**
+   * Validation errors; empty when the script was accepted and written.
+   *
+   * @generated from field: repeated string errors = 1;
+   */
+  errors: string[];
+
+  /**
+   * @generated from field: app.studio.v1.StudioScript script = 2;
+   */
+  script?: StudioScript | undefined;
+};
+
+/**
+ * Describes the message app.studio.v1.UpdateScriptResponse.
+ * Use `create(UpdateScriptResponseSchema)` to create a new message.
+ */
+export const UpdateScriptResponseSchema: GenMessage<UpdateScriptResponse> = /*@__PURE__*/
+  messageDesc(file_app_studio_v1_video, 10);
+
+/**
+ * @generated from message app.studio.v1.ApproveScriptRequest
+ */
+export type ApproveScriptRequest = Message<"app.studio.v1.ApproveScriptRequest"> & {
+  /**
+   * @generated from field: string video_id = 1;
+   */
+  videoId: string;
+};
+
+/**
+ * Describes the message app.studio.v1.ApproveScriptRequest.
+ * Use `create(ApproveScriptRequestSchema)` to create a new message.
+ */
+export const ApproveScriptRequestSchema: GenMessage<ApproveScriptRequest> = /*@__PURE__*/
+  messageDesc(file_app_studio_v1_video, 11);
+
+/**
+ * @generated from message app.studio.v1.ApproveScriptResponse
+ */
+export type ApproveScriptResponse = Message<"app.studio.v1.ApproveScriptResponse"> & {
+  /**
+   * @generated from field: app.studio.v1.Video video = 1;
+   */
+  video?: Video | undefined;
+};
+
+/**
+ * Describes the message app.studio.v1.ApproveScriptResponse.
+ * Use `create(ApproveScriptResponseSchema)` to create a new message.
+ */
+export const ApproveScriptResponseSchema: GenMessage<ApproveScriptResponse> = /*@__PURE__*/
+  messageDesc(file_app_studio_v1_video, 12);
+
+/**
+ * @generated from message app.studio.v1.RejectScriptRequest
+ */
+export type RejectScriptRequest = Message<"app.studio.v1.RejectScriptRequest"> & {
+  /**
+   * @generated from field: string video_id = 1;
+   */
+  videoId: string;
+
+  /**
+   * @generated from field: string comment = 2;
+   */
+  comment: string;
+};
+
+/**
+ * Describes the message app.studio.v1.RejectScriptRequest.
+ * Use `create(RejectScriptRequestSchema)` to create a new message.
+ */
+export const RejectScriptRequestSchema: GenMessage<RejectScriptRequest> = /*@__PURE__*/
+  messageDesc(file_app_studio_v1_video, 13);
+
+/**
+ * @generated from message app.studio.v1.RejectScriptResponse
+ */
+export type RejectScriptResponse = Message<"app.studio.v1.RejectScriptResponse"> & {
+  /**
+   * @generated from field: app.studio.v1.Video video = 1;
+   */
+  video?: Video | undefined;
+};
+
+/**
+ * Describes the message app.studio.v1.RejectScriptResponse.
+ * Use `create(RejectScriptResponseSchema)` to create a new message.
+ */
+export const RejectScriptResponseSchema: GenMessage<RejectScriptResponse> = /*@__PURE__*/
+  messageDesc(file_app_studio_v1_video, 14);
 
 /**
  * VideoStatus mirrors the canonical pipeline state machine (ROADMAP.md).
@@ -282,6 +495,30 @@ export const VideoService: GenService<{
     methodKind: "unary";
     input: typeof CreateVideoRequestSchema;
     output: typeof CreateVideoResponseSchema;
+  },
+  /**
+   * @generated from rpc app.studio.v1.VideoService.UpdateScript
+   */
+  updateScript: {
+    methodKind: "unary";
+    input: typeof UpdateScriptRequestSchema;
+    output: typeof UpdateScriptResponseSchema;
+  },
+  /**
+   * @generated from rpc app.studio.v1.VideoService.ApproveScript
+   */
+  approveScript: {
+    methodKind: "unary";
+    input: typeof ApproveScriptRequestSchema;
+    output: typeof ApproveScriptResponseSchema;
+  },
+  /**
+   * @generated from rpc app.studio.v1.VideoService.RejectScript
+   */
+  rejectScript: {
+    methodKind: "unary";
+    input: typeof RejectScriptRequestSchema;
+    output: typeof RejectScriptResponseSchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_app_studio_v1_video, 0);

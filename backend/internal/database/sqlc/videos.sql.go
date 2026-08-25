@@ -26,7 +26,7 @@ func (q *Queries) CountRssItems(ctx context.Context) (int64, error) {
 const createVideo = `-- name: CreateVideo :one
 INSERT INTO videos (slug, title, source_url)
 VALUES ($1, $2, $3)
-RETURNING id, slug, title, source_url, status, created_at, updated_at
+RETURNING id, slug, title, source_url, status, created_at, updated_at, original_script
 `
 
 type CreateVideoParams struct {
@@ -46,12 +46,24 @@ func (q *Queries) CreateVideo(ctx context.Context, arg CreateVideoParams) (Video
 		&i.Status,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.OriginalScript,
 	)
 	return i, err
 }
 
+const getOriginalScript = `-- name: GetOriginalScript :one
+SELECT original_script FROM videos WHERE id = $1
+`
+
+func (q *Queries) GetOriginalScript(ctx context.Context, id uuid.UUID) ([]byte, error) {
+	row := q.db.QueryRow(ctx, getOriginalScript, id)
+	var original_script []byte
+	err := row.Scan(&original_script)
+	return original_script, err
+}
+
 const getVideo = `-- name: GetVideo :one
-SELECT id, slug, title, source_url, status, created_at, updated_at FROM videos WHERE id = $1
+SELECT id, slug, title, source_url, status, created_at, updated_at, original_script FROM videos WHERE id = $1
 `
 
 func (q *Queries) GetVideo(ctx context.Context, id uuid.UUID) (Video, error) {
@@ -65,12 +77,13 @@ func (q *Queries) GetVideo(ctx context.Context, id uuid.UUID) (Video, error) {
 		&i.Status,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.OriginalScript,
 	)
 	return i, err
 }
 
 const getVideoBySlug = `-- name: GetVideoBySlug :one
-SELECT id, slug, title, source_url, status, created_at, updated_at FROM videos WHERE slug = $1
+SELECT id, slug, title, source_url, status, created_at, updated_at, original_script FROM videos WHERE slug = $1
 `
 
 func (q *Queries) GetVideoBySlug(ctx context.Context, slug string) (Video, error) {
@@ -84,6 +97,7 @@ func (q *Queries) GetVideoBySlug(ctx context.Context, slug string) (Video, error
 		&i.Status,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.OriginalScript,
 	)
 	return i, err
 }
@@ -139,6 +153,28 @@ func (q *Queries) InsertRssItem(ctx context.Context, arg InsertRssItemParams) (i
 	return result.RowsAffected(), nil
 }
 
+const insertStatusChange = `-- name: InsertStatusChange :exec
+INSERT INTO video_status_history (video_id, status, reason, actor)
+VALUES ($1, $2, $3, $4)
+`
+
+type InsertStatusChangeParams struct {
+	VideoID uuid.UUID `json:"video_id"`
+	Status  string    `json:"status"`
+	Reason  string    `json:"reason"`
+	Actor   string    `json:"actor"`
+}
+
+func (q *Queries) InsertStatusChange(ctx context.Context, arg InsertStatusChangeParams) error {
+	_, err := q.db.Exec(ctx, insertStatusChange,
+		arg.VideoID,
+		arg.Status,
+		arg.Reason,
+		arg.Actor,
+	)
+	return err
+}
+
 const listParsesByVideo = `-- name: ListParsesByVideo :many
 SELECT id, video_id, artifact, valid, errors, created_at FROM video_artifact_parses WHERE video_id = $1 ORDER BY created_at DESC LIMIT 50
 `
@@ -170,8 +206,39 @@ func (q *Queries) ListParsesByVideo(ctx context.Context, videoID uuid.UUID) ([]V
 	return items, nil
 }
 
+const listStatusHistoryByVideo = `-- name: ListStatusHistoryByVideo :many
+SELECT id, video_id, status, reason, actor, created_at FROM video_status_history WHERE video_id = $1 ORDER BY created_at ASC
+`
+
+func (q *Queries) ListStatusHistoryByVideo(ctx context.Context, videoID uuid.UUID) ([]VideoStatusHistory, error) {
+	rows, err := q.db.Query(ctx, listStatusHistoryByVideo, videoID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []VideoStatusHistory
+	for rows.Next() {
+		var i VideoStatusHistory
+		if err := rows.Scan(
+			&i.ID,
+			&i.VideoID,
+			&i.Status,
+			&i.Reason,
+			&i.Actor,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listVideos = `-- name: ListVideos :many
-SELECT id, slug, title, source_url, status, created_at, updated_at FROM videos ORDER BY created_at DESC LIMIT 200
+SELECT id, slug, title, source_url, status, created_at, updated_at, original_script FROM videos ORDER BY created_at DESC LIMIT 200
 `
 
 func (q *Queries) ListVideos(ctx context.Context) ([]Video, error) {
@@ -191,6 +258,7 @@ func (q *Queries) ListVideos(ctx context.Context) ([]Video, error) {
 			&i.Status,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.OriginalScript,
 		); err != nil {
 			return nil, err
 		}
@@ -200,6 +268,23 @@ func (q *Queries) ListVideos(ctx context.Context) ([]Video, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const setOriginalScript = `-- name: SetOriginalScript :execrows
+UPDATE videos SET original_script = $2 WHERE id = $1 AND original_script IS NULL
+`
+
+type SetOriginalScriptParams struct {
+	ID             uuid.UUID `json:"id"`
+	OriginalScript []byte    `json:"original_script"`
+}
+
+func (q *Queries) SetOriginalScript(ctx context.Context, arg SetOriginalScriptParams) (int64, error) {
+	result, err := q.db.Exec(ctx, setOriginalScript, arg.ID, arg.OriginalScript)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
 }
 
 const setRssItemVideo = `-- name: SetRssItemVideo :exec

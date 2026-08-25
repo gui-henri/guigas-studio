@@ -205,6 +205,17 @@ func (o *Observer) ProcessScriptPath(ctx context.Context, scriptPath string) {
 		return
 	}
 
+	// Freeze the first validated version as the review diff base (S1-04).
+	if rows, err := o.queries.SetOriginalScript(ctx, sqlc.SetOriginalScriptParams{
+		ID:             video.ID,
+		OriginalScript: data,
+	}); err != nil {
+		o.logger.Warn("artifacts.original_script_failed",
+			slog.String("video_id", videoID), slog.Any("error", err))
+	} else if rows == 1 {
+		o.logger.Debug("artifacts.original_script_frozen", slog.String("video_id", videoID))
+	}
+
 	o.logger.Info("artifacts.script_validated",
 		slog.String("video_id", videoID),
 		slog.String("slug", slug),

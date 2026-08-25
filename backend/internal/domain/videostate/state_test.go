@@ -21,27 +21,38 @@ func TestAllMatchesCanonicalOrder(t *testing.T) {
 	}
 }
 
-// TestTransitionsExhaustive walks the full 13×13 matrix and asserts that only
-// legal pairs pass: the 12 chain edges + every X→blocked + blocked→any.
+// legal pairs pass: the chain edges + task-mandated reverse edges + every
+// X→blocked + blocked→any.
 func TestTransitionsExhaustive(t *testing.T) {
+	// Task-mandated reverse edges (each added by its own task, never inline):
+	reverseEdges := map[State]map[State]bool{
+		StateScriptReview: {StateScriptPending: true}, // RejectScript (S1-04)
+	}
+
+	legal := make(map[[2]State]bool)
 	all := All()
+	for i := 0; i+1 < len(all)-1; i++ { // linear chain new → … → released
+		legal[[2]State{all[i], all[i+1]}] = true
+	}
+	legal[[2]State{StateFinalReview, StateReleased}] = true // terminal edge (covered above, kept explicit)
+	for _, s := range all {
+		if s != StateBlocked {
+			legal[[2]State{s, StateBlocked}] = true // anything can block
+		}
+		legal[[2]State{StateBlocked, s}] = true // blocked resumes anywhere
+	}
+	for from, targets := range reverseEdges {
+		for to := range targets {
+			legal[[2]State{from, to}] = true
+		}
+	}
+
 	for _, from := range all {
 		for _, to := range all {
-			want := false
-			switch {
-			case from == StateBlocked:
-				want = true // resume anywhere, including re-blocking
-			case from == to:
-				want = false // no self-loops elsewhere
-			case to == StateBlocked:
-				want = true // anything can block
-			case next(from) == to && to != StateReleased:
-				want = true // linear chain edge
-			case from == StateFinalReview && to == StateReleased:
-				want = true // terminal edge
-			}
+			want := legal[[2]State{from, to}]
 			if got := CanTransition(from, to); got != want {
 				t.Errorf("CanTransition(%q,%q) = %v, want %v", from, to, got, want)
+				continue
 			}
 			err := Transition(from, to)
 			if want && err != nil {
@@ -61,13 +72,10 @@ func TestTransitionsExhaustive(t *testing.T) {
 	}
 }
 
-// next returns the following state in the canonical chain (nil at the end).
-func next(s State) State {
-	all := All()
-	if i := slices.Index(all, s); i >= 0 && i+1 < len(all) {
-		return all[i+1]
+func TestRejectEdgeExplicit(t *testing.T) {
+	if err := Transition(StateScriptReview, StateScriptPending); err != nil {
+		t.Errorf("reject edge script_review→script_pending rejected: %v", err)
 	}
-	return ""
 }
 
 func TestChainEdgesExplicitly(t *testing.T) {

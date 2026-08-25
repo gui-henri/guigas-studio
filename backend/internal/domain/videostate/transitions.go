@@ -14,12 +14,12 @@ var ErrInvalidState = errors.New("invalid video state")
 //   - every state may become blocked (with a structured reason);
 //   - blocked may resume to any state (whoever resumes decides where).
 //
-// Reverse re-approval edges (e.g. final_review → queued) are appended later
-// by their own tasks (S5-07), never inline.
+// Reverse re-approval edges (e.g. final_review → queued at S5-07) are appended
+// here by their own tasks, never inline.
 var transitions = map[State][]State{
 	StateNew:            {StateScriptPending, StateBlocked},
 	StateScriptPending:  {StateScriptReview, StateBlocked},
-	StateScriptReview:   {StateScriptApproved, StateBlocked},
+	StateScriptReview:   {StateScriptApproved, StateScriptPending, StateBlocked}, // → pending = RejectScript (S1-04)
 	StateScriptApproved: {StateRecording, StateBlocked},
 	StateRecording:      {StateVoiceProcess, StateBlocked},
 	StateVoiceProcess:   {StateScenesPending, StateBlocked},

@@ -5,7 +5,7 @@ sprint: 1
 prioridade: P0
 depende_de: [S1-02, S0-15]
 estimativa_h: 2
-status: todo
+status: done
 ---
 
 # S1-04 — VideoService: revisão de roteiro via RPC
@@ -60,12 +60,12 @@ interceptor Connect (S0-08, D-04). A UI que consome estes RPCs nasce em S1-06/S1
 
 ## Critérios de aceite
 
-- [ ] `GetVideo` retorna script parsed, artefatos presentes, histórico e `original_script`
-- [ ] `UpdateScript` grava `script.json` + commit no git do workspace; script inválido é
+- [x] `GetVideo` retorna script parsed, artefatos presentes, histórico e `original_script`
+- [x] `UpdateScript` grava `script.json` + commit no git do workspace; script inválido é
       rejeitado com erros claros e nada é escrito
-- [ ] `ApproveScript` exige usuário autenticado e só opera em `script_review`
-- [ ] `RejectScript` retorna a `script_pending` e o comentário aparece no `GetVideo`
-- [ ] Transições somente via videostate; testes de integração verdes (D-18)
+- [x] `ApproveScript` exige usuário autenticado e só opera em `script_review`
+- [x] `RejectScript` retorna a `script_pending` e o comentário aparece no `GetVideo`
+- [x] Transições somente via videostate; testes de integração verdes (D-18)
 
 ## Verificação
 
