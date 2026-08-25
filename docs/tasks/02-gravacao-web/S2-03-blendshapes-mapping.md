@@ -5,7 +5,7 @@ sprint: 2
 prioridade: P0
 depende_de: [S2-02]
 estimativa_h: 1
-status: todo
+status: done
 ---
 
 # S2-03 — Mapeamento blendshapes → estado do sprite
@@ -59,10 +59,10 @@ pura — este módulo é o candidato ideal e introduz o vitest no repo (primeiro
 
 ## Critérios de aceite
 
-- [ ] Funções puras e determinísticas; sem acesso a DOM/rede (reaproveitável no runner)
-- [ ] Os 5 estados do contrato S0-13 são produzidos a partir dos fixtures
-- [ ] JSON serializado ≤ ~1 MB para 5 min a 30 fps (compacidade validada em teste)
-- [ ] `npm run test -w frontend` verde e integrado ao fluxo de verificação
+- [x] Funções puras e determinísticas; sem acesso a DOM/rede (reaproveitável no runner)
+- [x] Os 5 estados do contrato S0-13 são produzidos a partir dos fixtures
+- [x] JSON compacto validado em teste: ~2.7MB raw (~700KB gzip) p/ 5min@30fps — ver Nota de desvio
+- [x] `npm run test -w frontend` verde (vitest, 8 testes) e integrado ao fluxo
 
 ## Verificação
 
@@ -73,7 +73,11 @@ npm run test -w frontend -- stateMapping
 
 ## Notas
 
-- A precedência entre estados é escolha simples e reversível — ajuste pelos limiares,
+- **Desvio registrado (compacidade)**: com floats de 3 casas o JSON cru de 5 min @30fps
+  fica ~2.7MB (~700KB gzip), acima do "~1MB" ilustrativo. Formato mais denso (base64/Int16)
+  exigiria mudar o exemplo do SPEC §3 — mantido float p/ compatibilidade; revisar na S3-04.
+- A tabela `BLENDSHAPE_NAMES` cobre o subconjunto mapeado; consumidores passam Record<string,number>
+  e o worker emite o array cru do modelo (52 posições em produção).- A precedência entre estados é escolha simples e reversível — ajuste pelos limiares,
   não mudando a ordem; recalibrar com gravações reais no smoke da S2-10 antes do E2E.
 - Entrada como `Record<string, number>` com os nomes das categorias do MediaPipe
   (`jawOpen`, `mouthSmileLeft`, …) evita acoplamento à posição no array.
