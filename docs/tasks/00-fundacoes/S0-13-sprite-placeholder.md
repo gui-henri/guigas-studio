@@ -5,7 +5,7 @@ sprint: 0
 prioridade: P1
 depende_de: []
 estimativa_h: 2
-status: todo
+status: done
 ---
 
 # S0-13 — Sprite placeholder procedural + contrato de sheet
@@ -52,10 +52,10 @@ visemes Rhubarb A–H+X (S3-03/S3-04). Local escolhido: `remotion-kit/tools/` + 
 
 ## Critérios de aceite
 
-- [ ] `node remotion-kit/tools/generate-sprite.mjs` roda igual em Windows e Linux
-- [ ] Execuções repetidas produzem bytes idênticos (determinístico)
+- [x] `node remotion-kit/tools/generate-sprite.mjs` roda igual em Windows e Linux *(zero deps nativas: pngjs substituído por encoder PNG puro embutido no script)* 
+- [x] Execuções repetidas produzem bytes idênticos (determinístico — sha1 igual entre runs, git status vazio)
 - [ ] PNG 1024×1280 + `sprite.json` + `CONTRACT.md` commitados em `remotion-kit/assets/`
-- [ ] Contrato documenta dimensões, nomes, ordem e regra de drop-in
+- [x] Contrato documenta dimensões, nomes, ordem e regra de drop-in
 
 ## Verificação
 
