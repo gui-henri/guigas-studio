@@ -5,7 +5,7 @@ sprint: 0
 prioridade: P0
 depende_de: []
 estimativa_h: 1
-status: todo
+status: done
 ---
 
 # S0-01 — Esqueleto do monorepo
@@ -52,11 +52,11 @@ na VPS (T-07) e nunca dentro deste repositório.
 
 ## Critérios de aceite
 
-- [ ] `npm install` na raiz roda limpo e cria lockfile commitado (`package-lock.json`)
-- [ ] `npx npm-workspaces` implícito: `npm run --workspaces ps` não quebra (pacotes reconhecidos)
-- [ ] Árvore corresponde à referência do ROADMAP (5 pacotes + docs)
-- [ ] `.gitignore` impede staging de `.env`, `*.wav`, `*.mp4` (testar com `git check-ignore`)
-- [ ] CI ainda não existe (vem na S0-14) — nada a quebrar
+- [x] `npm install` na raiz roda limpo e cria lockfile commitado (`package-lock.json`)
+- [x] `npx npm-workspaces` implícito: `npm run --workspaces ps` não quebra (pacotes reconhecidos)
+- [x] Árvore corresponde à referência do ROADMAP (5 pacotes + docs)
+- [x] `.gitignore` impede staging de `.env`, `*.wav`, `*.mp4` (testar com `git check-ignore`)
+- [x] CI ainda não existe (vem na S0-14) — nada a quebrar
 
 ## Verificação
 

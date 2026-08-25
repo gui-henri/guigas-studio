@@ -1,0 +1,22 @@
+# JS
+node_modules/
+dist/
+*.tsbuildinfo
+
+# Go (compiled binaries stay out of the repo)
+# none
+
+# Media binaries
+*.wav
+*.mp4
+*.mkv
+*.webm
+
+# Secrets / environment
+.env
+.env.*
+!.env.example
+
+# Runtime data
+/data/
+.state/
