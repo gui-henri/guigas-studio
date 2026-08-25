@@ -355,3 +355,30 @@ func (s *VideoService) videoForReview(ctx context.Context, rawID string) (*sqlc.
 	}
 	return &video, func() {}
 }
+
+// ListTakes returns the recorded artifact index for a video (S2-08 progress).
+func (s *VideoService) ListTakes(
+	ctx context.Context,
+	req *connect.Request[studiov1.ListTakesRequest],
+) (*connect.Response[studiov1.ListTakesResponse], error) {
+	slug := req.Msg.GetVideoSlug()
+	if slug == "" {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("video_slug is required"))
+	}
+	rows, err := s.queries.ListTakesByVideo(ctx, slug)
+	if err != nil {
+		slog.Error("list takes failed", "error", err)
+		return nil, connect.NewError(connect.CodeInternal, errors.New("failed to list takes"))
+	}
+	takes := make([]*studiov1.TakeSummary, 0, len(rows))
+	for _, t := range rows {
+		takes = append(takes, &studiov1.TakeSummary{
+			SegmentId: t.SegmentID,
+			Kind:      t.Kind,
+			Sha256:    t.Sha256,
+			SizeBytes: t.SizeBytes,
+			CreatedAt: t.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		})
+	}
+	return connect.NewResponse(&studiov1.ListTakesResponse{Takes: takes}), nil
+}

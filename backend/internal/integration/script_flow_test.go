@@ -204,9 +204,9 @@ func TestScriptFlowEndToEnd(t *testing.T) {
 		v, err := db.Queries.GetVideo(ctx, videoID)
 		return err == nil && v.Status == string(videostate.StateScriptReview)
 	})
-	if pub.count() == 0 {
-		t.Error("publisher was not called after validation")
-	}
+	waitFor(t, 3*time.Second, "publisher notification", func() bool {
+		return pub.count() > 0
+	})
 
 	// UpdateScript edits narration through the real service.
 	edited := strings.Replace(fmt.Sprintf(validScriptTpl, slug, slug),

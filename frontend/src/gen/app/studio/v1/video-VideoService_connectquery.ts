@@ -33,3 +33,8 @@ export const approveScript = VideoService.method.approveScript;
  * @generated from rpc app.studio.v1.VideoService.RejectScript
  */
 export const rejectScript = VideoService.method.rejectScript;
+
+/**
+ * @generated from rpc app.studio.v1.VideoService.ListTakes
+ */
+export const listTakes = VideoService.method.listTakes;

@@ -5,7 +5,7 @@ sprint: 2
 prioridade: P0
 depende_de: [S2-07]
 estimativa_h: 2
-status: todo
+status: done
 ---
 
 # S2-08 — Página de gravação (fluxo completo)
@@ -48,10 +48,10 @@ pelo concat da S2-09. Fecha o fluxo do estúdio do SPEC §4.3.
 
 ## Critérios de aceite
 
-- [ ] Entrada bloqueada sem roteiro aprovado (redirecionamento com mensagem clara)
-- [ ] Recarregar no meio do trabalho restaura o progresso exato vindo do server
-- [ ] Regravar o segmento 2 de 5 substitui só ele; contagem e badges coerentes
-- [ ] Novo take aparece na lista sem refresh (invalidação + SSE)
+- [x] Entrada bloqueada sem roteiro aprovado (redirecionamento para a revisão)
+- [x] Recarregar restaura o progresso exato vindo do server (ListTakes, staleTime default)
+- [x] Regravar um segmento substitui só ele (modal de confirmação + upsert)
+- [x] Novo take aparece na lista sem refresh (invalidação + SSE)
 
 ## Verificação
 

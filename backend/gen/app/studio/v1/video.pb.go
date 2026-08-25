@@ -931,6 +931,171 @@ func (x *RejectScriptResponse) GetVideo() *Video {
 	return nil
 }
 
+// TakeSummary is one recorded artifact pair entry for a video.
+type TakeSummary struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SegmentId     string                 `protobuf:"bytes,1,opt,name=segment_id,json=segmentId,proto3" json:"segment_id,omitempty"`
+	Kind          string                 `protobuf:"bytes,2,opt,name=kind,proto3" json:"kind,omitempty"` // audio | blendshapes
+	Sha256        string                 `protobuf:"bytes,3,opt,name=sha256,proto3" json:"sha256,omitempty"`
+	SizeBytes     int64                  `protobuf:"varint,4,opt,name=size_bytes,json=sizeBytes,proto3" json:"size_bytes,omitempty"`
+	CreatedAt     string                 `protobuf:"bytes,5,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TakeSummary) Reset() {
+	*x = TakeSummary{}
+	mi := &file_app_studio_v1_video_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TakeSummary) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TakeSummary) ProtoMessage() {}
+
+func (x *TakeSummary) ProtoReflect() protoreflect.Message {
+	mi := &file_app_studio_v1_video_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TakeSummary.ProtoReflect.Descriptor instead.
+func (*TakeSummary) Descriptor() ([]byte, []int) {
+	return file_app_studio_v1_video_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *TakeSummary) GetSegmentId() string {
+	if x != nil {
+		return x.SegmentId
+	}
+	return ""
+}
+
+func (x *TakeSummary) GetKind() string {
+	if x != nil {
+		return x.Kind
+	}
+	return ""
+}
+
+func (x *TakeSummary) GetSha256() string {
+	if x != nil {
+		return x.Sha256
+	}
+	return ""
+}
+
+func (x *TakeSummary) GetSizeBytes() int64 {
+	if x != nil {
+		return x.SizeBytes
+	}
+	return 0
+}
+
+func (x *TakeSummary) GetCreatedAt() string {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return ""
+}
+
+type ListTakesRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	VideoSlug     string                 `protobuf:"bytes,1,opt,name=video_slug,json=videoSlug,proto3" json:"video_slug,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListTakesRequest) Reset() {
+	*x = ListTakesRequest{}
+	mi := &file_app_studio_v1_video_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListTakesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListTakesRequest) ProtoMessage() {}
+
+func (x *ListTakesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_app_studio_v1_video_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListTakesRequest.ProtoReflect.Descriptor instead.
+func (*ListTakesRequest) Descriptor() ([]byte, []int) {
+	return file_app_studio_v1_video_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *ListTakesRequest) GetVideoSlug() string {
+	if x != nil {
+		return x.VideoSlug
+	}
+	return ""
+}
+
+type ListTakesResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Takes         []*TakeSummary         `protobuf:"bytes,1,rep,name=takes,proto3" json:"takes,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListTakesResponse) Reset() {
+	*x = ListTakesResponse{}
+	mi := &file_app_studio_v1_video_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListTakesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListTakesResponse) ProtoMessage() {}
+
+func (x *ListTakesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_app_studio_v1_video_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListTakesResponse.ProtoReflect.Descriptor instead.
+func (*ListTakesResponse) Descriptor() ([]byte, []int) {
+	return file_app_studio_v1_video_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *ListTakesResponse) GetTakes() []*TakeSummary {
+	if x != nil {
+		return x.Takes
+	}
+	return nil
+}
+
 var File_app_studio_v1_video_proto protoreflect.FileDescriptor
 
 const file_app_studio_v1_video_proto_rawDesc = "" +
@@ -990,7 +1155,21 @@ const file_app_studio_v1_video_proto_rawDesc = "" +
 	"\bvideo_id\x18\x01 \x01(\tR\avideoId\x12\x18\n" +
 	"\acomment\x18\x02 \x01(\tR\acomment\"B\n" +
 	"\x14RejectScriptResponse\x12*\n" +
-	"\x05video\x18\x01 \x01(\v2\x14.app.studio.v1.VideoR\x05video*\xad\x03\n" +
+	"\x05video\x18\x01 \x01(\v2\x14.app.studio.v1.VideoR\x05video\"\x96\x01\n" +
+	"\vTakeSummary\x12\x1d\n" +
+	"\n" +
+	"segment_id\x18\x01 \x01(\tR\tsegmentId\x12\x12\n" +
+	"\x04kind\x18\x02 \x01(\tR\x04kind\x12\x16\n" +
+	"\x06sha256\x18\x03 \x01(\tR\x06sha256\x12\x1d\n" +
+	"\n" +
+	"size_bytes\x18\x04 \x01(\x03R\tsizeBytes\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\x05 \x01(\tR\tcreatedAt\"1\n" +
+	"\x10ListTakesRequest\x12\x1d\n" +
+	"\n" +
+	"video_slug\x18\x01 \x01(\tR\tvideoSlug\"E\n" +
+	"\x11ListTakesResponse\x120\n" +
+	"\x05takes\x18\x01 \x03(\v2\x1a.app.studio.v1.TakeSummaryR\x05takes*\xad\x03\n" +
 	"\vVideoStatus\x12\x1c\n" +
 	"\x18VIDEO_STATUS_UNSPECIFIED\x10\x00\x12\x14\n" +
 	"\x10VIDEO_STATUS_NEW\x10\x01\x12\x1f\n" +
@@ -1006,7 +1185,7 @@ const file_app_studio_v1_video_proto_rawDesc = "" +
 	"\x12\x1d\n" +
 	"\x19VIDEO_STATUS_FINAL_REVIEW\x10\v\x12\x19\n" +
 	"\x15VIDEO_STATUS_RELEASED\x10\f\x12\x18\n" +
-	"\x14VIDEO_STATUS_BLOCKED\x10\r2\x92\x04\n" +
+	"\x14VIDEO_STATUS_BLOCKED\x10\r2\xe2\x04\n" +
 	"\fVideoService\x12Q\n" +
 	"\n" +
 	"ListVideos\x12 .app.studio.v1.ListVideosRequest\x1a!.app.studio.v1.ListVideosResponse\x12K\n" +
@@ -1014,7 +1193,8 @@ const file_app_studio_v1_video_proto_rawDesc = "" +
 	"\vCreateVideo\x12!.app.studio.v1.CreateVideoRequest\x1a\".app.studio.v1.CreateVideoResponse\x12W\n" +
 	"\fUpdateScript\x12\".app.studio.v1.UpdateScriptRequest\x1a#.app.studio.v1.UpdateScriptResponse\x12Z\n" +
 	"\rApproveScript\x12#.app.studio.v1.ApproveScriptRequest\x1a$.app.studio.v1.ApproveScriptResponse\x12W\n" +
-	"\fRejectScript\x12\".app.studio.v1.RejectScriptRequest\x1a#.app.studio.v1.RejectScriptResponseBGZEgithub.com/gui-henri/guigas-studio/backend/gen/app/studio/v1;studiov1b\x06proto3"
+	"\fRejectScript\x12\".app.studio.v1.RejectScriptRequest\x1a#.app.studio.v1.RejectScriptResponse\x12N\n" +
+	"\tListTakes\x12\x1f.app.studio.v1.ListTakesRequest\x1a .app.studio.v1.ListTakesResponseBGZEgithub.com/gui-henri/guigas-studio/backend/gen/app/studio/v1;studiov1b\x06proto3"
 
 var (
 	file_app_studio_v1_video_proto_rawDescOnce sync.Once
@@ -1029,7 +1209,7 @@ func file_app_studio_v1_video_proto_rawDescGZIP() []byte {
 }
 
 var file_app_studio_v1_video_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_app_studio_v1_video_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
+var file_app_studio_v1_video_proto_msgTypes = make([]protoimpl.MessageInfo, 18)
 var file_app_studio_v1_video_proto_goTypes = []any{
 	(VideoStatus)(0),              // 0: app.studio.v1.VideoStatus
 	(*Video)(nil),                 // 1: app.studio.v1.Video
@@ -1047,38 +1227,44 @@ var file_app_studio_v1_video_proto_goTypes = []any{
 	(*ApproveScriptResponse)(nil), // 13: app.studio.v1.ApproveScriptResponse
 	(*RejectScriptRequest)(nil),   // 14: app.studio.v1.RejectScriptRequest
 	(*RejectScriptResponse)(nil),  // 15: app.studio.v1.RejectScriptResponse
-	(*StudioScript)(nil),          // 16: app.studio.v1.StudioScript
+	(*TakeSummary)(nil),           // 16: app.studio.v1.TakeSummary
+	(*ListTakesRequest)(nil),      // 17: app.studio.v1.ListTakesRequest
+	(*ListTakesResponse)(nil),     // 18: app.studio.v1.ListTakesResponse
+	(*StudioScript)(nil),          // 19: app.studio.v1.StudioScript
 }
 var file_app_studio_v1_video_proto_depIdxs = []int32{
 	0,  // 0: app.studio.v1.Video.status:type_name -> app.studio.v1.VideoStatus
 	1,  // 1: app.studio.v1.ListVideosResponse.videos:type_name -> app.studio.v1.Video
 	1,  // 2: app.studio.v1.GetVideoResponse.video:type_name -> app.studio.v1.Video
-	16, // 3: app.studio.v1.GetVideoResponse.script:type_name -> app.studio.v1.StudioScript
-	16, // 4: app.studio.v1.GetVideoResponse.original_script:type_name -> app.studio.v1.StudioScript
+	19, // 3: app.studio.v1.GetVideoResponse.script:type_name -> app.studio.v1.StudioScript
+	19, // 4: app.studio.v1.GetVideoResponse.original_script:type_name -> app.studio.v1.StudioScript
 	2,  // 5: app.studio.v1.GetVideoResponse.artifacts:type_name -> app.studio.v1.VideoArtifacts
 	3,  // 6: app.studio.v1.GetVideoResponse.status_history:type_name -> app.studio.v1.StatusChange
 	1,  // 7: app.studio.v1.CreateVideoResponse.video:type_name -> app.studio.v1.Video
-	16, // 8: app.studio.v1.UpdateScriptRequest.script:type_name -> app.studio.v1.StudioScript
-	16, // 9: app.studio.v1.UpdateScriptResponse.script:type_name -> app.studio.v1.StudioScript
+	19, // 8: app.studio.v1.UpdateScriptRequest.script:type_name -> app.studio.v1.StudioScript
+	19, // 9: app.studio.v1.UpdateScriptResponse.script:type_name -> app.studio.v1.StudioScript
 	1,  // 10: app.studio.v1.ApproveScriptResponse.video:type_name -> app.studio.v1.Video
 	1,  // 11: app.studio.v1.RejectScriptResponse.video:type_name -> app.studio.v1.Video
-	4,  // 12: app.studio.v1.VideoService.ListVideos:input_type -> app.studio.v1.ListVideosRequest
-	6,  // 13: app.studio.v1.VideoService.GetVideo:input_type -> app.studio.v1.GetVideoRequest
-	8,  // 14: app.studio.v1.VideoService.CreateVideo:input_type -> app.studio.v1.CreateVideoRequest
-	10, // 15: app.studio.v1.VideoService.UpdateScript:input_type -> app.studio.v1.UpdateScriptRequest
-	12, // 16: app.studio.v1.VideoService.ApproveScript:input_type -> app.studio.v1.ApproveScriptRequest
-	14, // 17: app.studio.v1.VideoService.RejectScript:input_type -> app.studio.v1.RejectScriptRequest
-	5,  // 18: app.studio.v1.VideoService.ListVideos:output_type -> app.studio.v1.ListVideosResponse
-	7,  // 19: app.studio.v1.VideoService.GetVideo:output_type -> app.studio.v1.GetVideoResponse
-	9,  // 20: app.studio.v1.VideoService.CreateVideo:output_type -> app.studio.v1.CreateVideoResponse
-	11, // 21: app.studio.v1.VideoService.UpdateScript:output_type -> app.studio.v1.UpdateScriptResponse
-	13, // 22: app.studio.v1.VideoService.ApproveScript:output_type -> app.studio.v1.ApproveScriptResponse
-	15, // 23: app.studio.v1.VideoService.RejectScript:output_type -> app.studio.v1.RejectScriptResponse
-	18, // [18:24] is the sub-list for method output_type
-	12, // [12:18] is the sub-list for method input_type
-	12, // [12:12] is the sub-list for extension type_name
-	12, // [12:12] is the sub-list for extension extendee
-	0,  // [0:12] is the sub-list for field type_name
+	16, // 12: app.studio.v1.ListTakesResponse.takes:type_name -> app.studio.v1.TakeSummary
+	4,  // 13: app.studio.v1.VideoService.ListVideos:input_type -> app.studio.v1.ListVideosRequest
+	6,  // 14: app.studio.v1.VideoService.GetVideo:input_type -> app.studio.v1.GetVideoRequest
+	8,  // 15: app.studio.v1.VideoService.CreateVideo:input_type -> app.studio.v1.CreateVideoRequest
+	10, // 16: app.studio.v1.VideoService.UpdateScript:input_type -> app.studio.v1.UpdateScriptRequest
+	12, // 17: app.studio.v1.VideoService.ApproveScript:input_type -> app.studio.v1.ApproveScriptRequest
+	14, // 18: app.studio.v1.VideoService.RejectScript:input_type -> app.studio.v1.RejectScriptRequest
+	17, // 19: app.studio.v1.VideoService.ListTakes:input_type -> app.studio.v1.ListTakesRequest
+	5,  // 20: app.studio.v1.VideoService.ListVideos:output_type -> app.studio.v1.ListVideosResponse
+	7,  // 21: app.studio.v1.VideoService.GetVideo:output_type -> app.studio.v1.GetVideoResponse
+	9,  // 22: app.studio.v1.VideoService.CreateVideo:output_type -> app.studio.v1.CreateVideoResponse
+	11, // 23: app.studio.v1.VideoService.UpdateScript:output_type -> app.studio.v1.UpdateScriptResponse
+	13, // 24: app.studio.v1.VideoService.ApproveScript:output_type -> app.studio.v1.ApproveScriptResponse
+	15, // 25: app.studio.v1.VideoService.RejectScript:output_type -> app.studio.v1.RejectScriptResponse
+	18, // 26: app.studio.v1.VideoService.ListTakes:output_type -> app.studio.v1.ListTakesResponse
+	20, // [20:27] is the sub-list for method output_type
+	13, // [13:20] is the sub-list for method input_type
+	13, // [13:13] is the sub-list for extension type_name
+	13, // [13:13] is the sub-list for extension extendee
+	0,  // [0:13] is the sub-list for field type_name
 }
 
 func init() { file_app_studio_v1_video_proto_init() }
@@ -1093,7 +1279,7 @@ func file_app_studio_v1_video_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_app_studio_v1_video_proto_rawDesc), len(file_app_studio_v1_video_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   15,
+			NumMessages:   18,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

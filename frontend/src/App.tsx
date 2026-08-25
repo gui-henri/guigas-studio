@@ -12,6 +12,7 @@ import AvatarDevPage from "./pages/AvatarDevPage";
 import MicDevPage from "./pages/MicDevPage";
 import TeleprompterDevPage from "./pages/TeleprompterDevPage";
 import RecorderDevPage from "./pages/RecorderDevPage";
+import StudioRecordingPage from "./pages/StudioRecordingPage";
 
 export default function App() {
   useStudioEvents();
@@ -30,6 +31,16 @@ export default function App() {
           <RequireAuth>
             <AppShell>
               <DashboardPage />
+            </AppShell>
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/videos/:slug/studio"
+        element={
+          <RequireAuth>
+            <AppShell>
+              <StudioRecordingPage />
             </AppShell>
           </RequireAuth>
         }

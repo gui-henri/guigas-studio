@@ -110,6 +110,23 @@ message RejectScriptResponse {
   Video video = 1;
 }
 
+// TakeSummary is one recorded artifact pair entry for a video.
+message TakeSummary {
+  string segment_id = 1;
+  string kind = 2; // audio | blendshapes
+  string sha256 = 3;
+  int64 size_bytes = 4;
+  string created_at = 5;
+}
+
+message ListTakesRequest {
+  string video_slug = 1;
+}
+
+message ListTakesResponse {
+  repeated TakeSummary takes = 1;
+}
+
 // VideoService manages the video index of the Studio.
 service VideoService {
   rpc ListVideos(ListVideosRequest) returns (ListVideosResponse);
@@ -118,4 +135,5 @@ service VideoService {
   rpc UpdateScript(UpdateScriptRequest) returns (UpdateScriptResponse);
   rpc ApproveScript(ApproveScriptRequest) returns (ApproveScriptResponse);
   rpc RejectScript(RejectScriptRequest) returns (RejectScriptResponse);
+  rpc ListTakes(ListTakesRequest) returns (ListTakesResponse);
 }
