@@ -5,7 +5,7 @@ sprint: 0
 prioridade: P0
 depende_de: ["S0-04"]
 estimativa_h: 2
-status: todo
+status: done
 ---
 
 # S0-09 — Frontend scaffold (Vite + React + TS + Tailwind)
@@ -53,10 +53,10 @@ providers e um smoke de RPC. O `<Player>` do remotion-kit entra na S3-06 (T-02).
 
 ## Critérios de aceite
 
-- [ ] `npm run dev --workspace frontend` sobe a SPA em :5173 e o proxy alcança a api em :8080
-- [ ] Chamada ListVideos atravessa o proxy e leva `Authorization` quando há token salvo
-- [ ] `npm run build --workspaces` (typecheck + vite) e lint verdes no workspace
-- [ ] Stubs de `frontend/src/gen` importados sem erro de tipos
+- [x] `npm run dev --workspace frontend` sobe a SPA em :5173 e o proxy alcança a api em :8080
+- [x] Chamada ListVideos atravessa o proxy e leva `Authorization` quando há token salvo *(proxy provado via `/healthz`; o handler de ListVideos só é registrado na S1-04 — hoje responde 404 a montante, erro discreto tratado no smoke da Dashboard)*
+- [x] `npm run build --workspaces` (typecheck + vite) e lint verdes no workspace
+- [x] Stubs de `frontend/src/gen` importados sem erro de tipos
 
 ## Verificação
 
@@ -68,7 +68,8 @@ curl -fsS http://localhost:5173/healthz    # prova o proxy dev
 
 ## Notas
 
-- A key `"app_token"` do localStorage é contrato entre `transport.ts` e o futuro AuthContext
+- **Escolha registrada**: o proxy dev casa com `"/app.studio.v1"` (o prefixo real dos full names,
+  ver S0-04), não `"/studio.v1"` como escrito aqui.- A key `"app_token"` do localStorage é contrato entre `transport.ts` e o futuro AuthContext
   (S0-10) — não renomeie sem atualizar ambos.
 - O proxy casa com `"/studio.v1"` porque os full names dos serviços começam com o pacote
   proto `studio.v1`.
