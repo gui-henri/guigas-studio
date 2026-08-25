@@ -2,22 +2,18 @@ package database
 
 import (
 	"context"
-	"os"
 	"testing"
 
 	"github.com/google/uuid"
 
 	sqlc "github.com/gui-henri/guigas-studio/backend/internal/database/sqlc"
+	"github.com/gui-henri/guigas-studio/backend/internal/testutil"
 )
 
 // testDBURL comes from STUDIO_TEST_DATABASE_URL; without it integration tests skip.
 func testDBURL(t *testing.T) string {
 	t.Helper()
-	url := os.Getenv("STUDIO_TEST_DATABASE_URL")
-	if url == "" {
-		t.Skip("STUDIO_TEST_DATABASE_URL not set; skipping integration test")
-	}
-	return url
+	return testutil.DatabaseURL(t, "database")
 }
 
 func TestConnectMigrateAndQueriesRoundtrip(t *testing.T) {

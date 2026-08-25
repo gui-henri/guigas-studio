@@ -22,6 +22,7 @@ import (
 	sqlc "github.com/gui-henri/guigas-studio/backend/internal/database/sqlc"
 	"github.com/gui-henri/guigas-studio/backend/internal/domain/videostate"
 	"github.com/gui-henri/guigas-studio/backend/internal/middleware"
+	"github.com/gui-henri/guigas-studio/backend/internal/testutil"
 	"github.com/gui-henri/guigas-studio/backend/internal/workspace"
 )
 
@@ -79,9 +80,9 @@ func workspaceScaffold(dataDir, slug string, post []byte) (string, error) {
 func newReviewService(t *testing.T) (studiov1connect.VideoServiceClient, *database.DB, string, func()) {
 	t.Helper()
 	ctx := context.Background()
-	url := os.Getenv("STUDIO_TEST_DATABASE_URL")
+	url := testutil.DatabaseURL(t, "services")
 	if url == "" {
-		t.Skip("STUDIO_TEST_DATABASE_URL not set; skipping integration test")
+		t.Skip("STUDIO_TEST_DATABASE_URL/TEST_DATABASE_URL not set; skipping integration test")
 	}
 	db, err := database.Connect(ctx, url)
 	if err != nil {

@@ -6,12 +6,12 @@ import (
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/gui-henri/guigas-studio/backend/internal/database"
+	"github.com/gui-henri/guigas-studio/backend/internal/testutil"
 )
 
 //go:embed testdata/feed.xml
@@ -22,7 +22,7 @@ func testCtx(t *testing.T) context.Context {
 }
 
 func TestBaselineThenNewItem(t *testing.T) {
-	url := os.Getenv("STUDIO_TEST_DATABASE_URL")
+	url := testutil.DatabaseURL(t, "watcher")
 	if url == "" {
 		t.Skip("STUDIO_TEST_DATABASE_URL not set; skipping integration test")
 	}

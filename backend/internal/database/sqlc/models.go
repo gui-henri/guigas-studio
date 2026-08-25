@@ -17,6 +17,18 @@ type RssItem struct {
 	SeenAt  time.Time   `json:"seen_at"`
 }
 
+type Take struct {
+	ID         uuid.UUID `json:"id"`
+	VideoSlug  string    `json:"video_slug"`
+	SegmentID  string    `json:"segment_id"`
+	Kind       string    `json:"kind"`
+	RelPath    string    `json:"rel_path"`
+	SizeBytes  int64     `json:"size_bytes"`
+	Sha256     string    `json:"sha256"`
+	DurationMs int64     `json:"duration_ms"`
+	CreatedAt  time.Time `json:"created_at"`
+}
+
 type User struct {
 	ID           uuid.UUID `json:"id"`
 	Username     string    `json:"username"`

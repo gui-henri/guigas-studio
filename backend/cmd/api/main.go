@@ -25,6 +25,7 @@ import (
 	"github.com/gui-henri/guigas-studio/backend/internal/events"
 	"github.com/gui-henri/guigas-studio/backend/internal/middleware"
 	"github.com/gui-henri/guigas-studio/backend/internal/services"
+	"github.com/gui-henri/guigas-studio/backend/internal/upload"
 	"github.com/gui-henri/guigas-studio/backend/internal/watcher"
 )
 
@@ -49,6 +50,12 @@ func newHandler(cfg config.Config, db *database.DB, appHub *events.Hub) http.Han
 	if hub == nil {
 		hub = events.NewHub() // tests / standalone usage
 	}
+
+	takeUpload := upload.NewHandler(db.Queries, db.Pool, cfg.DataDir, func(raw string) (*auth.Claims, error) {
+		return auth.ParseToken(cfg.Auth.JWTSecret, raw)
+	})
+	mux.Handle("POST /api/v1/videos/{videoSlug}/takes", takeUpload)
+	mux.Handle("GET /api/v1/videos/{videoSlug}/takes", takeUpload)
 	mux.Handle("GET /api/events", events.HTTPHandler(hub, func(raw string) (*auth.Claims, error) {
 		return auth.ParseToken(cfg.Auth.JWTSecret, raw)
 	}))

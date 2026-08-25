@@ -4,7 +4,6 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"testing"
 
 	"connectrpc.com/connect"
@@ -13,15 +12,12 @@ import (
 	studiov1connect "github.com/gui-henri/guigas-studio/backend/gen/app/studio/v1/studiov1connect"
 	"github.com/gui-henri/guigas-studio/backend/internal/auth"
 	"github.com/gui-henri/guigas-studio/backend/internal/database"
+	"github.com/gui-henri/guigas-studio/backend/internal/testutil"
 )
 
 func testDBURL(t *testing.T) string {
 	t.Helper()
-	url := os.Getenv("STUDIO_TEST_DATABASE_URL")
-	if url == "" {
-		t.Skip("STUDIO_TEST_DATABASE_URL not set; skipping integration test")
-	}
-	return url
+	return testutil.DatabaseURL(t, "services")
 }
 
 // newAuthClient seeds the account and returns an in-process Connect client.

@@ -12,6 +12,7 @@ import (
 
 type Querier interface {
 	CountRssItems(ctx context.Context) (int64, error)
+	CountTakesForVideo(ctx context.Context, videoSlug string) (int64, error)
 	CreateUserIfNotExists(ctx context.Context, arg CreateUserIfNotExistsParams) (int64, error)
 	CreateVideo(ctx context.Context, arg CreateVideoParams) (Video, error)
 	GetOriginalScript(ctx context.Context, id uuid.UUID) ([]byte, error)
@@ -23,10 +24,12 @@ type Querier interface {
 	InsertStatusChange(ctx context.Context, arg InsertStatusChangeParams) error
 	ListParsesByVideo(ctx context.Context, videoID uuid.UUID) ([]VideoArtifactParse, error)
 	ListStatusHistoryByVideo(ctx context.Context, videoID uuid.UUID) ([]VideoStatusHistory, error)
+	ListTakesByVideo(ctx context.Context, videoSlug string) ([]Take, error)
 	ListVideos(ctx context.Context) ([]Video, error)
 	SetOriginalScript(ctx context.Context, arg SetOriginalScriptParams) (int64, error)
 	SetRssItemVideo(ctx context.Context, arg SetRssItemVideoParams) error
 	UpdateVideoStatus(ctx context.Context, arg UpdateVideoStatusParams) error
+	UpsertTake(ctx context.Context, arg UpsertTakeParams) (Take, error)
 }
 
 var _ Querier = (*Queries)(nil)

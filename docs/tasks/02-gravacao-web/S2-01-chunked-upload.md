@@ -5,7 +5,7 @@ sprint: 2
 prioridade: P0
 depende_de: [S1-01]
 estimativa_h: 2
-status: todo
+status: done
 ---
 
 # S2-01 — Upload chunked autenticado
@@ -62,11 +62,11 @@ uploads gerados pela junção de segmento (S2-07).
 
 ## Critérios de aceite
 
-- [ ] Upload de 5 MB em chunks retomados termina byte-a-byte idêntico (sha256 confere)
-- [ ] Checksum divergente → 409, partial preservado, nada registrado no PG
-- [ ] Re-upload do mesmo `segment_id+kind` substitui o take anterior (último vence)
-- [ ] Primeiro take promove `script_approved → recording`; demais takes não re-disparam
-- [ ] Teste de integração cobrindo o fluxo completo passa contra PG de teste
+- [x] Upload de 5 MB em chunks retomados termina byte-a-byte idêntico (sha256 confere)
+- [x] Checksum divergente → 409, partial preservado, nada registrado no PG
+- [x] Re-upload do mesmo `segment_id+kind` substitui o take anterior (último vence)
+- [x] Primeiro take promove `script_approved → recording`; demais takes não re-disparam
+- [x] Teste de integração cobrindo o fluxo completo passa contra PG de teste
 
 ## Verificação
 

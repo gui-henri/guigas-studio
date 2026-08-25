@@ -2,11 +2,12 @@ package artifacts
 
 import (
 	"context"
-	"os"
 	"testing"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
+
+	"github.com/gui-henri/guigas-studio/backend/internal/testutil"
 
 	"github.com/gui-henri/guigas-studio/backend/internal/database"
 	sqlc "github.com/gui-henri/guigas-studio/backend/internal/database/sqlc"
@@ -16,7 +17,7 @@ import (
 
 func connectTestDB(t *testing.T) (*database.DB, error) {
 	t.Helper()
-	url := os.Getenv("STUDIO_TEST_DATABASE_URL")
+	url := testutil.DatabaseURL(t, "artifacts")
 	if url == "" {
 		t.Skip("STUDIO_TEST_DATABASE_URL not set; skipping integration test")
 	}
