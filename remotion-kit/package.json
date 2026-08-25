@@ -2,5 +2,8 @@
   "name": "@guigas/remotion-kit",
   "version": "0.0.0",
   "private": true,
-  "type": "module"
+  "type": "module",
+  "devDependencies": {
+    "pngjs": "^7.0.0"
+  }
 }
