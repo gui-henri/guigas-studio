@@ -5,7 +5,7 @@ sprint: 0
 prioridade: P0
 depende_de: ["S0-06"]
 estimativa_h: 2
-status: todo
+status: done
 ---
 
 # S0-15 — Máquina de estados do vídeo (domain)
@@ -50,10 +50,10 @@ entra agora para as duas pontas falarem igual.
 
 ## Critérios de aceite
 
-- [ ] Transição ilegal retorna erro tipado (nunca panic, nunca string mágica)
-- [ ] Teste 13×13 exaustivo verde, gerado por laço (não copiado à mão)
-- [ ] Constraint no PG ativa: INSERT/UPDATE com status inválido falha
-- [ ] Enum proto e domínio provadamente sincronizados pelo teste
+- [x] Transição ilegal retorna erro tipado (nunca panic, nunca string mágica)
+- [x] Teste 13×13 exaustivo verde, gerado por laço (não copiado à mão)
+- [x] Constraint no PG ativa: INSERT com status inválido falha (violates check constraint "videos_status_valid")
+- [x] Enum proto e domínio provadamente sincronizados pelo teste
 
 ## Verificação
 
