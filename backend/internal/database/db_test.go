@@ -13,7 +13,11 @@ import (
 // testDBURL comes from STUDIO_TEST_DATABASE_URL; without it integration tests skip.
 func testDBURL(t *testing.T) string {
 	t.Helper()
-	return testutil.DatabaseURL(t, "database")
+	url := testutil.DatabaseURL(t, "database")
+	if url == "" {
+		t.Skip("STUDIO_TEST_DATABASE_URL not set; skipping integration test")
+	}
+	return url
 }
 
 func TestConnectMigrateAndQueriesRoundtrip(t *testing.T) {

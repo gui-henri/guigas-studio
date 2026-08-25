@@ -5,7 +5,7 @@ sprint: 3
 prioridade: P0
 depende_de: ["S2-09"]
 estimativa_h: 2
-status: todo
+status: done
 ---
 
 # S3-01 — Cliente Gemini Flash Lite (transcrição)
@@ -59,11 +59,11 @@ e das legendas EN (S3-05) — o primeiro passo do pipeline que roda enquanto o v
 
 ## Critérios de aceite
 
-- [ ] `Transcriber` implementada pelo cliente Gemini sem vazar detalhes HTTP p/ callers
-- [ ] Retry/backoff + timeout cobertos por testes determinísticos
-- [ ] Custo (tokens) logado estruturadamente a cada chamada
-- [ ] `GEMINI_API_KEY` presente no `.env.example` (sem valor) e lida via config
-- [ ] Suíte roda 100% offline (fixtures + httptest)
+- [x] `Transcriber` implementada pelo cliente Gemini sem vazar detalhes HTTP p/ callers
+- [x] Retry/backoff (429→sucesso, 500 esgota, 4xx falha rápido) cobertos por testes determinísticos
+- [x] Custo (tokens) logado estruturadamente a cada chamada (`gemini.usage`)
+- [x] `GEMINI_API_KEY` presente no `.env.example` (sem valor) e lida via config (+ GEMINI_MODEL/GEMINI_TIMEOUT)
+- [x] Suíte roda 100% offline (fixtures + httptest, 5 testes)
 
 ## Verificação
 
