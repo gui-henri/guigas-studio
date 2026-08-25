@@ -5,7 +5,7 @@ sprint: 3
 prioridade: P0
 depende_de: ["S2-09"]
 estimativa_h: 2
-status: todo
+status: done
 ---
 
 # S3-03 — Viseme engine na VPS
@@ -56,11 +56,11 @@ boca do avatar nasce aqui — webcam nunca alimenta boca (SPEC §2 #5).
 
 ## Critérios de aceite
 
-- [ ] Interface `Engine` trocável; callers não conhecem wazero/binário
-- [ ] Escolha de execução registrada em Nota com justificativa objetiva
-- [ ] Segunda chamada com o mesmo WAV não reprocessa (cache por checksum provado em teste)
-- [ ] Shapes inválidas/desordenadas rejeitadas com erro claro
-- [ ] Testes de parser/validação/cache rodam offline
+- [x] Interface `Engine` trocável; callers não conhecem wazero/binário
+- [x] Escolha de execução registrada em Nota com justificativa objetiva
+- [x] Segunda chamada com o mesmo WAV não reprocessa (cache por checksum provado em teste; regravar invalida)
+- [x] Shapes inválidas/desordenadas rejeitadas com erro claro (+ clamp à duração do WAV)
+- [x] Testes de parser/validação/cache rodam offline (7 no suite + 2 taggeados c/ binário fake)
 
 ## Verificação
 
@@ -71,9 +71,13 @@ go test ./backend/internal/visemes/... -v
 
 ## Notas
 
-- wazero tende a ser o caminho mais simples de operar (binário Go único, imagem enxuta);
-  binário auxiliar só compensa se o port WASM estiver imaturo. Decida olhando o estado
-  real do repositório do engine — não por achismo — e documente a comparação aqui.
+- **Escolha registrada (binário auxiliar)**: não há port WASM do Rhubarb com artefato
+  publicado e verificável offline; wazero exige um .wasm concreto cuja procedência não
+  pôde ser estabelecida neste ambiente. `ExecEngine` implementa a opção "binário
+  auxiliar" (contrato CLI do Rhubarb, configurado via `RHUBARB_BIN`), roda o build
+  nativo oficial na VPS e é trocável por um engine wazero depois sem tocar callers.
+  Execução REAL do engine fica para o host com o binário (teste taggeado cobre o caminho
+  com binário fake).
 - O Rhubarb original é binário nativo; o SPEC cita o port/lip-sync-engine em WASM. Se
   NENHUM dos caminhos estiver utilizável, marque `status: blocked` com diagnóstico — não
   substitua o engine por conta própria (o contrato A–H+X é consumido à frente).
