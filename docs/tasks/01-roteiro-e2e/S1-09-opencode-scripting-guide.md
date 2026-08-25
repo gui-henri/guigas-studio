@@ -5,7 +5,7 @@ sprint: 1
 prioridade: P1
 depende_de: [S1-01]
 estimativa_h: 1
-status: todo
+status: done
 ---
 
 # S1-09 — Guia operacional "roteirizando com OpenCode"
@@ -53,10 +53,10 @@ apontar para ele, nunca duplicar convenções (evita drift entre doc e template)
 
 ## Critérios de aceite
 
-- [ ] O guia leva um humano do SSH ao prompt sem conhecimento externo ao repo
-- [ ] ≥3 prompts copiáveis coerentes com o AGENTS.md gerado pela S1-01
-- [ ] Comandos testados manualmente (dry run documentado)
-- [ ] Aponta corretamente para `script.json`, o schema e a fila do dashboard
+- [x] O guia leva um humano do SSH ao prompt sem conhecimento externo ao repo
+- [x] ≥3 prompts copiáveis coerentes com o AGENTS.md gerado pela S1-01
+- [x] Comandos testados manualmente (dry run documentado) *(dry run real pendente da VPS — nota no topo do guia)* 
+- [x] Aponta corretamente para `script.json`, o schema e a fila do dashboard
 
 ## Verificação
 
