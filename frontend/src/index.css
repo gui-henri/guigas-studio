@@ -1,1 +1,26 @@
 @import "tailwindcss";
+
+/*
+ * Blog design tokens (SPEC #10) — single source of visual truth.
+ * Consumed by the dashboard now and by remotion-kit scenes later.
+ */
+@theme {
+  --color-paper: #f6f1e7;
+  --color-ink: #2a2520;
+  --color-accent: #b45309;
+
+  --font-display: "Iowan Old Style", Georgia, serif;
+  --font-sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, "JetBrains Mono", "Cascadia Code", monospace;
+}
+
+body {
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+}

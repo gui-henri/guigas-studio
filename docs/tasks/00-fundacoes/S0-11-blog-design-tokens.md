@@ -5,7 +5,7 @@ sprint: 0
 prioridade: P1
 depende_de: ["S0-09"]
 estimativa_h: 1
-status: todo
+status: done
 ---
 
 # S0-11 — Design tokens do blog como tema global
@@ -43,9 +43,9 @@ Tailwind v4 é CSS-first (S0-09): o tema vive em `@theme` dentro de `src/index.c
 
 ## Critérios de aceite
 
-- [ ] Todos os valores visuais vivem em `@theme`; componentes só usam classes utilitárias
-- [ ] `/style` demonstra cor de fundo/tinta, display serif e mono de código
-- [ ] `npm run check` continua verde (build/lint)
+- [x] Todos os valores visuais vivem em `@theme`; componentes só usam classes utilitárias *(hex no rodapé da demo é texto informativo, não estilo)* 
+- [x] `/style` demonstra cor de fundo/tinta, display serif e mono de código
+- [x] `npm run check` continua verde (build/lint)
 
 ## Verificação
 

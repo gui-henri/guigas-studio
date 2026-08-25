@@ -4,6 +4,7 @@ import AppShell from "./components/AppShell";
 import RequireAuth from "./components/RequireAuth";
 import DashboardPage from "./pages/DashboardPage";
 import LoginPage from "./pages/LoginPage";
+import StyleDemoPage from "./pages/StyleDemoPage";
 
 function VideoDetailPlaceholder() {
   return (
@@ -33,6 +34,16 @@ export default function App() {
           <RequireAuth>
             <AppShell>
               <VideoDetailPlaceholder />
+            </AppShell>
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/style"
+        element={
+          <RequireAuth>
+            <AppShell>
+              <StyleDemoPage />
             </AppShell>
           </RequireAuth>
         }
