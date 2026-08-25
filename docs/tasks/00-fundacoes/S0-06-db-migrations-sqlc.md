@@ -5,7 +5,7 @@ sprint: 0
 prioridade: P0
 depende_de: ["S0-05"]
 estimativa_h: 2
-status: todo
+status: done
 ---
 
 # S0-06 — Migrações embutidas + pgx pool + sqlc
@@ -53,10 +53,10 @@ Queries base já atendem os RPCs ListVideos/GetVideo/CreateVideo contratados na 
 
 ## Critérios de aceite
 
-- [ ] `sqlc generate` roda limpo; código em `internal/database/sqlc/` nunca editado à mão
-- [ ] Boot da api aplica migrações idempotentemente (restart não duplica nem falha)
-- [ ] Tabelas `users` e `videos` existem no PG do compose
-- [ ] Teste de integração verde contra PG de teste; sem a env, teste é pulado (não falha)
+- [x] `sqlc generate` roda limpo; código em `internal/database/sqlc/` nunca editado à mão
+- [x] Boot da api aplica migrações idempotentemente (restart não duplica nem falha)
+- [x] Tabelas `users` e `videos` existem no PG do compose *(verificado contra PG local de teste; smoke compose pendente de host com Docker — ver nota da S0-05)*
+- [x] Teste de integração verde contra PG de teste; sem a env, teste é pulado (não falha)
 
 ## Verificação
 
@@ -68,7 +68,12 @@ cd backend && STUDIO_TEST_DATABASE_URL="postgres://guigas:senha@localhost:5432/g
 
 ## Notas
 
-- Sem `.down.sql`: rollback = restore de backup; roll-forward simples mantém o diretório
+- **Escolha registrada**: o blueprint §3 omite `engine`; sqlc exige. Adicionado
+  `engine: "postgresql"` ao `sqlc.yaml`.
+- `Config` ganhou bloco `POSTGRES_*` (+ override opcional `POSTGRES_DATABASE_URL`) com helper
+  `DatabaseURL()`; boot conecta e migra com fail-fast.
+- Integração verificada contra Postgres 15 local (`STUDIO_TEST_DATABASE_URL`): roundtrip de
+  vídeos, idempotência de migração e upsert-idempotente de usuários — todos verdes.- Sem `.down.sql`: rollback = restore de backup; roll-forward simples mantém o diretório
   parseável pelo sqlc (que lê as migrações como schema). Se um dia down for imprescindível,
   reavaliar golang-migrate — decisão registrada aqui.
 - Runner embutido de ~60 linhas escolhido no lugar do golang-migrate (T-05 fala "padrão

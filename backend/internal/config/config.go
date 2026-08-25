@@ -6,6 +6,8 @@ import (
 	"log/slog"
 	"os"
 	"strings"
+
+	"github.com/gui-henri/guigas-studio/backend/internal/database"
 )
 
 // Config holds the server runtime configuration.
@@ -13,6 +15,17 @@ type Config struct {
 	Port     string
 	DataDir  string
 	LogLevel string
+	Postgres PostgresConfig
+}
+
+// PostgresConfig groups the individual POSTGRES_* variables (D-02).
+type PostgresConfig struct {
+	User         string
+	Password     string
+	DatabaseName string
+	Host         string
+	Port         string
+	URL          string // optional full URL override
 }
 
 // Load reads configuration from the environment with defaults:
@@ -23,6 +36,14 @@ func Load() (Config, error) {
 		Port:     envOr("PORT", "8080"),
 		DataDir:  envOr("DATA_DIR", "/data"),
 		LogLevel: strings.ToLower(envOr("LOG_LEVEL", "info")),
+		Postgres: PostgresConfig{
+			User:         envOr("POSTGRES_USER", ""),
+			Password:     envOr("POSTGRES_PASSWORD", ""),
+			DatabaseName: envOr("POSTGRES_DB", ""),
+			Host:         envOr("POSTGRES_HOST", "localhost"),
+			Port:         envOr("POSTGRES_PORT", "5432"),
+			URL:          os.Getenv("POSTGRES_DATABASE_URL"),
+		},
 	}
 
 	switch cfg.LogLevel {
@@ -31,6 +52,15 @@ func Load() (Config, error) {
 		return Config{}, fmt.Errorf("invalid LOG_LEVEL %q: must be one of debug, info, warn, error", cfg.LogLevel)
 	}
 	return cfg, nil
+}
+
+// DatabaseURL assembles the postgres connection URL from the configured parts.
+func (c Config) DatabaseURL() string {
+	return database.BuildDatabaseURL(
+		c.Postgres.Host, c.Postgres.Port,
+		c.Postgres.User, c.Postgres.Password,
+		c.Postgres.DatabaseName, c.Postgres.URL,
+	)
 }
 
 // SlogLevel maps the configured level name to a slog.Level.

@@ -7,7 +7,7 @@ import (
 )
 
 func TestHealthRoute(t *testing.T) {
-	srv := httptest.NewServer(newHandler())
+	srv := httptest.NewServer(newHandler(nil))
 	defer srv.Close()
 
 	resp, err := srv.Client().Post(srv.URL+"/app.studio.v1.HealthService/Check", "application/json", strings.NewReader("{}"))

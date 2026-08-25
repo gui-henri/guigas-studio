@@ -18,10 +18,11 @@ import (
 
 	studiov1connect "github.com/gui-henri/guigas-studio/backend/gen/app/studio/v1/studiov1connect"
 	"github.com/gui-henri/guigas-studio/backend/internal/config"
+	"github.com/gui-henri/guigas-studio/backend/internal/database"
 	"github.com/gui-henri/guigas-studio/backend/internal/services"
 )
 
-func newHandler() http.Handler {
+func newHandler(db *database.DB) http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -46,13 +47,21 @@ func main() {
 	logger := slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{Level: cfg.SlogLevel()}))
 	slog.SetDefault(logger)
 
-	server := &http.Server{
-		Addr:    ":" + cfg.Port,
-		Handler: newHandler(),
-	}
-
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
+
+	db, err := database.Connect(ctx, cfg.DatabaseURL())
+	if err != nil {
+		logger.Error("database unavailable", "error", err)
+		os.Exit(1)
+	}
+	defer db.Pool.Close()
+	logger.Info("database connected")
+
+	server := &http.Server{
+		Addr:    ":" + cfg.Port,
+		Handler: newHandler(db),
+	}
 
 	errCh := make(chan error, 1)
 	go func() {
