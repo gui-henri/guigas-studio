@@ -12,3 +12,6 @@ plugins:
   - remote: buf.build/connectrpc/query-es
     out: frontend/src/gen
     opt: target=ts
+  - remote: buf.build/bufbuild/es
+    out: remotion-kit/src/gen
+    opt: target=ts

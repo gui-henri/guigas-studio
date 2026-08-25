@@ -12,6 +12,7 @@ import AvatarDevPage from "./pages/AvatarDevPage";
 import MicDevPage from "./pages/MicDevPage";
 import TeleprompterDevPage from "./pages/TeleprompterDevPage";
 import RecorderDevPage from "./pages/RecorderDevPage";
+import PlayerDevPage from "./pages/PlayerDevPage";
 import StudioRecordingPage from "./pages/StudioRecordingPage";
 
 export default function App() {
@@ -25,6 +26,7 @@ export default function App() {
       <Route path="/dev/mic" element={<MicDevPage />} />
       <Route path="/dev/teleprompter" element={<TeleprompterDevPage />} />
       <Route path="/dev/recorder" element={<RecorderDevPage />} />
+      <Route path="/dev/player" element={<PlayerDevPage />} />
       <Route
         path="/"
         element={

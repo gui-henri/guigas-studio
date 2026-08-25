@@ -17,7 +17,11 @@ import (
 
 func testDBURL(t *testing.T) string {
 	t.Helper()
-	return testutil.DatabaseURL(t, "services")
+	url := testutil.DatabaseURL(t, "services")
+	if url == "" {
+		t.Skip("STUDIO_TEST_DATABASE_URL not set; skipping integration test")
+	}
+	return url
 }
 
 // newAuthClient seeds the account and returns an in-process Connect client.

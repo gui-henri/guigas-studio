@@ -97,7 +97,10 @@ export default function ScriptReviewPage() {
     if (!editing && script) setDrafts(null);
   }, [script, editing]);
 
-  const draftSegments = drafts ?? script?.segments ?? [];
+  const draftSegments = useMemo(
+    () => drafts ?? script?.segments ?? [],
+    [drafts, script]
+  );
   const fieldErrors = useMemo(
     () => (editing ? validateSegments(draftSegments) : new Map<string, SegmentErrors>()),
     [editing, draftSegments]

@@ -5,7 +5,7 @@ sprint: 3
 prioridade: P0
 depende_de: ["S0-09"]
 estimativa_h: 2
-status: todo
+status: done
 ---
 
 # S3-06 — Scaffold do `remotion-kit`
@@ -54,11 +54,11 @@ pacotes que a tocam.
 
 ## Critérios de aceite
 
-- [ ] `LongForm` e `Short` registradas e renderizáveis via CLI
-- [ ] Tipos de props vêm do codegen proto — zero schema TS paralelo
-- [ ] `PlayerHost` do workspace renderiza na SPA em `/dev/player`
-- [ ] `npm run build --workspaces` passa com o typecheck do pacote
-- [ ] Smoke 5 s documentado e executado uma vez
+- [x] `LongForm` e `Short` registradas e renderizáveis via CLI (smoke5s.mp4 gerado, 242KB, 0-149 frames)
+- [x] Tipos de props vêm do codegen proto (gen próprio em remotion-kit/src/gen) — zero schema TS paralelo
+- [x] `PlayerHost` do workspace renderiza na SPA em `/dev/player`
+- [x] `npm run build --workspaces` passa com o typecheck do pacote
+- [x] Smoke 5 s documentado e executado (comando da Verificação)
 
 ## Verificação
 
@@ -70,6 +70,11 @@ npx remotion render remotion-kit/src/index.tsx LongForm out/smoke5s.mp4 \
 
 ## Notas
 
+- **Escolha registrada**: sem schema zod nas composições (evitaria duplicar tipos do proto);
+  `Composition` usa componente loose + cast controlado, e a tipagem pública forte vive em
+  `StudioVideoProps`/`PlayerHost` (ambos derivados do codegen).
+- CLI de render vive em `@remotion/cli` (o pacote `remotion` não traz binário); instalado
+  como devDep pinned 4.0.517 no remotion-kit.
 - Pin absoluto de versão entre `remotion` e `@remotion/player`: minor misturado quebra o
   `<Player>` de formas sutis, e drift de render já é risco registrado (SPEC §9).
 - `--frames=0-149` mantém o smoke em 5 s mesmo que a composição declare duração maior —

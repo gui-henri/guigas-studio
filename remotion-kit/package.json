@@ -4,6 +4,24 @@
   "private": true,
   "type": "module",
   "devDependencies": {
-    "pngjs": "^7.0.0"
+    "pngjs": "^7.0.0",
+    "remotion": "4.0.517",
+    "typescript": "5.9.3"
+  },
+  "scripts": {
+    "build": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "dependencies": {
+    "@bufbuild/protobuf": "2.14.0",
+    "@remotion/cli": "4.0.517"
+  },
+  "main": "src/index.tsx",
+  "types": "src/index.tsx",
+  "exports": {
+    ".": "./src/index.tsx"
   }
 }

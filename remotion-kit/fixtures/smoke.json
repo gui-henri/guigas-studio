@@ -1,0 +1,13 @@
+{
+  "title": "Smoke Test — Guigas Studio",
+  "durationMs": 30000,
+  "script": {
+    "post": "smoke-post",
+    "language": { "spoken": "pt-BR", "subtitles": "en" },
+    "target": { "durationMin": 8 },
+    "segments": [
+      { "id": "hook", "beat": "BEAT_HOOK", "emotion": "EMOTION_SURPRISED", "narration_pt": "Gancho do smoke test." },
+      { "id": "cta", "beat": "BEAT_CTA", "emotion": "EMOTION_IDLE", "narration_pt": "CTA final." }
+    ]
+  }
+}
