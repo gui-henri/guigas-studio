@@ -186,6 +186,15 @@ func (w *Watcher) scaffoldWorkspace(ctx context.Context, videoID uuid.UUID, slug
 			slog.String("slug", slug), slog.Any("error", err))
 		return
 	}
+	if err := w.queries.InsertStatusChange(ctx, sqlc.InsertStatusChangeParams{
+		VideoID: videoID,
+		Status:  string(videostate.StateScriptPending),
+		Reason:  "context pack scaffolded from RSS post",
+		Actor:   "watcher",
+	}); err != nil {
+		w.logger.Warn("watcher.workspace.history_insert_failed",
+			slog.String("slug", slug), slog.Any("error", err))
+	}
 	if err := workspace.Commit(root, fmt.Sprintf("chore(%s): scaffold context pack", slug)); err != nil {
 		w.logger.Error("watcher.workspace.commit_failed",
 			slog.String("slug", slug), slog.Any("error", err))

@@ -5,7 +5,7 @@ sprint: 1
 prioridade: P1
 depende_de: [S1-03, S1-04]
 estimativa_h: 2
-status: todo
+status: done
 ---
 
 # S1-08 — Teste de integração do fluxo de roteiro E2E
@@ -56,12 +56,12 @@ rápido (CI D-15 segue rodando o suite normal).
 
 ## Critérios de aceite
 
-- [ ] Caso positivo cobre watcher → context pack → observador → UpdateScript →
+- [x] Caso positivo cobre watcher → context pack → observador → UpdateScript →
       ApproveScript com asserts de estado no PG e no FS
-- [ ] Caso negativo prova estagnação segura em `script_pending` + registro estruturado
+- [x] Caso negativo prova estagnação segura em `script_pending` + registro estruturado
       dos erros
-- [ ] Suite isolada e re-executável (truncates + GUID único por run)
-- [ ] Sem a tag, `go test ./...` não executa integração (suite unitária rápida)
+- [x] Suite isolada e re-executável (truncates + GUID único por run)
+- [x] Sem a tag, `go test ./...` não executa integração (suite unitária rápida)
 
 ## Verificação
 

@@ -123,6 +123,11 @@ func (d *debouncer) trigger(path string) {
 
 // watchAll adds dir and every existing subdirectory to the watcher.
 func (o *Observer) watchAll(watcher *fsnotify.Watcher, dir string) error {
+	// The workspace root may not exist yet (first video creates it); ensure it
+	// does so initial watching succeeds and future subdirs are picked up via Create.
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		return fmt.Errorf("create watch root %s: %w", dir, err)
+	}
 	return filepath.WalkDir(dir, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
 			if os.IsNotExist(err) {
@@ -203,6 +208,15 @@ func (o *Observer) ProcessScriptPath(ctx context.Context, scriptPath string) {
 		o.logger.Error("artifacts.status_update_failed",
 			slog.String("video_id", videoID), slog.Any("error", err))
 		return
+	}
+	if err := o.queries.InsertStatusChange(ctx, sqlc.InsertStatusChangeParams{
+		VideoID: video.ID,
+		Status:  string(to),
+		Reason:  fmt.Sprintf("script.json validated (%s)", slug),
+		Actor:   "opencode",
+	}); err != nil {
+		o.logger.Warn("artifacts.history_insert_failed",
+			slog.String("video_id", videoID), slog.Any("error", err))
 	}
 
 	// Freeze the first validated version as the review diff base (S1-04).
