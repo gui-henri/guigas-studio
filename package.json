@@ -11,5 +11,11 @@
     "remotion-kit",
     "runner"
   ],
-  "scripts": {}
+  "scripts": {
+    "gen": "buf generate && cd backend && sqlc generate",
+    "backend:check": "cd backend && sqlc vet && go vet ./... && go build ./... && go test ./...",
+    "lint": "npm run lint --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present",
+    "check": "npm run lint && npm run build && buf lint && npm run backend:check"
+  }
 }

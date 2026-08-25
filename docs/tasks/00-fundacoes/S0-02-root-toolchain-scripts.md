@@ -5,7 +5,7 @@ sprint: 0
 prioridade: P0
 depende_de: ["S0-01"]
 estimativa_h: 1
-status: todo
+status: done
 ---
 
 # S0-02 — Scripts npm raiz cross-platform
@@ -54,10 +54,10 @@ passa a ser pré-condição de todo `done` no roadmap.
 
 ## Critérios de aceite
 
-- [ ] `npm run check` encadeia lint+build dos workspaces e os checks do backend sem erro de shell
-- [ ] `npm run gen` está pronto para regenerar stubs proto/sqlc quando existirem (S0-04/S0-06)
-- [ ] Nenhum script requer bash/WSL — revisão linha a linha confirma portabilidade (D-13)
-- [ ] README explica os scripts e o toolchain exigido
+- [x] `npm run check` encadeia lint+build dos workspaces e os checks do backend sem erro de shell
+- [x] `npm run gen` está pronto para regenerar stubs proto/sqlc quando existirem (S0-04/S0-06)
+- [x] Nenhum script requer bash/WSL — revisão linha a linha confirma portabilidade (D-13)
+- [x] README explica os scripts e o toolchain exigido
 
 ## Verificação
 
