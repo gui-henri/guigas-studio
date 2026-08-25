@@ -23,7 +23,7 @@ function StatusBadge({ status }: { status: VideoStatus }) {
 
 function VideoCard({ video }: { video: Video }) {
   const navigate = useNavigate();
-  const onClick = () => void navigate(`/video/${video.id}`);
+  const onClick = () => void navigate(`/videos/${video.id}`);
 
   return (
     <button

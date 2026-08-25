@@ -5,7 +5,7 @@ sprint: 1
 prioridade: P0
 depende_de: [S1-04, S1-05, S0-12]
 estimativa_h: 2
-status: todo
+status: done
 ---
 
 # S1-06 — UI de revisão de roteiro
@@ -52,11 +52,11 @@ entradas na S1-07; aqui é somente leitura.
 
 ## Critérios de aceite
 
-- [ ] Todos os segmentos renderizam com beat/emotion/narração/badges corretos
-- [ ] Diff lado a lado destaca exatamente as diferenças entre original e edição atual
-- [ ] Navegação por segmento funcional (rail + seleção/scroll)
-- [ ] Reescrita do `script.json` pelo agente aparece na tela sem reload manual (SSE)
-- [ ] `npm run build --workspace frontend` verde (typecheck incluso)
+- [x] Todos os segmentos renderizam com beat/emotion/narração/badges corretos
+- [x] Diff lado a lado destaca exatamente as diferenças entre original e edição atual (jsdiff por campo)
+- [x] Navegação por segmento funcional (rail + seleção/scroll + indicador de alterados)
+- [x] Reescrita do `script.json` pelo agente aparece na tela sem reload manual (SSE via useStudioEvents)
+- [x] `npm run build --workspace frontend` verde (typecheck incluso)
 
 ## Verificação
 

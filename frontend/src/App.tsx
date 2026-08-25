@@ -5,15 +5,8 @@ import RequireAuth from "./components/RequireAuth";
 import { useStudioEvents } from "./hooks/useStudioEvents";
 import DashboardPage from "./pages/DashboardPage";
 import LoginPage from "./pages/LoginPage";
+import ScriptReviewPage from "./pages/ScriptReviewPage";
 import StyleDemoPage from "./pages/StyleDemoPage";
-
-function VideoDetailPlaceholder() {
-  return (
-    <p className="text-sm text-neutral-500">
-      Detalhe do vídeo chega na S1-06 (revisão de roteiro).
-    </p>
-  );
-}
 
 export default function App() {
   useStudioEvents();
@@ -32,11 +25,11 @@ export default function App() {
         }
       />
       <Route
-        path="/video/:id"
+        path="/videos/:id"
         element={
           <RequireAuth>
             <AppShell>
-              <VideoDetailPlaceholder />
+              <ScriptReviewPage />
             </AppShell>
           </RequireAuth>
         }
