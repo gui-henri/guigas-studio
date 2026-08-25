@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package app.studio.v1;
+
+option go_package = "github.com/gui-henri/guigas-studio/backend/gen/app/studio/v1;studiov1";
+
+// CheckRequest asks for the serving status of the API.
+message CheckRequest {}
+
+// CheckResponse reports the current serving status.
+message CheckResponse {
+  string status = 1;
+}
+
+// HealthService exposes liveness for load balancers and compose healthchecks.
+service HealthService {
+  rpc Check(CheckRequest) returns (CheckResponse);
+}

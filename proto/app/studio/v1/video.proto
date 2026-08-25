@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+package app.studio.v1;
+
+option go_package = "github.com/gui-henri/guigas-studio/backend/gen/app/studio/v1;studiov1";
+
+// VideoStatus mirrors the canonical pipeline state machine (ROADMAP.md).
+// Never rename an existing value; append new states at the end.
+enum VideoStatus {
+  VIDEO_STATUS_UNSPECIFIED = 0;
+  VIDEO_STATUS_NEW = 1;
+  VIDEO_STATUS_SCRIPT_PENDING = 2;
+  VIDEO_STATUS_SCRIPT_REVIEW = 3;
+  VIDEO_STATUS_SCRIPT_APPROVED = 4;
+  VIDEO_STATUS_RECORDING = 5;
+  VIDEO_STATUS_VOICE_PROCESSING = 6;
+  VIDEO_STATUS_SCENES_PENDING = 7;
+  VIDEO_STATUS_SCENES_REVIEW = 8;
+  VIDEO_STATUS_QUEUED = 9;
+  VIDEO_STATUS_RENDERING = 10;
+  VIDEO_STATUS_FINAL_REVIEW = 11;
+  VIDEO_STATUS_RELEASED = 12;
+  VIDEO_STATUS_BLOCKED = 13;
+}
+
+// Video is the pipeline index entry kept in Postgres (D-02); heavy artifacts live on disk.
+message Video {
+  string id = 1;
+  string slug = 2;
+  string title = 3;
+  string source_url = 4;
+  VideoStatus status = 5;
+  string created_at = 6;
+  string updated_at = 7;
+}
+
+message ListVideosRequest {}
+
+message ListVideosResponse {
+  repeated Video videos = 1;
+}
+
+message GetVideoRequest {
+  string id = 1;
+}
+
+message GetVideoResponse {
+  Video video = 1;
+}
+
+message CreateVideoRequest {
+  string slug = 1;
+  string title = 2;
+  string source_url = 3;
+}
+
+message CreateVideoResponse {
+  Video video = 1;
+}
+
+// VideoService manages the video index of the Studio.
+service VideoService {
+  rpc ListVideos(ListVideosRequest) returns (ListVideosResponse);
+  rpc GetVideo(GetVideoRequest) returns (GetVideoResponse);
+  rpc CreateVideo(CreateVideoRequest) returns (CreateVideoResponse);
+}

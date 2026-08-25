@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package app.studio.v1;
+
+option go_package = "github.com/gui-henri/guigas-studio/backend/gen/app/studio/v1;studiov1";
+
+// LoginRequest carries the single seeded account credentials (D-04).
+message LoginRequest {
+  string username = 1;
+  string password = 2;
+}
+
+// LoginResponse returns a signed JWT session token and its expiry (RFC3339).
+message LoginResponse {
+  string token = 1;
+  string expires_at = 2;
+}
+
+// AuthService issues JWTs for the dashboard.
+service AuthService {
+  rpc Login(LoginRequest) returns (LoginResponse);
+}

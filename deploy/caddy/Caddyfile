@@ -1,6 +1,6 @@
 :80 {
-	# RPC + health goes to the Go API (Connect handlers live under /studio.v1/*).
-	handle /studio.v1/* {
+	# RPC + health goes to the Go API (Connect handlers live under /app.studio.v1/*).
+	handle /app.studio.v1/* {
 		reverse_proxy api:8080
 	}
 

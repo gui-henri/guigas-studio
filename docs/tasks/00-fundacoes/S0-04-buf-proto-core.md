@@ -5,7 +5,7 @@ sprint: 0
 prioridade: P0
 depende_de: ["S0-02", "S0-03"]
 estimativa_h: 2
-status: todo
+status: done
 ---
 
 # S0-04 — Buf setup + proto studio.v1 núcleo
@@ -56,10 +56,10 @@ alimentam o backend (handlers nas S0-07/S1-04) e o frontend (S0-09).
 
 ## Critérios de aceite
 
-- [ ] `buf lint` verde; `buf breaking --against .git#branch=main` utilizável pelo CI (S0-14)
-- [ ] Backend compila importando `studiov1connect` e serve HealthService em `/studio.v1.HealthService/Check`
-- [ ] `frontend/src/gen/` contém os arquivos `*_connectquery.ts` (consumidos na S0-09)
-- [ ] Enum VideoStatus cobre exatamente 12 estados + blocked (+ UNSPECIFIED)
+- [x] `buf lint` verde; `buf breaking --against .git#branch=main` utilizável pelo CI (S0-14)
+- [x] Backend compila importando `studiov1connect` e serve HealthService em `/app.studio.v1.HealthService/Check`
+- [x] `frontend/src/gen/` contém os arquivos `*_connectquery.ts` (consumidos na S0-09)
+- [x] Enum VideoStatus cobre exatamente 12 estados + blocked (+ UNSPECIFIED)
 
 ## Verificação
 
@@ -71,7 +71,12 @@ cd backend && go build ./... && go test ./...
 
 ## Notas
 
-- Nunca renomear valor de enum existente (breaking); novos estados entram no fim, com o
+- **Escolhas registradas**: (1) `go_package` usa o módulo real `github.com/gui-henri/guigas-studio/backend/gen/app/studio/v1;studiov1`
+  (dono do repo via git remote — ver nota da S0-03). (2) `GetVideo`/`CreateVideo` retornam
+  `GetVideoResponse`/`CreateVideoResponse` embrulhando `Video`, pois `buf lint`
+  (`RPC_RESPONSE_STANDARD_NAME`) rejeita retornar a entidade crua. (3) O prefixo das rotas
+  Connect é `/app.studio.v1.*` (deriva do pacote proto, não de `studio.v1`); o Caddyfile da
+  S0-05 foi corrigido para esse prefixo.- Nunca renomear valor de enum existente (breaking); novos estados entram no fim, com o
   teste de sincronia da S0-15 garantindo paridade domínio ↔ proto.
 - Plugins remotos (`buf.build/...`) exigem rede; se virar problema offline, migrar para
   plugins locais (`protoc-gen-es`) seria decisão nova — registrar antes de trocar.
