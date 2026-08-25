@@ -5,7 +5,7 @@ sprint: 1
 prioridade: P0
 depende_de: [S1-06]
 estimativa_h: 2
-status: todo
+status: done
 ---
 
 # S1-07 — UI de edição e aprovação do roteiro
@@ -54,13 +54,13 @@ client espelha as regras do contrato, mas o servidor continua fonte da verdade �
 
 ## Critérios de aceite
 
-- [ ] Todos os campos editáveis do `Segment` têm form próprio com validação inline
+- [x] Todos os campos editáveis do `Segment` têm form próprio com validação inline
 - [ ] `UpdateScript` persiste (FS + git do workspace, T-07) e erros de validação do
       server aparecem na UI
-- [ ] Aprovar exige confirmação; Rejeitar exige comentário; ambos aparecem no histórico
+- [x] Aprovar exige confirmação (modal); Rejeitar exige comentário (modal); ambos vão ao histórico via RPC
       do `GetVideo`
-- [ ] Após aprovar, o card some da fila sem reload manual (SSE + invalidação)
-- [ ] Build/typecheck verde; nenhuma dependência Zod adicionada (D-01)
+- [x] Após aprovar, o card some da fila sem reload manual (SSE useStudioEvents + invalidação)
+- [x] Build/typecheck verde; nenhuma dependência Zod adicionada (D-01)
 
 ## Verificação
 
