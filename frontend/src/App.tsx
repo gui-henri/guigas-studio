@@ -9,6 +9,7 @@ import ScriptReviewPage from "./pages/ScriptReviewPage";
 import StyleDemoPage from "./pages/StyleDemoPage";
 import LandmarkerDevPage from "./pages/LandmarkerDevPage";
 import AvatarDevPage from "./pages/AvatarDevPage";
+import MicDevPage from "./pages/MicDevPage";
 
 export default function App() {
   useStudioEvents();
@@ -18,6 +19,7 @@ export default function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/dev/landmarker" element={<LandmarkerDevPage />} />
       <Route path="/dev/avatar" element={<AvatarDevPage />} />
+      <Route path="/dev/mic" element={<MicDevPage />} />
       <Route
         path="/"
         element={

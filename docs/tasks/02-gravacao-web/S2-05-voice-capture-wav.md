@@ -5,7 +5,7 @@ sprint: 2
 prioridade: P0
 depende_de: [S0-09]
 estimativa_h: 2
-status: todo
+status: done
 ---
 
 # S2-05 — Captura de voz com encoder WAV no cliente
@@ -51,10 +51,10 @@ puro da S2-09. Encoder isolado e testado com fixtures de PCM (D-18).
 
 ## Critérios de aceite
 
-- [ ] Header WAV validado byte-a-byte nos campos fixos pelos testes
-- [ ] Duração do blob bate com os frames gravados (±1 amostra)
-- [ ] Medidor reage à voz; silêncio > 2 s dispara aviso único e recuperável
-- [ ] Encerrar libera tudo: `track.stop()`, `AudioContext.close()`, buffers liberados
+- [x] Header WAV validado byte-a-byte nos campos fixos pelos testes
+- [x] Duração do blob bate com os frames gravados (±1 amostra)
+- [x] Medidor reage à voz; silêncio > 2 s dispara aviso único e recuperável (implementado; validação visual p/ smoke com mic)
+- [x] Encerrar libera tudo: `track.stop()`, `AudioContext.close()`, buffers liberados
 
 ## Verificação
 
