@@ -16,6 +16,14 @@ type Config struct {
 	DataDir  string
 	LogLevel string
 	Postgres PostgresConfig
+	Auth     AuthConfig
+}
+
+// AuthConfig groups the single-account credentials and JWT secret (D-04/T-06).
+type AuthConfig struct {
+	StudioUsername     string
+	StudioPasswordHash string
+	JWTSecret          string
 }
 
 // PostgresConfig groups the individual POSTGRES_* variables (D-02).
@@ -43,6 +51,11 @@ func Load() (Config, error) {
 			Host:         envOr("POSTGRES_HOST", "localhost"),
 			Port:         envOr("POSTGRES_PORT", "5432"),
 			URL:          os.Getenv("POSTGRES_DATABASE_URL"),
+		},
+		Auth: AuthConfig{
+			StudioUsername:     os.Getenv("STUDIO_USERNAME"),
+			StudioPasswordHash: os.Getenv("STUDIO_PASSWORD_HASH"),
+			JWTSecret:          os.Getenv("JWT_SECRET"),
 		},
 	}
 

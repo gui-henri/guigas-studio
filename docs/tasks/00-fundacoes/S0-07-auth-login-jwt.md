@@ -5,7 +5,7 @@ sprint: 0
 prioridade: P0
 depende_de: ["S0-04", "S0-06"]
 estimativa_h: 2
-status: todo
+status: done
 ---
 
 # S0-07 — Auth: seed da conta única + Login RPC → JWT
@@ -48,10 +48,10 @@ pronto no `.env` evita hashear em runtime e remove ambiguidade de custo no boot.
 
 ## Critérios de aceite
 
-- [ ] Boot cria a conta uma única vez; restart não duplica nem reseta a senha
-- [ ] Login correto → JWT HS256 verificável com `JWT_SECRET`; errado → Unauthenticated
-- [ ] Senha/hash jamais aparecem em logs ou respostas
-- [ ] `go run ./cmd/studio-hashpassword` produz hash aceito pelo seed
+- [x] Boot cria a conta uma única vez; restart não duplica nem reseta a senha
+- [x] Login correto → JWT HS256 verificável com `JWT_SECRET`; errado → Unauthenticated
+- [x] Senha/hash jamais aparecem em logs ou respostas
+- [x] `go run ./cmd/studio-hashpassword` produz hash aceito pelo seed
 
 ## Verificação
 

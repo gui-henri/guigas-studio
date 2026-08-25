@@ -22,7 +22,7 @@ import (
 	"github.com/gui-henri/guigas-studio/backend/internal/services"
 )
 
-func newHandler(db *database.DB) http.Handler {
+func newHandler(cfg config.Config, db *database.DB) http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -32,6 +32,7 @@ func newHandler(db *database.DB) http.Handler {
 
 	interceptors := []connect.Interceptor{}
 	mux.Handle(studiov1connect.NewHealthServiceHandler(services.NewHealthService(), connect.WithInterceptors(interceptors...)))
+	mux.Handle(studiov1connect.NewAuthServiceHandler(services.NewAuthService(db.Pool, cfg.Auth.JWTSecret), connect.WithInterceptors(interceptors...)))
 
 	return h2c.NewHandler(mux, &http2.Server{})
 }
@@ -58,9 +59,18 @@ func main() {
 	defer db.Pool.Close()
 	logger.Info("database connected")
 
+	created, err := services.SeedSingleAccount(ctx, db.Pool, cfg.Auth.StudioUsername, cfg.Auth.StudioPasswordHash)
+	if err != nil {
+		logger.Error("account seed failed", "error", err)
+		os.Exit(1)
+	}
+	if created {
+		logger.Info("auth.seeded", "username", cfg.Auth.StudioUsername)
+	}
+
 	server := &http.Server{
 		Addr:    ":" + cfg.Port,
-		Handler: newHandler(db),
+		Handler: newHandler(cfg, db),
 	}
 
 	errCh := make(chan error, 1)
