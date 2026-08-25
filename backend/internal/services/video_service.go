@@ -19,6 +19,7 @@ import (
 	"github.com/gui-henri/guigas-studio/backend/internal/auth"
 	sqlc "github.com/gui-henri/guigas-studio/backend/internal/database/sqlc"
 	"github.com/gui-henri/guigas-studio/backend/internal/domain/videostate"
+	"github.com/gui-henri/guigas-studio/backend/internal/events"
 	"github.com/gui-henri/guigas-studio/backend/internal/workspace"
 )
 
@@ -52,11 +53,31 @@ func statusToProto(status string) studiov1.VideoStatus {
 type VideoService struct {
 	queries *sqlc.Queries
 	dataDir string
+	hub     *events.Hub // optional; nil disables SSE publishing
 }
 
 // NewVideoService returns the Connect handler for VideoService.
-func NewVideoService(queries *sqlc.Queries, dataDir string) studiov1connect.VideoServiceHandler {
-	return &VideoService{queries: queries, dataDir: dataDir}
+func NewVideoService(queries *sqlc.Queries, dataDir string, hub *events.Hub) studiov1connect.VideoServiceHandler {
+	return &VideoService{queries: queries, dataDir: dataDir, hub: hub}
+}
+
+// publishStatusChanged emits video.status_changed to global + per-video topics.
+func (s *VideoService) publishStatusChanged(videoID, slug, from, to string) {
+	if s.hub == nil {
+		return
+	}
+	evt := &studiov1.StudioEvent{
+		Event: &studiov1.StudioEvent_VideoStatusChanged{
+			VideoStatusChanged: &studiov1.VideoStatusChanged{
+				VideoId:    videoID,
+				Slug:       slug,
+				FromStatus: from,
+				ToStatus:   to,
+			},
+		},
+	}
+	s.hub.Publish(events.TopicGlobal, evt)
+	s.hub.Publish(events.TopicForVideo(videoID), evt)
 }
 
 // workspaceRoot returns <dataDir>/videos/<slug>.
@@ -318,6 +339,7 @@ func (s *VideoService) transitionAndRecord(ctx context.Context, video *sqlc.Vide
 	}); err != nil {
 		slog.Error("history insert failed", "error", err)
 	}
+	s.publishStatusChanged(video.ID.String(), video.Slug, string(from), string(to))
 	return nil
 }
 

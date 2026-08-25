@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 
 import AppShell from "./components/AppShell";
 import RequireAuth from "./components/RequireAuth";
+import { useStudioEvents } from "./hooks/useStudioEvents";
 import DashboardPage from "./pages/DashboardPage";
 import LoginPage from "./pages/LoginPage";
 import StyleDemoPage from "./pages/StyleDemoPage";
@@ -15,6 +16,8 @@ function VideoDetailPlaceholder() {
 }
 
 export default function App() {
+  useStudioEvents();
+
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />

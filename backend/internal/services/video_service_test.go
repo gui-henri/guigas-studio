@@ -95,7 +95,7 @@ func newReviewService(t *testing.T) (studiov1connect.VideoServiceClient, *databa
 
 	mux := new(http.ServeMux)
 	mux.Handle(studiov1connect.NewVideoServiceHandler(
-		NewVideoService(db.Queries, dataDir),
+		NewVideoService(db.Queries, dataDir, nil),
 		connect.WithInterceptors(interceptor),
 	))
 	srv := httptest.NewServer(mux)

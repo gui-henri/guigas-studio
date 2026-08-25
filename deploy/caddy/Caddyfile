@@ -1,7 +1,16 @@
 :80 {
 	# RPC + health goes to the Go API (Connect handlers live under /app.studio.v1/*).
 	handle /app.studio.v1/* {
-		reverse_proxy api:8080
+		reverse_proxy api:8080 {
+			flush_interval -1
+		}
+	}
+
+	# SSE must stream without buffering (D-03).
+	handle /api/events* {
+		reverse_proxy api:8080 {
+			flush_interval -1
+		}
 	}
 
 	handle /healthz {

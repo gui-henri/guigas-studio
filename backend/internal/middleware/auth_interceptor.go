@@ -61,3 +61,10 @@ func authorized(authorization string, verifyToken VerifyToken, runnerToken strin
 	}
 	return nil, false
 }
+
+// AuthorizeBearer checks an Authorization header against a JWT verifier and
+// optional runner PAT; usable by non-Connect endpoints (e.g. SSE).
+func AuthorizeBearer(authorization string, verifyToken VerifyToken) bool {
+	_, ok := authorized(authorization, verifyToken, "")
+	return ok
+}

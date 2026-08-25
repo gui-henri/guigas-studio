@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package app.studio.v1;
+
+option go_package = "github.com/gui-henri/guigas-studio/backend/gen/app/studio/v1;studiov1";
+
+// VideoStatusChanged is emitted whenever a video moves through the machine.
+message VideoStatusChanged {
+  string video_id = 1;
+  string slug = 2;
+  string from_status = 3;
+  string to_status = 4;
+}
+
+// ScriptValidated is emitted by the artifact observer (valid or not).
+message ScriptValidated {
+  string video_id = 1;
+  string slug = 2;
+  bool valid = 3;
+}
+
+// WatcherPostFound announces a brand-new post detected by the RSS watcher.
+message WatcherPostFound {
+  string slug = 1;
+}
+
+// StudioEvent is the typed envelope shared Go↔TS over SSE (protojson).
+message StudioEvent {
+  oneof event {
+    VideoStatusChanged video_status_changed = 1;
+    ScriptValidated script_validated = 2;
+    WatcherPostFound watcher_post_found = 3;
+  }
+}

@@ -22,12 +22,13 @@ import (
 	"github.com/gui-henri/guigas-studio/backend/internal/auth"
 	"github.com/gui-henri/guigas-studio/backend/internal/config"
 	"github.com/gui-henri/guigas-studio/backend/internal/database"
+	"github.com/gui-henri/guigas-studio/backend/internal/events"
 	"github.com/gui-henri/guigas-studio/backend/internal/middleware"
 	"github.com/gui-henri/guigas-studio/backend/internal/services"
 	"github.com/gui-henri/guigas-studio/backend/internal/watcher"
 )
 
-func newHandler(cfg config.Config, db *database.DB) http.Handler {
+func newHandler(cfg config.Config, db *database.DB, appHub *events.Hub) http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -43,9 +44,17 @@ func newHandler(cfg config.Config, db *database.DB) http.Handler {
 	if cfg.Auth.RunnerToken == "" {
 		slog.Warn("runner PAT disabled: RUNNER_TOKEN is empty")
 	}
+
+	hub := appHub
+	if hub == nil {
+		hub = events.NewHub() // tests / standalone usage
+	}
+	mux.Handle("GET /api/events", events.HTTPHandler(hub, func(raw string) (*auth.Claims, error) {
+		return auth.ParseToken(cfg.Auth.JWTSecret, raw)
+	}))
 	mux.Handle(studiov1connect.NewHealthServiceHandler(services.NewHealthService(), connect.WithInterceptors(interceptors...)))
 	mux.Handle(studiov1connect.NewAuthServiceHandler(services.NewAuthService(db.Pool, cfg.Auth.JWTSecret), connect.WithInterceptors(interceptors...)))
-	mux.Handle(studiov1connect.NewVideoServiceHandler(services.NewVideoService(db.Queries, cfg.DataDir), connect.WithInterceptors(interceptors...)))
+	mux.Handle(studiov1connect.NewVideoServiceHandler(services.NewVideoService(db.Queries, cfg.DataDir, hub), connect.WithInterceptors(interceptors...)))
 
 	return h2c.NewHandler(mux, &http2.Server{})
 }
@@ -89,6 +98,9 @@ func main() {
 			logger.Warn("invalid RSS_POLL_INTERVAL, using default", slog.String("value", raw))
 		}
 	}
+
+	appHub := events.NewHub()
+
 	rssWatcher := watcher.New(db.Queries, watcher.Config{
 		URL:      os.Getenv("RSS_URL"),
 		Interval: interval,
@@ -99,7 +111,7 @@ func main() {
 	scriptObserver := artifacts.NewObserver(
 		filepath.Join(cfg.DataDir, "videos"),
 		db.Queries,
-		nil, // SSE hub (S1-05) plugs in here; nil → NoopPublisher
+		artifacts.HubPublisher{Hub: appHub},
 		logger,
 	)
 	go func() {
@@ -110,7 +122,7 @@ func main() {
 
 	server := &http.Server{
 		Addr:    ":" + cfg.Port,
-		Handler: newHandler(cfg, db),
+		Handler: newHandler(cfg, db, appHub),
 	}
 
 	errCh := make(chan error, 1)
