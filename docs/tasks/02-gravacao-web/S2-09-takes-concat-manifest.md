@@ -5,7 +5,7 @@ sprint: 2
 prioridade: P0
 depende_de: [S2-08]
 estimativa_h: 2
-status: todo
+status: done
 ---
 
 # S2-09 — Concat dos takes + manifest de gravação
@@ -61,10 +61,10 @@ seguem gitignored (D-11). Assume o formato fixo 48 kHz/mono/16-bit garantido pel
 
 ## Critérios de aceite
 
-- [ ] `full.wav` reproduz os segmentos na ordem do script, independente da ordem de upload
-- [ ] Manifest com `start_ms`/`duration_ms` corretos e `take_sha256` casando com o PG
-- [ ] Transição disparada exatamente uma vez; reexecução é no-op seguro
-- [ ] Regravagem de um segmento enquanto `recording` regenera tudo na conclusão seguinte
+- [x] `full.wav` reproduz os segmentos na ordem do script, independente da ordem de upload
+- [x] Manifest com `start_ms`/`duration_ms` corretos e `take_sha256` casando com o PG
+- [x] Transição disparada exatamente uma vez; reexecução é no-op seguro (lock por slug + guard de estado)
+- [x] Regravagem durante `recording` regenera tudo na conclusão seguinte (hook pós-upsert)
 
 ## Verificação
 

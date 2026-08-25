@@ -40,13 +40,17 @@ var (
 
 // Handler serves POST/GET /api/v1/videos/{videoSlug}/takes.
 type Handler struct {
-	queries    *sqlc.Queries
-	pool       *pgxpool.Pool
-	dataDir    string
-	verify     middleware.VerifyToken
-	maxUpload  int64
-	onTakeTake func(videoSlug string) // optional SSE hook after first take
+	queries     *sqlc.Queries
+	pool        *pgxpool.Pool
+	dataDir     string
+	verify      middleware.VerifyToken
+	maxUpload   int64
+	afterUpsert func(videoSlug string) // optional post-upload pipeline hook
 }
+
+// SetAfterUpsert registers a callback fired (async caller's choice) after a
+// take is recorded — used to trigger the concat service.
+func (h *Handler) SetAfterUpsert(fn func(videoSlug string)) { h.afterUpsert = fn }
 
 func NewHandler(queries *sqlc.Queries, pool *pgxpool.Pool, dataDir string, verify middleware.VerifyToken) *Handler {
 	return &Handler{
@@ -59,7 +63,7 @@ func NewHandler(queries *sqlc.Queries, pool *pgxpool.Pool, dataDir string, verif
 }
 
 // SetOnFirstTake registers a callback fired once when a video enters recording.
-func (h *Handler) SetOnFirstTake(fn func(videoSlug string)) { h.onTakeTake = fn }
+func (h *Handler) SetOnFirstTake(fn func(videoSlug string)) { h.afterUpsert = fn }
 
 // response payloads.
 
@@ -234,6 +238,9 @@ func (h *Handler) receiveChunk(
 	}
 
 	h.maybeEnterRecording(ctx, videoSlug)
+	if h.afterUpsert != nil {
+		h.afterUpsert(videoSlug)
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(chunkResponse{Received: received, NextOffset: newSize, Complete: true})
@@ -268,8 +275,8 @@ func (h *Handler) maybeEnterRecording(ctx context.Context, videoSlug string) {
 		`INSERT INTO video_status_history (video_id, status, reason, actor) VALUES ($1,$2,$3,$4)`,
 		video.ID, string(videostate.StateRecording), "first take uploaded", "studio-web")
 	slog.Info("upload.recording_started", slog.String("slug", videoSlug))
-	if h.onTakeTake != nil {
-		h.onTakeTake(videoSlug)
+	if h.afterUpsert != nil {
+		h.afterUpsert(videoSlug)
 	}
 }
 

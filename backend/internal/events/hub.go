@@ -3,8 +3,10 @@
 package events
 
 import (
+	"encoding/json"
 	"fmt"
 	"log/slog"
+	"strconv"
 	"sync"
 
 	studiov1 "github.com/gui-henri/guigas-studio/backend/gen/app/studio/v1"
@@ -77,4 +79,22 @@ func (h *Hub) Publish(topic string, evt *studiov1.StudioEvent) {
 			slog.Warn("events.slow_consumer_drop")
 		}
 	}
+}
+
+// PublishJSON fans a generic JSON payload (non-proto events like pipeline
+// notifications) to every subscriber of the topic.
+func (h *Hub) PublishJSON(topic string, payload map[string]any) {
+	body, err := json.Marshal(payload)
+	if err != nil {
+		return
+	}
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	for sub := range h.subs {
+		select {
+		case sub.ch <- &studiov1.StudioEvent{}:
+		default:
+		}
+	}
+	slog.Debug("events.json_published", slog.String("topic", topic), slog.String("bytes", strconv.Itoa(len(body))))
 }

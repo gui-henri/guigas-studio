@@ -25,6 +25,7 @@ import (
 	"github.com/gui-henri/guigas-studio/backend/internal/events"
 	"github.com/gui-henri/guigas-studio/backend/internal/middleware"
 	"github.com/gui-henri/guigas-studio/backend/internal/services"
+	recording "github.com/gui-henri/guigas-studio/backend/internal/services/recording"
 	"github.com/gui-henri/guigas-studio/backend/internal/upload"
 	"github.com/gui-henri/guigas-studio/backend/internal/watcher"
 )
@@ -51,9 +52,14 @@ func newHandler(cfg config.Config, db *database.DB, appHub *events.Hub) http.Han
 		hub = events.NewHub() // tests / standalone usage
 	}
 
+	concatSvc := recording.NewService(db.Queries, cfg.DataDir, hub)
+	runConcat := func(ctx context.Context, videoSlug string) {
+		go concatSvc.Run(ctx, videoSlug) // response never waits on concat
+	}
 	takeUpload := upload.NewHandler(db.Queries, db.Pool, cfg.DataDir, func(raw string) (*auth.Claims, error) {
 		return auth.ParseToken(cfg.Auth.JWTSecret, raw)
 	})
+	takeUpload.SetAfterUpsert(func(videoSlug string) { runConcat(context.Background(), videoSlug) })
 	mux.Handle("POST /api/v1/videos/{videoSlug}/takes", takeUpload)
 	mux.Handle("GET /api/v1/videos/{videoSlug}/takes", takeUpload)
 	mux.Handle("GET /api/events", events.HTTPHandler(hub, func(raw string) (*auth.Claims, error) {
