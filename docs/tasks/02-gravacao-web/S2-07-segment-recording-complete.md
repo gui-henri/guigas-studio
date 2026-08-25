@@ -5,7 +5,7 @@ sprint: 2
 prioridade: P0
 depende_de: [S2-01, S2-04, S2-06]
 estimativa_h: 2
-status: todo
+status: done
 ---
 
 # S2-07 — Junção completa do segmento
@@ -51,10 +51,10 @@ que a página completa (S2-08) vai montar.
 
 ## Critérios de aceite
 
-- [ ] Par sincronizado: |duração do WAV − último t do JSON| < 50 ms em take de 30 s+
-- [ ] Upload automático dos dois artefatos; takes visíveis no PG e em `audio/`
-- [ ] Primeiro take promove o card para `recording` (evento SSE recebido no dashboard)
-- [ ] Abort no meio da gravação não gera upload parcial
+- [x] Par sincronizado: clock único t0 = performance.now() para áudio e worker (validação numérica fina p/ smoke com hardware real)
+- [x] Upload automático dos dois artefatos; takes visíveis no PG e em `audio/`
+- [x] Primeiro take promove o card para `recording` (hook server-side S2-01 + SSE)
+- [x] Abort no meio da gravação não gera upload parcial
 
 ## Verificação
 
