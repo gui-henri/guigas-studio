@@ -5,7 +5,7 @@ sprint: 2
 prioridade: P1
 depende_de: [S0-13, S2-03]
 estimativa_h: 2
-status: todo
+status: done
 ---
 
 # S2-04 — Avatar vivo (preview em canvas)
@@ -48,10 +48,10 @@ S0-13, D-17) e o tipo `SpriteState` da S2-03. Será embutido na página do telep
 
 ## Critérios de aceite
 
-- [ ] Troca de estado visível no mesmo frame da amostra (sem lag perceptível)
-- [ ] Espelho liga/desliga sem distorcer; escala respeita os limites
-- [ ] Modo demo percorre os 5 estados do contrato S0-13
-- [ ] Sem vazamentos: rAF cancelado no unmount; nenhum timer esquecido
+- [x] Troca de estado visível no mesmo frame da amostra (rAF lê stateRef, sem re-render React; validação visual fica p/ smoke com webcam)
+- [x] Espelho liga/desliga sem distorcer; escala respeita os limites (240–720, sliders em /dev/avatar)
+- [x] Modo demo percorre os 5 estados do contrato S0-13
+- [x] Sem vazamentos: rAF cancelado no unmount; timer do demo limpo
 
 ## Verificação
 

@@ -8,6 +8,7 @@ import LoginPage from "./pages/LoginPage";
 import ScriptReviewPage from "./pages/ScriptReviewPage";
 import StyleDemoPage from "./pages/StyleDemoPage";
 import LandmarkerDevPage from "./pages/LandmarkerDevPage";
+import AvatarDevPage from "./pages/AvatarDevPage";
 
 export default function App() {
   useStudioEvents();
@@ -16,6 +17,7 @@ export default function App() {
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/dev/landmarker" element={<LandmarkerDevPage />} />
+      <Route path="/dev/avatar" element={<AvatarDevPage />} />
       <Route
         path="/"
         element={
