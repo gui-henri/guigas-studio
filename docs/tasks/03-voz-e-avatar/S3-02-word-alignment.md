@@ -5,7 +5,7 @@ sprint: 3
 prioridade: P1
 depende_de: ["S3-01"]
 estimativa_h: 2
-status: todo
+status: done
 ---
 
 # S3-02 — Alinhamento fino transcrição ↔ `narration_pt`
@@ -49,10 +49,10 @@ aprovado segue como fonte da verdade (SPEC §3); os timestamps viram metadados d
 
 ## Critérios de aceite
 
-- [ ] Função pura determinística: mesmas entradas ⇒ mesma saída
-- [ ] Lacunas interpoladas ficam dentro do intervalo das âncoras vizinhas
-- [ ] Fallback acionado e sinalizado quando o match é ruim
-- [ ] Golden tests cobrindo os 4 cenários dos passos
+- [x] Função pura determinística: mesmas entradas ⇒ mesma saída
+- [x] Lacunas interpoladas ficam dentro do intervalo das âncoras vizinhas (âncora anterior conta pelo FIM)
+- [x] Fallback acionado e sinalizado quando o match < 0.6
+- [x] 8 testes cobrindo feliz, substituições, lacunas mid/leading/trailing, degenerado, acentos e determinismo
 
 ## Verificação
 
