@@ -11,6 +11,7 @@ Requisitos no PATH: Node.js ≥22 / npm ≥10, Go ≥1.22, `buf`, `sqlc`, `proto
 | `npm run gen` | Regenera stubs (`buf generate` + `sqlc generate`) |
 | `npm run lint` | Lint dos workspaces npm (se presente) |
 | `npm run build` | Build/typecheck dos workspaces npm (se presente) |
+| `npm run test` | Testes unitários JS dos workspaces (vitest; Go roda no `check`) |
 | `npm run backend:check` | `sqlc vet` + `go vet` + `go build` + `go test` |
 | `npm run check` | Conjunto global canônico: lint + build + buf lint + backend |
 

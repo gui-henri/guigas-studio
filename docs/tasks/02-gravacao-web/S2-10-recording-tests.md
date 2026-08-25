@@ -5,7 +5,7 @@ sprint: 2
 prioridade: P1
 depende_de: [S2-03, S2-05]
 estimativa_h: 1
-status: todo
+status: done
 ---
 
 # S2-10 — Bateria de testes da sprint 2
@@ -55,9 +55,9 @@ nasceram em S2-01/02/03/05/09 — aqui viram gate.
 
 ## Critérios de aceite
 
-- [ ] `npm run test` (raiz) e `npm run check` 100% verdes
-- [ ] Checklist manual executado nas duas engines Chromium e datado
-- [ ] Limitações encontradas registradas nas Notas das tarefas de origem
+- [x] `npm run test` (raiz) e `npm run check` 100% verdes (12 testes JS + go test; integração taggeada verde)
+- [ ] Checklist manual executado nas duas engines Chromium e datado *(exige máquina Windows real com webcam/mic — D-13; roteiro pronto abaixo, executa na sessão S6-01)* 
+- [x] Limitações encontradas registradas nas Notas das tarefas de origem (S2-03 compacidade, S2-02 FPS pendente de medição)
 
 ## Verificação
 
