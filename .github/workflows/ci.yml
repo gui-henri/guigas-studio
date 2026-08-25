@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  proto:
+    name: buf lint + breaking
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # buf breaking needs full history against main
+      - uses: bufbuild/buf-setup-action@v1
+      - run: buf lint
+      - run: buf breaking --against "${{ github.server_url }}/${{ github.repository }}.git#branch=main"
+
+  sqlc:
+    name: sqlc vet
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: sqlc-dev/setup-sqlc-action@v2
+        with:
+          sqlc_version: latest
+      - run: sqlc vet
+        working-directory: backend
+
+  backend:
+    name: go vet/build/test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: backend/go.mod
+          cache: true
+          cache-dependency-path: backend/go.sum
+      # Integration tests stay skipped in CI (STUDIO_TEST_DATABASE_URL unset).
+      - run: go vet ./... && go build ./... && go test ./...
+        working-directory: backend
+
+  js:
+    name: npm lint + build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint --workspaces --if-present
+      - run: npm run build --workspaces --if-present
