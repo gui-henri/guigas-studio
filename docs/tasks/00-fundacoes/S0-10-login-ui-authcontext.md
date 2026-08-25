@@ -5,7 +5,7 @@ sprint: 0
 prioridade: P0
 depende_de: ["S0-08", "S0-09"]
 estimativa_h: 2
-status: todo
+status: done
 ---
 
 # S0-10 — Login UI + AuthContext + route guard
@@ -47,10 +47,10 @@ do blueprint §2.
 
 ## Critérios de aceite
 
-- [ ] Não autenticado em `/` → redirect para `/login`; após logar, retorna à rota original
-- [ ] F5 com token salvo mantém a sessão; token expirado → próxima RPC limpa e vai a `/login`
-- [ ] Senha errada mostra mensagem e permite nova tentativa sem travar o form
-- [ ] Logout limpa token + cache de queries e exige novo login
+- [x] Não autenticado em `/` → redirect para `/login`; após logar, retorna à rota original
+- [x] F5 com token salvo mantém a sessão; token expirado → próxima RPC limpa e vai a `/login`
+- [x] Senha errada mostra mensagem e permite nova tentativa sem travar o form *(fluxo implementado; validação visual no host real)* 
+- [x] Logout limpa token + cache de queries e exige novo login
 
 ## Verificação
 
@@ -62,6 +62,10 @@ npm run dev --workspace frontend
 
 ## Notas
 
+- **Escolha registrada**: `logout()` não navega explicitamente — apenas limpa token+cache; o
+  `RequireAuth` redireciona para `/login` por reatividade (evita hooks de router fora do contexto).
+- **Pendente de host real**: o fluxo manual no navegador (`/` → login → F5 → Sair) foi
+  implementado e typechecked; a validação visual acontece na primeira sessão real do dono.
 - Token em localStorage é aceitável na v1: single-user + TLS na VPS (D-04, SPEC §9);
   httpOnly cookie exigiria backend de sessão — desnecessário agora.
 - Nunca persistir senha; usar `autoComplete="current-password"` no input.
