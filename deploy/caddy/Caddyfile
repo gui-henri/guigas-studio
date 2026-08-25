@@ -1,0 +1,15 @@
+:80 {
+	# RPC + health goes to the Go API (Connect handlers live under /studio.v1/*).
+	handle /studio.v1/* {
+		reverse_proxy api:8080
+	}
+
+	handle /healthz {
+		reverse_proxy api:8080
+	}
+
+	# Everything else: SPA placeholder until the frontend build is served from here.
+	handle {
+		respond "Guigas Studio" 200
+	}
+}
