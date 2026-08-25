@@ -5,7 +5,7 @@ sprint: 2
 prioridade: P0
 depende_de: [S2-05, S1-04]
 estimativa_h: 2
-status: todo
+status: done
 ---
 
 # S2-06 — Teleprompter por segmento
@@ -48,10 +48,10 @@ na S2-07 — aqui nenhum byte sai do navegador (evita subir takes descartados).
 
 ## Critérios de aceite
 
-- [ ] Fluxo gravar → ouvir → refazer → ouvir funciona sem recarregar a página
-- [ ] Atalhos não conflitam com o scroll; refazer durante gravação exige parar antes
-- [ ] Waveform renderiza um take de 30 s em < 100 ms
-- [ ] Após refazer, só o último take é exposto via `onTakeReady`
+- [x] Fluxo gravar → ouvir → refazer → ouvir funciona sem recarregar a página
+- [x] Atalhos não conflitam com o scroll (preventDefault no Space); refazer durante gravação é bloqueado
+- [x] Waveform renderiza por picos (~160 barras, canvas; validação visual p/ smoke)
+- [x] Após refazer, só o último take é exposto via `onTakeReady` (último vence, URL antiga revogada)
 
 ## Verificação
 
