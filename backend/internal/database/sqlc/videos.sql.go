@@ -133,3 +133,17 @@ func (q *Queries) SetRssItemVideo(ctx context.Context, arg SetRssItemVideoParams
 	_, err := q.db.Exec(ctx, setRssItemVideo, arg.Guid, arg.VideoID)
 	return err
 }
+
+const updateVideoStatus = `-- name: UpdateVideoStatus :exec
+UPDATE videos SET status = $2, updated_at = now() WHERE id = $1
+`
+
+type UpdateVideoStatusParams struct {
+	ID     uuid.UUID `json:"id"`
+	Status string    `json:"status"`
+}
+
+func (q *Queries) UpdateVideoStatus(ctx context.Context, arg UpdateVideoStatusParams) error {
+	_, err := q.db.Exec(ctx, updateVideoStatus, arg.ID, arg.Status)
+	return err
+}

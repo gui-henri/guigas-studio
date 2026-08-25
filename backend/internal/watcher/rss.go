@@ -12,15 +12,19 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 
 	sqlc "github.com/gui-henri/guigas-studio/backend/internal/database/sqlc"
+	"github.com/gui-henri/guigas-studio/backend/internal/domain/videostate"
+	"github.com/gui-henri/guigas-studio/backend/internal/workspace"
 )
 
-// Config controls the RSS polling loop.
+// Config controls the RSS polling loop and workspace scaffolding.
 type Config struct {
 	URL      string        // RSS_URL
 	Interval time.Duration // RSS_POLL_INTERVAL (default 30m)
+	DataDir  string        // DATA_DIR — workspace root (/data/videos/<slug>)
 }
 
 // Watcher polls the blog feed and creates `new` videos for unseen posts.
@@ -151,7 +155,46 @@ func (w *Watcher) processItems(ctx context.Context, items []rssItem) {
 			slog.String("slug", slug),
 			slog.String("title", title),
 		)
+
+		w.scaffoldWorkspace(ctx, video.ID, slug, title, link)
 	}
+}
+
+// scaffoldWorkspace materializes the context pack and moves the video to
+// script_pending. On failure the video stays in `new` (natural retry next poll).
+func (w *Watcher) scaffoldWorkspace(ctx context.Context, videoID uuid.UUID, slug, title, link string) {
+	if w.cfg.DataDir == "" {
+		return // scaffolding disabled (e.g. unit tests)
+	}
+	postMD := fmt.Sprintf("# %s\n\nFonte: %s\n", title, link)
+	root, err := workspace.Scaffold(w.cfg.DataDir, slug, []byte(postMD))
+	if err != nil {
+		w.logger.Error("watcher.workspace.scaffold_failed",
+			slog.String("slug", slug), slog.Any("error", err))
+		return
+	}
+	if err := videostate.Transition(videostate.StateNew, videostate.StateScriptPending); err != nil {
+		w.logger.Error("watcher.workspace.transition_rejected",
+			slog.String("slug", slug), slog.Any("error", err))
+		return
+	}
+	if err := w.queries.UpdateVideoStatus(ctx, sqlc.UpdateVideoStatusParams{
+		ID:     videoID,
+		Status: string(videostate.StateScriptPending),
+	}); err != nil {
+		w.logger.Error("watcher.workspace.status_update_failed",
+			slog.String("slug", slug), slog.Any("error", err))
+		return
+	}
+	if err := workspace.Commit(root, fmt.Sprintf("chore(%s): scaffold context pack", slug)); err != nil {
+		w.logger.Error("watcher.workspace.commit_failed",
+			slog.String("slug", slug), slog.Any("error", err))
+		return
+	}
+	w.logger.Info("watcher.workspace.ready",
+		slog.String("slug", slug),
+		slog.String("status", string(videostate.StateScriptPending)),
+	)
 }
 
 // Run loops until ctx is cancelled; a bad feed never kills the watcher.

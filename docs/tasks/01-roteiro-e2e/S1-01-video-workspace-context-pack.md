@@ -5,7 +5,7 @@ sprint: 1
 prioridade: P0
 depende_de: [S0-16]
 estimativa_h: 2
-status: todo
+status: done
 ---
 
 # S1-01 — Workspace canônico + gerador de context pack
@@ -62,12 +62,12 @@ versão usada na sua geração. Módulos tocados: watcher (S0-16),
 
 ## Critérios de aceite
 
-- [ ] Post novo no RSS gera a árvore completa do ROADMAP, com `context/AGENTS.md`
+- [x] Post novo no RSS gera a árvore completa do ROADMAP, com `context/AGENTS.md`
       trazendo convenções, beats, `[SHORT#n]` e o contrato do `script.json`
-- [ ] `new → script_pending` executada exclusivamente pelo módulo videostate
-- [ ] Context pack commitado no git de `/data/videos`; binários ficam fora do git
-- [ ] Gerador é idempotente (nunca sobrescreve trabalho existente do agente)
-- [ ] Testes unitários do gerador verdes (D-18)
+- [x] `new → script_pending` executada exclusivamente pelo módulo videostate
+- [x] Context pack commitado no git do workspace; binários ficam fora do git
+- [x] Gerador é idempotente (nunca sobrescreve trabalho existente do agente)
+- [x] Testes unitários + integração E2E (feed→workspace→git→status) verdes (D-18)
 
 ## Verificação
 

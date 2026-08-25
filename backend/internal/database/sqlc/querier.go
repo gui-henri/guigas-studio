@@ -19,6 +19,7 @@ type Querier interface {
 	InsertRssItem(ctx context.Context, arg InsertRssItemParams) (int64, error)
 	ListVideos(ctx context.Context) ([]Video, error)
 	SetRssItemVideo(ctx context.Context, arg SetRssItemVideoParams) error
+	UpdateVideoStatus(ctx context.Context, arg UpdateVideoStatusParams) error
 }
 
 var _ Querier = (*Queries)(nil)

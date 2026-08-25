@@ -87,7 +87,11 @@ func main() {
 			logger.Warn("invalid RSS_POLL_INTERVAL, using default", slog.String("value", raw))
 		}
 	}
-	rssWatcher := watcher.New(db.Queries, watcher.Config{URL: os.Getenv("RSS_URL"), Interval: interval}, logger)
+	rssWatcher := watcher.New(db.Queries, watcher.Config{
+		URL:      os.Getenv("RSS_URL"),
+		Interval: interval,
+		DataDir:  cfg.DataDir,
+	}, logger)
 	go rssWatcher.Run(ctx)
 
 	server := &http.Server{

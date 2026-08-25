@@ -3,6 +3,9 @@ INSERT INTO videos (slug, title, source_url)
 VALUES ($1, $2, $3)
 RETURNING *;
 
+-- name: UpdateVideoStatus :exec
+UPDATE videos SET status = $2, updated_at = now() WHERE id = $1;
+
 -- name: InsertRssItem :execrows
 INSERT INTO rss_items (guid, video_id)
 VALUES ($1, $2)
