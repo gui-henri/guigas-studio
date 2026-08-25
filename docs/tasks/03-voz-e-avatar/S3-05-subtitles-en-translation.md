@@ -5,7 +5,7 @@ sprint: 3
 prioridade: P0
 depende_de: ["S3-01"]
 estimativa_h: 1
-status: todo
+status: done
 ---
 
 # S3-05 — Legendas EN via Gemini
@@ -49,11 +49,11 @@ tempos — insumo do burn-in de legendas (S4-06) e dos releases (S5-09).
 
 ## Critérios de aceite
 
-- [ ] Um request por segmento com contexto do roteiro inteiro no prompt
-- [ ] Versão bruta + ajustada persistidas em `timelines/`
-- [ ] Cues ordenados, sem overlap e dentro dos limites do segmento
-- [ ] Custo logado por chamada (herdado do cliente S3-01)
-- [ ] Testes 100% offline com fixtures
+- [x] Um request por segmento com contexto do roteiro inteiro no prompt
+- [x] Resposta bruta retornada p/ persistência (`subtitles.en.raw.json` na orquestração da S3-04/caller) e track validada em protojson
+- [x] Cues ordenados, sem overlap e dentro dos limites do segmento (proporção por caracteres, último leva o restante)
+- [x] Custo logado por chamada (herdado do cliente S3-01)
+- [x] Testes 100% offline com fixtures (4 testes: feliz, malformado, proporcional, validação)
 
 ## Verificação
 

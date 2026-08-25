@@ -278,3 +278,81 @@ func truncate(b []byte, n int) string {
 	}
 	return string(b[:n]) + "…"
 }
+
+// Generate sends a text-only prompt and returns the model's first part text.
+// Same retry/backoff/usage logging as Transcribe (S3-01 machinery reused).
+func (c *Client) Generate(ctx context.Context, prompt string) (string, error) {
+	payload, err := json.Marshal(generateRequest{
+		Contents: []content{{Parts: []part{{Text: prompt}}}},
+	})
+	if err != nil {
+		return "", fmt.Errorf("marshal request: %w", err)
+	}
+
+	var lastErr error
+	for attempt := 0; attempt < maxAttempts; attempt++ {
+		if attempt > 0 {
+			delay := c.cfg.backoffBase() << (attempt - 1)
+			select {
+			case <-ctx.Done():
+				return "", ctx.Err()
+			case <-time.After(delay):
+			}
+		}
+
+		resp, retryable, callErr := c.generateOnce(ctx, payload)
+		if callErr == nil {
+			return resp, nil
+		}
+		lastErr = callErr
+		if !retryable {
+			return "", callErr
+		}
+		slog.Warn("gemini.retry",
+			slog.Int("attempt", attempt+1), slog.Any("error", callErr))
+	}
+	return "", fmt.Errorf("gemini: exhausted %d attempts: %w", maxAttempts, lastErr)
+}
+
+func (c *Client) generateOnce(ctx context.Context, payload []byte) (string, bool, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.endpoint(), bytes.NewReader(payload))
+	if err != nil {
+		return "", false, fmt.Errorf("build request: %w", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := c.http.Do(req)
+	if err != nil {
+		return "", true, fmt.Errorf("network: %w", err)
+	}
+	defer resp.Body.Close()
+
+	raw, err := io.ReadAll(io.LimitReader(resp.Body, 10<<20))
+	if err != nil {
+		return "", true, fmt.Errorf("read body: %w", err)
+	}
+
+	switch {
+	case resp.StatusCode == http.StatusTooManyRequests || resp.StatusCode >= 500:
+		return "", true, fmt.Errorf("upstream %d: %s", resp.StatusCode, truncate(raw, 200))
+	case resp.StatusCode >= 400:
+		return "", false, fmt.Errorf("client error %d: %s", resp.StatusCode, truncate(raw, 200))
+	case resp.StatusCode != http.StatusOK:
+		return "", true, fmt.Errorf("unexpected status %d", resp.StatusCode)
+	}
+
+	var parsed generateResponse
+	if err := json.Unmarshal(raw, &parsed); err != nil {
+		return "", false, fmt.Errorf("parse response: %w", err)
+	}
+	if len(parsed.Candidates) == 0 || len(parsed.Candidates[0].Content.Parts) == 0 {
+		return "", false, errors.New("empty candidates")
+	}
+
+	slog.Info("gemini.usage",
+		slog.String("model", c.cfg.model()),
+		slog.Int("prompt_tokens", parsed.UsageMetadata.PromptTokenCount),
+		slog.Int("output_tokens", parsed.UsageMetadata.CandidatesTokenCount))
+
+	return parsed.Candidates[0].Content.Parts[0].Text, false, nil
+}

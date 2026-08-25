@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package app.studio.v1;
+
+option go_package = "github.com/gui-henri/guigas-studio/backend/gen/app/studio/v1;studiov1";
+
+// One EN subtitle cue inside a segment window (S3-05).
+message SubtitleCue {
+  int64 start_ms = 1;
+  int64 end_ms = 2;
+  string text = 3;
+}
+
+// SubtitleTrack groups the cues of one segment.
+message SubtitleTrack {
+  int32 version = 1;
+  string segment_id = 2;
+  repeated SubtitleCue cues = 3;
+}
