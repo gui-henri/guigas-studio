@@ -5,7 +5,7 @@ sprint: 0
 prioridade: P0
 depende_de: ["S0-07"]
 estimativa_h: 1
-status: todo
+status: done
 ---
 
 # S0-08 — Interceptor Connect de auth (Bearer)
@@ -45,10 +45,10 @@ código `16/unauthenticated` limpando token e redirecionando para `/login`.
 
 ## Critérios de aceite
 
-- [ ] RPCs privadas recusam requisição sem Bearer válido (JWT **ou** PAT)
-- [ ] Login/Health respondem sem header de autorização
-- [ ] Comparação da PAT é constante (sem timing leak)
-- [ ] Matriz de testes acima coberta e verde
+- [x] RPCs privadas recusam requisição sem Bearer válido (JWT **ou** PAT)
+- [x] Login/Health respondem sem header de autorização
+- [x] Comparação da PAT é constante (sem timing leak)
+- [x] Matriz de testes acima coberta e verde
 
 ## Verificação
 
@@ -60,7 +60,9 @@ curl -fsS http://localhost:8080/healthz        # público: 200 sem auth
 
 ## Notas
 
-- Use sempre `CodeUnauthenticated` para sessão inválida — é o gatilho exato do redirect
+- **Escolha registrada**: os full names reais das procedures públicas são `/app.studio.v1.AuthService/Login`
+  e `/app.studio.v1.HealthService/Check` (prefixo do pacote proto é `app.studio.v1`, ver S0-04).
+- Interceptor implementado com `connect.UnaryInterceptorFunc` (API atual do connect-go).- Use sempre `CodeUnauthenticated` para sessão inválida — é o gatilho exato do redirect
   automático no frontend; outro código quebraria silenciosamente a UX da S0-10.
 - Whitelist é por procedure full name, nunca por prefixo solto — evita liberar RPC nova por
   acidente ao adicionar services.

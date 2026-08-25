@@ -17,8 +17,10 @@ import (
 	"connectrpc.com/connect"
 
 	studiov1connect "github.com/gui-henri/guigas-studio/backend/gen/app/studio/v1/studiov1connect"
+	"github.com/gui-henri/guigas-studio/backend/internal/auth"
 	"github.com/gui-henri/guigas-studio/backend/internal/config"
 	"github.com/gui-henri/guigas-studio/backend/internal/database"
+	"github.com/gui-henri/guigas-studio/backend/internal/middleware"
 	"github.com/gui-henri/guigas-studio/backend/internal/services"
 )
 
@@ -30,7 +32,14 @@ func newHandler(cfg config.Config, db *database.DB) http.Handler {
 		_ = json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
 	})
 
-	interceptors := []connect.Interceptor{}
+	interceptors := []connect.Interceptor{
+		middleware.NewAuthInterceptor(func(raw string) (*auth.Claims, error) {
+			return auth.ParseToken(cfg.Auth.JWTSecret, raw)
+		}, cfg.Auth.RunnerToken),
+	}
+	if cfg.Auth.RunnerToken == "" {
+		slog.Warn("runner PAT disabled: RUNNER_TOKEN is empty")
+	}
 	mux.Handle(studiov1connect.NewHealthServiceHandler(services.NewHealthService(), connect.WithInterceptors(interceptors...)))
 	mux.Handle(studiov1connect.NewAuthServiceHandler(services.NewAuthService(db.Pool, cfg.Auth.JWTSecret), connect.WithInterceptors(interceptors...)))
 

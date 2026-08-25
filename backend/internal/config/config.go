@@ -24,6 +24,7 @@ type AuthConfig struct {
 	StudioUsername     string
 	StudioPasswordHash string
 	JWTSecret          string
+	RunnerToken        string // PAT accepted by protected procedures; empty disables it
 }
 
 // PostgresConfig groups the individual POSTGRES_* variables (D-02).
@@ -56,6 +57,7 @@ func Load() (Config, error) {
 			StudioUsername:     os.Getenv("STUDIO_USERNAME"),
 			StudioPasswordHash: os.Getenv("STUDIO_PASSWORD_HASH"),
 			JWTSecret:          os.Getenv("JWT_SECRET"),
+			RunnerToken:        os.Getenv("RUNNER_TOKEN"),
 		},
 	}
 
