@@ -8,7 +8,14 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
+
+type RssItem struct {
+	Guid    string      `json:"guid"`
+	VideoID pgtype.UUID `json:"video_id"`
+	SeenAt  time.Time   `json:"seen_at"`
+}
 
 type User struct {
 	ID           uuid.UUID `json:"id"`

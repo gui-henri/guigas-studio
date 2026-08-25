@@ -22,6 +22,7 @@ import (
 	"github.com/gui-henri/guigas-studio/backend/internal/database"
 	"github.com/gui-henri/guigas-studio/backend/internal/middleware"
 	"github.com/gui-henri/guigas-studio/backend/internal/services"
+	"github.com/gui-henri/guigas-studio/backend/internal/watcher"
 )
 
 func newHandler(cfg config.Config, db *database.DB) http.Handler {
@@ -77,6 +78,17 @@ func main() {
 	if created {
 		logger.Info("auth.seeded", "username", cfg.Auth.StudioUsername)
 	}
+
+	interval := 30 * time.Minute
+	if raw := os.Getenv("RSS_POLL_INTERVAL"); raw != "" {
+		if parsed, perr := time.ParseDuration(raw); perr == nil && parsed > 0 {
+			interval = parsed
+		} else if perr != nil {
+			logger.Warn("invalid RSS_POLL_INTERVAL, using default", slog.String("value", raw))
+		}
+	}
+	rssWatcher := watcher.New(db.Queries, watcher.Config{URL: os.Getenv("RSS_URL"), Interval: interval}, logger)
+	go rssWatcher.Run(ctx)
 
 	server := &http.Server{
 		Addr:    ":" + cfg.Port,

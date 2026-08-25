@@ -5,7 +5,7 @@ sprint: 0
 prioridade: P0
 depende_de: ["S0-06"]
 estimativa_h: 2
-status: todo
+status: done
 ---
 
 # S0-16 — Watcher RSS núcleo
@@ -49,11 +49,11 @@ a S1-05. `RSS_URL` já existe (D-12); roda dentro da api (goroutine), sem proces
 
 ## Critérios de aceite
 
-- [ ] Post novo → exatamente 1 linha em `videos` com status `new` + log estruturado
-- [ ] Re-poll do mesmo feed não duplica nada (dedup por GUID)
-- [ ] Intervalo configurável via `RSS_POLL_INTERVAL` (formato duração Go, ex.: "30m")
-- [ ] Watcher sobrevive a feed indisponível/malformado (loga e tenta de novo)
-- [ ] Testes com fixture verdes contra PG de teste
+- [x] Post novo → exatamente 1 linha em `videos` com status `new` + log estruturado
+- [x] Re-poll do mesmo feed não duplica nada (dedup por GUID)
+- [x] Intervalo configurável via `RSS_POLL_INTERVAL` (formato duração Go, ex.: "30m")
+- [x] Watcher sobrevive a feed indisponível/malformado (loga e tenta de novo)
+- [x] Testes com fixture verdes contra PG de teste
 
 ## Verificação
 

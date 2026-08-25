@@ -11,11 +11,14 @@ import (
 )
 
 type Querier interface {
+	CountRssItems(ctx context.Context) (int64, error)
 	CreateUserIfNotExists(ctx context.Context, arg CreateUserIfNotExistsParams) (int64, error)
 	CreateVideo(ctx context.Context, arg CreateVideoParams) (Video, error)
 	GetUserByUsername(ctx context.Context, username string) (User, error)
 	GetVideo(ctx context.Context, id uuid.UUID) (Video, error)
+	InsertRssItem(ctx context.Context, arg InsertRssItemParams) (int64, error)
 	ListVideos(ctx context.Context) ([]Video, error)
+	SetRssItemVideo(ctx context.Context, arg SetRssItemVideoParams) error
 }
 
 var _ Querier = (*Queries)(nil)

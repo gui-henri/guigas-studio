@@ -9,7 +9,19 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
+
+const countRssItems = `-- name: CountRssItems :one
+SELECT count(*) FROM rss_items
+`
+
+func (q *Queries) CountRssItems(ctx context.Context) (int64, error) {
+	row := q.db.QueryRow(ctx, countRssItems)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
 
 const createVideo = `-- name: CreateVideo :one
 INSERT INTO videos (slug, title, source_url)
@@ -57,6 +69,25 @@ func (q *Queries) GetVideo(ctx context.Context, id uuid.UUID) (Video, error) {
 	return i, err
 }
 
+const insertRssItem = `-- name: InsertRssItem :execrows
+INSERT INTO rss_items (guid, video_id)
+VALUES ($1, $2)
+ON CONFLICT (guid) DO NOTHING
+`
+
+type InsertRssItemParams struct {
+	Guid    string      `json:"guid"`
+	VideoID pgtype.UUID `json:"video_id"`
+}
+
+func (q *Queries) InsertRssItem(ctx context.Context, arg InsertRssItemParams) (int64, error) {
+	result, err := q.db.Exec(ctx, insertRssItem, arg.Guid, arg.VideoID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
 const listVideos = `-- name: ListVideos :many
 SELECT id, slug, title, source_url, status, created_at, updated_at FROM videos ORDER BY created_at DESC LIMIT 200
 `
@@ -87,4 +118,18 @@ func (q *Queries) ListVideos(ctx context.Context) ([]Video, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const setRssItemVideo = `-- name: SetRssItemVideo :exec
+UPDATE rss_items SET video_id = $2 WHERE guid = $1
+`
+
+type SetRssItemVideoParams struct {
+	Guid    string      `json:"guid"`
+	VideoID pgtype.UUID `json:"video_id"`
+}
+
+func (q *Queries) SetRssItemVideo(ctx context.Context, arg SetRssItemVideoParams) error {
+	_, err := q.db.Exec(ctx, setRssItemVideo, arg.Guid, arg.VideoID)
+	return err
 }
