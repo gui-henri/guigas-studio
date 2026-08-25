@@ -17,6 +17,17 @@ SELECT count(*) FROM rss_items;
 -- name: SetRssItemVideo :exec
 UPDATE rss_items SET video_id = $2 WHERE guid = $1;
 
+-- name: GetVideoBySlug :one
+SELECT * FROM videos WHERE slug = $1;
+
+-- name: InsertArtifactParse :one
+INSERT INTO video_artifact_parses (video_id, artifact, valid, errors)
+VALUES ($1, $2, $3, $4)
+RETURNING *;
+
+-- name: ListParsesByVideo :many
+SELECT * FROM video_artifact_parses WHERE video_id = $1 ORDER BY created_at DESC LIMIT 50;
+
 -- name: GetVideo :one
 SELECT * FROM videos WHERE id = $1;
 

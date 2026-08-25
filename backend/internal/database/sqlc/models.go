@@ -33,3 +33,12 @@ type Video struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
+
+type VideoArtifactParse struct {
+	ID        uuid.UUID `json:"id"`
+	VideoID   uuid.UUID `json:"video_id"`
+	Artifact  string    `json:"artifact"`
+	Valid     bool      `json:"valid"`
+	Errors    []byte    `json:"errors"`
+	CreatedAt time.Time `json:"created_at"`
+}

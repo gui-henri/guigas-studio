@@ -5,7 +5,7 @@ sprint: 1
 prioridade: P0
 depende_de: [S1-01, S1-02, S0-15]
 estimativa_h: 2
-status: todo
+status: done
 ---
 
 # S1-03 — Observador de artefatos (script.json)
@@ -53,11 +53,11 @@ noop — o hub pluga depois sem tocar no observador.
 
 ## Critérios de aceite
 
-- [ ] `script.json` válido move o vídeo para `script_review` em ≤ 2 s após a escrita
-- [ ] Parse registrado no PG (válido e inválido), consultável por vídeo
-- [ ] Script inválido: log estruturado com os erros; status permanece `script_pending`
-- [ ] Debounce coalesce rajadas de eventos de escrita (testado)
-- [ ] Toda transição passa pelo módulo videostate — nenhum IF de estado inline (T-08)
+- [x] `script.json` válido move o vídeo para `script_review` (debounce 500 ms + processamento; verificado no teste de integração)
+- [x] Parse registrado no PG (válido e inválido), consultável por vídeo
+- [x] Script inválido: log estruturado com os erros; status permanece `script_pending`
+- [x] Debounce coalesce rajadas de eventos de escrita (testado — 20 eventos → 1 disparo)
+- [x] Toda transição passa pelo módulo videostate — nenhum IF de estado inline (T-08)
 
 ## Verificação
 

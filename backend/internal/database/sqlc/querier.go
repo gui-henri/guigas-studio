@@ -16,7 +16,10 @@ type Querier interface {
 	CreateVideo(ctx context.Context, arg CreateVideoParams) (Video, error)
 	GetUserByUsername(ctx context.Context, username string) (User, error)
 	GetVideo(ctx context.Context, id uuid.UUID) (Video, error)
+	GetVideoBySlug(ctx context.Context, slug string) (Video, error)
+	InsertArtifactParse(ctx context.Context, arg InsertArtifactParseParams) (VideoArtifactParse, error)
 	InsertRssItem(ctx context.Context, arg InsertRssItemParams) (int64, error)
+	ListParsesByVideo(ctx context.Context, videoID uuid.UUID) ([]VideoArtifactParse, error)
 	ListVideos(ctx context.Context) ([]Video, error)
 	SetRssItemVideo(ctx context.Context, arg SetRssItemVideoParams) error
 	UpdateVideoStatus(ctx context.Context, arg UpdateVideoStatusParams) error

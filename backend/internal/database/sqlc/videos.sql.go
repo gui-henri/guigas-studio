@@ -69,6 +69,57 @@ func (q *Queries) GetVideo(ctx context.Context, id uuid.UUID) (Video, error) {
 	return i, err
 }
 
+const getVideoBySlug = `-- name: GetVideoBySlug :one
+SELECT id, slug, title, source_url, status, created_at, updated_at FROM videos WHERE slug = $1
+`
+
+func (q *Queries) GetVideoBySlug(ctx context.Context, slug string) (Video, error) {
+	row := q.db.QueryRow(ctx, getVideoBySlug, slug)
+	var i Video
+	err := row.Scan(
+		&i.ID,
+		&i.Slug,
+		&i.Title,
+		&i.SourceUrl,
+		&i.Status,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const insertArtifactParse = `-- name: InsertArtifactParse :one
+INSERT INTO video_artifact_parses (video_id, artifact, valid, errors)
+VALUES ($1, $2, $3, $4)
+RETURNING id, video_id, artifact, valid, errors, created_at
+`
+
+type InsertArtifactParseParams struct {
+	VideoID  uuid.UUID `json:"video_id"`
+	Artifact string    `json:"artifact"`
+	Valid    bool      `json:"valid"`
+	Errors   []byte    `json:"errors"`
+}
+
+func (q *Queries) InsertArtifactParse(ctx context.Context, arg InsertArtifactParseParams) (VideoArtifactParse, error) {
+	row := q.db.QueryRow(ctx, insertArtifactParse,
+		arg.VideoID,
+		arg.Artifact,
+		arg.Valid,
+		arg.Errors,
+	)
+	var i VideoArtifactParse
+	err := row.Scan(
+		&i.ID,
+		&i.VideoID,
+		&i.Artifact,
+		&i.Valid,
+		&i.Errors,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const insertRssItem = `-- name: InsertRssItem :execrows
 INSERT INTO rss_items (guid, video_id)
 VALUES ($1, $2)
@@ -86,6 +137,37 @@ func (q *Queries) InsertRssItem(ctx context.Context, arg InsertRssItemParams) (i
 		return 0, err
 	}
 	return result.RowsAffected(), nil
+}
+
+const listParsesByVideo = `-- name: ListParsesByVideo :many
+SELECT id, video_id, artifact, valid, errors, created_at FROM video_artifact_parses WHERE video_id = $1 ORDER BY created_at DESC LIMIT 50
+`
+
+func (q *Queries) ListParsesByVideo(ctx context.Context, videoID uuid.UUID) ([]VideoArtifactParse, error) {
+	rows, err := q.db.Query(ctx, listParsesByVideo, videoID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []VideoArtifactParse
+	for rows.Next() {
+		var i VideoArtifactParse
+		if err := rows.Scan(
+			&i.ID,
+			&i.VideoID,
+			&i.Artifact,
+			&i.Valid,
+			&i.Errors,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const listVideos = `-- name: ListVideos :many

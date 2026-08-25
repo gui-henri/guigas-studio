@@ -28,7 +28,7 @@ func TestConnectMigrateAndQueriesRoundtrip(t *testing.T) {
 	}
 	defer db.Pool.Close()
 
-	if _, err := db.Pool.Exec(ctx, `TRUNCATE rss_items, videos, users`); err != nil {
+	if _, err := db.Pool.Exec(ctx, `TRUNCATE video_artifact_parses, rss_items, videos, users CASCADE`); err != nil {
 		t.Fatalf("clean tables: %v", err)
 	}
 

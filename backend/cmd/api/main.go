@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 	"time"
 
@@ -17,6 +18,7 @@ import (
 	"connectrpc.com/connect"
 
 	studiov1connect "github.com/gui-henri/guigas-studio/backend/gen/app/studio/v1/studiov1connect"
+	"github.com/gui-henri/guigas-studio/backend/internal/artifacts"
 	"github.com/gui-henri/guigas-studio/backend/internal/auth"
 	"github.com/gui-henri/guigas-studio/backend/internal/config"
 	"github.com/gui-henri/guigas-studio/backend/internal/database"
@@ -93,6 +95,18 @@ func main() {
 		DataDir:  cfg.DataDir,
 	}, logger)
 	go rssWatcher.Run(ctx)
+
+	scriptObserver := artifacts.NewObserver(
+		filepath.Join(cfg.DataDir, "videos"),
+		db.Queries,
+		nil, // SSE hub (S1-05) plugs in here; nil → NoopPublisher
+		logger,
+	)
+	go func() {
+		if err := scriptObserver.Run(ctx); err != nil {
+			logger.Error("artifacts.observer_failed", slog.Any("error", err))
+		}
+	}()
 
 	server := &http.Server{
 		Addr:    ":" + cfg.Port,
