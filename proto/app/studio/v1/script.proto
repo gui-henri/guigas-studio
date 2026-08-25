@@ -1,0 +1,80 @@
+syntax = "proto3";
+
+package app.studio.v1;
+
+import "google/protobuf/struct.proto";
+
+option go_package = "github.com/gui-henri/guigas-studio/backend/gen/app/studio/v1;studiov1";
+
+// StudioScript — the single source of truth of a video (SPEC §3).
+//
+// Canonical JSON notes (the .json file written by agents on disk):
+//   - Enums serialize as their proto names: "BEAT_HOOK", "EMOTION_HAPPY", …
+//     (NOT the lowercase literals shown in early SPEC examples).
+//   - Field names follow json_name: "narration_pt" stays snake_case,
+//     "durationMin" is camelCase — matching SPEC §3 literally.
+//   - Unknown fields are rejected at validation time (strict protojson).
+
+message Language {
+  string spoken = 1;
+  string subtitles = 2;
+}
+
+message Target {
+  int32 duration_min = 1 [json_name = "durationMin"];
+}
+
+// SceneRef keeps props open until the scene grammar lands (S4-01).
+message SceneRef {
+  string type = 1;
+  google.protobuf.Struct props = 2;
+}
+
+message ShortMarker {
+  uint32 id = 1;
+  string hook = 2;
+  string cta = 3;
+}
+
+message Segment {
+  string id = 1;
+  Beat beat = 2;
+  Emotion emotion = 3;
+  string narration_pt = 4 [json_name = "narration_pt"];
+  SceneRef scene = 5;
+  ShortMarker short = 6;
+}
+
+message SocialCopy {
+  repeated string x_thread = 1 [json_name = "x_thread"];
+  string linkedin = 2;
+  string instagram_caption = 3 [json_name = "instagram_caption"];
+}
+
+message StudioScript {
+  string post = 1;
+  Language language = 2;
+  Target target = 3;
+  repeated string related = 4;
+  repeated Segment segments = 5;
+  SocialCopy social = 6;
+}
+
+enum Beat {
+  BEAT_UNSPECIFIED = 0;
+  BEAT_HOOK = 1;
+  BEAT_SETUP = 2;
+  BEAT_EXAMPLE = 3;
+  BEAT_PAYOFF = 4;
+  BEAT_CTA = 5;
+}
+
+// The five avatar sprite states (SPEC #7).
+enum Emotion {
+  EMOTION_UNSPECIFIED = 0;
+  EMOTION_IDLE = 1;
+  EMOTION_SPEAKING = 2;
+  EMOTION_HAPPY = 3;
+  EMOTION_THOUGHTFUL = 4;
+  EMOTION_SURPRISED = 5;
+}

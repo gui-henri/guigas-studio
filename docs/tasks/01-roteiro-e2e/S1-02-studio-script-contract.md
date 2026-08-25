@@ -5,7 +5,7 @@ sprint: 1
 prioridade: P0
 depende_de: [S0-04]
 estimativa_h: 2
-status: todo
+status: done
 ---
 
 # S1-02 — Contrato StudioScript (proto) + JSON Schema
@@ -60,11 +60,11 @@ da S0-04.
 
 ## Critérios de aceite
 
-- [ ] `buf lint` verde; stubs Go+TS regenerados sem breaking (CI D-15)
-- [ ] `studio_script.schema.json` commitado e embutível via go:embed
-- [ ] Exemplo do SPEC §3 passa no schema e no protojson estrito; mutações grosseiras falham
-- [ ] `ValidateScript` retorna erros enumerados (não só "inválido") para uso no log da S1-03
-- [ ] Nenhum Zod no caminho de validação FS (D-01)
+- [x] `buf lint` verde; stubs Go+TS regenerados sem breaking (CI D-15)
+- [x] `studio_script.schema.json` commitado e embutível via go:embed
+- [x] Exemplo do SPEC §3 passa no schema e no protojson estrito; mutações grosseiras falham
+- [x] `ValidateScript` retorna erros enumerados (não só "inválido") para uso no log da S1-03
+- [x] Nenhum Zod no caminho de validação FS (D-01)
 
 ## Verificação
 
@@ -76,7 +76,12 @@ cd backend && go test ./internal/artifacts/...
 
 ## Notas
 
-- protojson serializa enums como `BEAT_HOOK`/`EMOTION_HAPPY`, não os literais minúsculos
+- **Escolha registrada**: o plugin `protoc-gen-jsonschema` (pubg) foi descartado do pipeline
+  de codegen — exige file-options/entrypoint ceremony e dependência remota no buf registry
+  para cada `npm run gen`. Seguiu o caminho alternativo documentado no passo 4: schema
+  commitado como artefato, mantido à mão espelhando `script.proto`, com teste de sincronia
+  dos nomes de enums (`TestSchemaEnumNamesMatchProto`) contra drift.
+- Schema aceita explicitamente `null` em `scene`/`short` (SPEC §3 usa nulls literais).- protojson serializa enums como `BEAT_HOOK`/`EMOTION_HAPPY`, não os literais minúsculos
   do jsonc ilustrativo do SPEC §3 — o proto passa a ser o contrato canônico; deixe isso
   explícito no header do `.proto` para não gerar dúvida no OpenCode.
 - `SceneRef.props` como `Struct` é deliberado: tipagem fechada de cenas entra na S4-01;

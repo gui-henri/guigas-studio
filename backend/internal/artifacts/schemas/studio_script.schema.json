@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://guigas.studio/schemas/studio_script.schema.json",
+  "title": "StudioScript",
+  "description": "Single source of truth of a Guigas Studio video (SPEC §3). Hand-maintained mirror of proto/app/studio/v1/script.proto — keep both in sync.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["post", "language", "target", "segments"],
+  "properties": {
+    "post": { "type": "string", "minLength": 1 },
+    "language": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["spoken", "subtitles"],
+      "properties": {
+        "spoken": { "type": "string", "const": "pt-BR" },
+        "subtitles": { "type": "string", "const": "en" }
+      }
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["durationMin"],
+      "properties": {
+        "durationMin": { "type": "integer", "minimum": 4, "maximum": 30 }
+      }
+    },
+    "related": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "segments": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/Segment" }
+    },
+    "social": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "x_thread": { "type": "array", "items": { "type": "string" } },
+        "linkedin": { "type": "string" },
+        "instagram_caption": { "type": "string" }
+      }
+    }
+  },
+  "$defs": {
+    "Beat": {
+      "enum": ["BEAT_HOOK", "BEAT_SETUP", "BEAT_EXAMPLE", "BEAT_PAYOFF", "BEAT_CTA"]
+    },
+    "Emotion": {
+      "enum": [
+        "EMOTION_IDLE",
+        "EMOTION_SPEAKING",
+        "EMOTION_HAPPY",
+        "EMOTION_THOUGHTFUL",
+        "EMOTION_SURPRISED"
+      ]
+    },
+    "SceneRef": {
+      "anyOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type"],
+          "properties": {
+            "type": { "type": "string" },
+            "props": { "type": "object" }
+          }
+        }
+      ]
+    },
+    "ShortMarker": {
+      "anyOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "hook", "cta"],
+          "properties": {
+            "id": { "type": "integer", "minimum": 1 },
+            "hook": { "type": "string", "minLength": 1 },
+            "cta": { "type": "string", "minLength": 1 }
+          }
+        }
+      ]
+    },
+    "Segment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "beat", "emotion", "narration_pt"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "maxLength": 64
+        },
+        "beat": { "$ref": "#/$defs/Beat" },
+        "emotion": { "$ref": "#/$defs/Emotion" },
+        "narration_pt": { "type": "string", "minLength": 1 },
+        "scene": { "$ref": "#/$defs/SceneRef" },
+        "short": { "$ref": "#/$defs/ShortMarker" }
+      }
+    }
+  }
+}
