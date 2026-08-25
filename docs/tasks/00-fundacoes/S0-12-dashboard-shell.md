@@ -5,7 +5,7 @@ sprint: 0
 prioridade: P0
 depende_de: ["S0-10"]
 estimativa_h: 2
-status: todo
+status: done
 ---
 
 # S0-12 — Dashboard shell + lista de vídeos
@@ -45,10 +45,10 @@ Detalhe do vídeo, SSE e ações chegam no Sprint 1 (S1-05/S1-06) — aqui é le
 
 ## Critérios de aceite
 
-- [ ] Lista renderiza dados reais autenticados; badge correta para cada status presente
-- [ ] Os 13 valores de VideoStatus têm label+grupo definidos (sem fallback quebrado)
-- [ ] Empty/loading/error tratados, com retry funcional
-- [ ] Logout acessível pelo shell; navegação mostra o mapa do produto
+- [x] Lista renderiza dados reais autenticados; badge correta para cada status presente *(ListVideos verificado ponta a ponta: 401 sem token, payload com vídeos com JWT)* 
+- [x] Os 13 valores de VideoStatus têm label+grupo definidos (sem fallback quebrado)
+- [x] Empty/loading/error tratados, com retry funcional
+- [x] Logout acessível pelo shell; navegação mostra o mapa do produto
 
 ## Verificação
 
@@ -61,7 +61,10 @@ docker compose exec postgres psql -U guigas -d guigas_studio -c "insert into vid
 
 ## Notas
 
-- Sem paginação/filtros (<100 vídeos previsíveis); ordenação vem do SQL (`created_at DESC`,
+- **Escolha registrada**: o núcleo do `VideoService` Go (List/Get/Create sobre as queries da
+  S0-06) foi implementado aqui porque o aceite "dados reais autenticados" exige o RPC servido;
+  a S1-04 estende esse service com UpdateScript/Approve/Reject. Mapa texto→enum vive em
+  `video_service.go` até o módulo `videostate` (S0-15) assumir a sincronia.- Sem paginação/filtros (<100 vídeos previsíveis); ordenação vem do SQL (`created_at DESC`,
   S0-06). Paginar só se a dor aparecer.
 - Cores por grupo semântico mantêm a UI calma com 13 estados; granularidade fica pro
   detalhe do vídeo (S1-06).
