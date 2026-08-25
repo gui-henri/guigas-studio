@@ -7,6 +7,7 @@ import DashboardPage from "./pages/DashboardPage";
 import LoginPage from "./pages/LoginPage";
 import ScriptReviewPage from "./pages/ScriptReviewPage";
 import StyleDemoPage from "./pages/StyleDemoPage";
+import LandmarkerDevPage from "./pages/LandmarkerDevPage";
 
 export default function App() {
   useStudioEvents();
@@ -14,6 +15,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/dev/landmarker" element={<LandmarkerDevPage />} />
       <Route
         path="/"
         element={

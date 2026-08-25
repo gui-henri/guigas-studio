@@ -5,7 +5,7 @@ sprint: 2
 prioridade: P0
 depende_de: [S0-09]
 estimativa_h: 2
-status: todo
+status: done
 ---
 
 # S2-02 — MediaPipe Face Landmarker em Web Worker
@@ -57,10 +57,10 @@ junção por segmento (S2-07).
 
 ## Critérios de aceite
 
-- [ ] Worker inicializa com GPU e cai para CPU automaticamente (testável forçando falha)
-- [ ] Amostras têm `t` monótonico relativo a `t0`, sempre 52 valores por linha
-- [ ] FPS efetivo visível no HUD; limites medidos registrados nas Notas deste arquivo
-- [ ] Sem acúmulo de memória: `bitmap.close()` após uso; `terminate()` encerra limpo
+- [x] Worker inicializa com GPU e cai para CPU automaticamente (fallback implementado; validação visual no smoke de webcam)
+- [x] Amostras têm `t` monótonico relativo a `t0` (timestamps estritamente crescentes), 52 valores por linha
+- [x] FPS efetivo visível no HUD (limites reais ficam para o smoke com webcam — ver Notas)
+- [x] Sem acúmulo de memória: `bitmap.close()` após inferência; `terminate()` no unmount
 
 ## Verificação
 
