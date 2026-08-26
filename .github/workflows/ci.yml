@@ -28,9 +28,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - uses: sqlc-dev/setup-sqlc-action@v2
-        with:
-          sqlc_version: latest
+      - uses: sqlc-dev/setup-sqlc@v4
       - run: sqlc vet
         working-directory: backend
 
