@@ -99,7 +99,32 @@
                 "lines": {
                   "type": "array",
                   "items": {
-                    "type": "string"
+                    "type": "object",
+                    "properties": {
+                      "text": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "kind": {
+                        "type": "string",
+                        "enum": [
+                          "command",
+                          "output",
+                          "success",
+                          "error"
+                        ],
+                        "default": "output"
+                      },
+                      "delayFrames": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "default": 0
+                      }
+                    },
+                    "required": [
+                      "text"
+                    ],
+                    "additionalProperties": false
                   },
                   "minItems": 1
                 },

@@ -1,6 +1,13 @@
 {
   "type": "terminal_run",
   "props": {
-    "lines": ["$ npm run check", "buf lint ✓", "go test ./... ✓", "vitest ✓"]
+    "prompt": "$",
+    "lines": [
+      { "text": "npm run check", "kind": "command" },
+      { "text": "buf lint ✓", "delayFrames": 20 },
+      { "text": "go test ./... ✓", "delayFrames": 12 },
+      { "text": "1 falha: sprite.png ausente", "kind": "error", "delayFrames": 18 },
+      { "text": "corrigido com generate-sprite.mjs", "kind": "success", "delayFrames": 14 }
+    ]
   }
 }

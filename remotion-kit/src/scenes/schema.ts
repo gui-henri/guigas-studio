@@ -25,10 +25,25 @@ export const diffViewPropsSchema = z
   })
   .strict();
 
+export const terminalLineKindSchema = z.enum([
+  "command",
+  "output",
+  "success",
+  "error",
+]);
+
+export const terminalLineSchema = z
+  .object({
+    text: z.string().min(1),
+    kind: terminalLineKindSchema.default("output"),
+    delayFrames: z.number().int().nonnegative().default(0),
+  })
+  .strict();
+
 export const terminalRunPropsSchema = z
   .object({
     prompt: z.string().default("$"),
-    lines: z.array(z.string()).min(1),
+    lines: z.array(terminalLineSchema).min(1),
     cursor: z.boolean().default(true),
   })
   .strict();
@@ -134,6 +149,7 @@ export const sceneSchema = z.discriminatedUnion("type", [
 export type CodeTypingScene = z.infer<typeof codeTypingSceneSchema>;
 export type DiffViewScene = z.infer<typeof diffViewSceneSchema>;
 export type TerminalRunScene = z.infer<typeof terminalRunSceneSchema>;
+export type TerminalLine = z.infer<typeof terminalLineSchema>;
 export type FlowDiagramScene = z.infer<typeof flowDiagramSceneSchema>;
 export type BigNumberScene = z.infer<typeof bigNumberSceneSchema>;
 export type TimelineScene = z.infer<typeof timelineSceneSchema>;

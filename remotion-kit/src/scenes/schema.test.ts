@@ -14,7 +14,7 @@ import {
 const validScenes = [
   { type: "code_typing", props: { code: "const x = 1;" } },
   { type: "diff_view", props: { before: ["a"], after: ["b"] } },
-  { type: "terminal_run", props: { lines: ["npm run check"] } },
+  { type: "terminal_run", props: { lines: [{ text: "npm run check" }] } },
   {
     type: "flow_diagram",
     props: { nodes: [{ id: "a", label: "Start" }], edges: [] },
@@ -68,6 +68,11 @@ describe("scene grammar — invalid cases per type", () => {
       { type: "terminal_run", props: { lines: [] } },
       "lines",
       "Array must contain at least 1 element(s)"
+    );
+    expectIssue(
+      { type: "terminal_run", props: { lines: [{ text: "ls", kind: "sudo" }] } },
+      "lines[0].kind",
+      "Invalid enum value. Expected 'command' | 'output' | 'success' | 'error', received 'sudo'"
     );
   });
 
@@ -150,10 +155,12 @@ describe("scene grammar — defaults applied (D-18)", () => {
     expect(result.charsPerSecond).toBe(18);
   });
 
-  it("terminal_run defaults prompt and cursor", () => {
-    const result = terminalRunPropsSchema.parse({ lines: ["ls"] });
+  it("terminal_run defaults prompt, cursor, kind and delayFrames", () => {
+    const result = terminalRunPropsSchema.parse({ lines: [{ text: "ls" }] });
     expect(result.prompt).toBe("$");
     expect(result.cursor).toBe(true);
+    expect(result.lines[0].kind).toBe("output");
+    expect(result.lines[0].delayFrames).toBe(0);
   });
 
   it("flow_diagram defaults edges to empty array", () => {

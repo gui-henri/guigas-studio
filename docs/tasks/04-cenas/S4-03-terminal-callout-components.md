@@ -5,7 +5,7 @@ sprint: 4
 prioridade: P1
 depende_de: [S4-01]
 estimativa_h: 2
-status: todo
+status: done
 ---
 
 # S4-03 — Componentes TerminalRun e Callout
@@ -47,11 +47,11 @@ compositor (S4-05 depende só de S4-02), mas fecham o kit exigido pelo SPEC §4.
 
 ## Critérios de aceite
 
-- [ ] Terminal revela linhas estritamente pela função pura do frame (scrub ok no Player)
-- [ ] Cursor pisca determinístico; nenhum timer/setInterval
-- [ ] Callout tem as 4 variantes renderizando com cores/ícones dos tokens
-- [ ] Funções puras testadas; fixtures validam contra `sceneSchema` (D-18)
-- [ ] Nenhum hex literal fora de `theme.ts`
+- [x] Terminal revela linhas estritamente pela função pura do frame (visibleTerminalLines testada: delays acumulados, linha parcial, todas visíveis)
+- [x] Cursor pisca determinístico; nenhum timer/setInterval (reusa isCursorVisible da S4-02)
+- [x] Callout tem as 4 variantes renderizando com cores/ícones dos tokens (fixtures por variante validadas)
+- [x] Funções puras testadas (8 casos terminal); fixtures validam contra `sceneSchema` (D-18)
+- [x] Nenhum hex literal fora de `theme.ts`
 
 ## Verificação
 
@@ -63,6 +63,12 @@ rg -n "setInterval|setTimeout|Math.random" remotion-kit/src/scenes && exit 1 || 
 
 ## Notas
 
+## Notas
+
+- Schema S4-01 ampliado no mesmo commit conforme previsto: `lines` virou
+  `{text, kind?, delayFrames?}[]` com kind ∈ command|output|success|error (teste do enum
+  incluído); fixture e catálogo atualizados juntos.
+- Entrada do Callout usa `interpolate` do Remotion (função do frame) — scrub correto.
 - `delayFrames` por linha é a forma simples de ritmo (pausa entre comando e saída);
   não inventar engine de timing genérica.
 - Se um `kind` novo fizer falta (ex.: `warning`), estreitar/ampliar o schema da S4-01 no

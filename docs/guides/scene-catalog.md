@@ -62,12 +62,23 @@ Comandos executando linha a linha num terminal, com prompt e cursor.
 
 | Prop | Tipo | Default | Descrição |
 | --- | --- | --- | --- |
-| `prompt` | string | `"$"` | Prefixo das linhas de comando |
-| `lines` | string[] | — (obrigatória, ≥1) | Saída/comandos em ordem |
-| `cursor` | boolean | `true` | Cursor piscando ao final |
+| `prompt` | string | `"$"` | Prefixo das linhas `command` |
+| `lines` | `{text, kind?, delayFrames?}[]` | — (obrigatória, ≥1) | Linhas em ordem de execução |
+| `cursor` | boolean | `true` | Cursor piscando na linha corrente |
+
+Cada linha: `kind` ∈ `command` (digitado char a char) \| `output` \| `success` \|
+`error`; `delayFrames` pausa ANTES da linha (acumulado).
 
 ```json
-{ "type": "terminal_run", "props": { "lines": ["npm run check", "✓ 0 erros"] } }
+{
+  "type": "terminal_run",
+  "props": {
+    "lines": [
+      { "text": "npm run check", "kind": "command" },
+      { "text": "✓ 0 erros", "kind": "success", "delayFrames": 20 }
+    ]
+  }
+}
 ```
 
 <!-- print pendente: S4-09 -->

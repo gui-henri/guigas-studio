@@ -89,6 +89,8 @@ export type { TimelineView, MouthCue } from "./selectors";
 export { SmokeRender } from "./SmokeRender";
 export { CodeTyping } from "./scenes/code-typing/CodeTyping";
 export { DiffView } from "./scenes/diff-view/DiffView";
+export { TerminalRun } from "./scenes/terminal-run/TerminalRun";
+export { Callout } from "./scenes/callout/Callout";
 export {
   parseScene,
   sceneSchema,
@@ -103,5 +105,6 @@ export {
   type BigNumberScene,
   type TimelineScene,
   type CalloutScene,
+  type TerminalLine,
 } from "./scenes/schema";
 export { theme } from "./theme";

@@ -1,4 +1,0 @@
-{
-  "type": "callout",
-  "props": { "variant": "warning", "title": "Atenção", "body": "Rode o smoke render antes de publicar." }
-}

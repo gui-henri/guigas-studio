@@ -10,7 +10,10 @@ const FIXTURES = [
   "flow-diagram.json",
   "big-number.json",
   "scene-timeline.json",
-  "callout.json",
+  "callout-info.json",
+  "callout-warning.json",
+  "callout-success.json",
+  "callout-danger.json",
 ] as const;
 
 describe("scene fixtures", () => {
