@@ -6,6 +6,7 @@ import { StudioScriptSchema } from "./gen/app/studio/v1/script_pb";
 import type { StudioVideoProps } from "./props";
 import { PlaceholderScene } from "./scenes/PlaceholderScene";
 import { SmokeRender } from "./SmokeRender";
+import { LongFormVideo } from "./compositions/LongFormVideo";
 
 const FPS = 30;
 
@@ -25,25 +26,28 @@ const defaultProps: StudioVideoProps = {
 // Remotion's schema-less Composition infers Record<string, unknown>; our
 // public typing lives on StudioVideoProps/PlayerHost (proto-derived).
 const scene = PlaceholderScene as unknown as React.FC<Record<string, unknown>>;
+const longFormScene = LongFormVideo as unknown as React.FC<Record<string, unknown>>;
 
 const Root: React.FC = () => (
   <>
     <Composition
       id="LongForm"
-      component={scene}
+      component={longFormScene}
       durationInFrames={FPS * 30}
       fps={FPS}
       width={1920}
       height={1080}
-      defaultProps={defaultProps}
+      defaultProps={{ title: "Guigas Studio", segments: [], timelines: {}, audioFiles: {}, spriteSheetUrl: "", spriteMeta: {}, showSubtitles: false, subtitleWordsBySeg: {} } as unknown as Record<string, never>}
       calculateMetadata={({ props }) => {
-        const videoProps = props as unknown as StudioVideoProps;
-        return {
-          durationInFrames: Math.max(
-            FPS,
-            Math.round((videoProps.durationMs / 1000) * FPS)
-          ),
+        const p = props as unknown as {
+          segments?: Array<{ id: string }>;
+          timelines?: Record<string, { durationMs?: number }>;
         };
+        const totalMs = (p.segments ?? []).reduce(
+          (sum, s) => sum + (Number(p.timelines?.[s.id]?.durationMs ?? 0) || 1000),
+          0
+        );
+        return { durationInFrames: Math.max(FPS, Math.round((totalMs / 1000) * FPS)) };
       }}
     />
     <Composition
@@ -97,6 +101,11 @@ export { FlowDiagram } from "./scenes/flow-diagram/FlowDiagram";
 export { BigNumber } from "./scenes/big-number/BigNumber";
 export { Timeline } from "./scenes/timeline/Timeline";
 export { SegmentComposition, type SegmentCompositionProps } from "./compositions/SegmentComposition";
+export {
+  LongFormVideo,
+  type LongFormProps,
+  type LongFormSegmentInput,
+} from "./compositions/LongFormVideo";
 export { selectLayout, type SegmentLayout } from "./compositions/layout";
 export { Subtitles, type SubtitlesProps } from "./subtitles/Subtitles";
 export {

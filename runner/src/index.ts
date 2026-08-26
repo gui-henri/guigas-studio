@@ -48,6 +48,9 @@ async function main(): Promise<void> {
         defaultStages(manifest, {
           baseUrl: config.studioUrl,
           bearerToken: config.runnerToken,
+          workDir: config.workDir,
+          cacheDir: config.cacheDir,
+          remotionEntry: config.remotionEntry,
         }),
         {
           baseUrl: config.studioUrl,

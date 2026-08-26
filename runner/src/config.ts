@@ -10,6 +10,10 @@ export interface RunnerConfig {
   runnerToken: string;
   runnerId: string;
   workDir: string;
+  /** Remotion entry override (defaults to the monorepo layout). */
+  remotionEntry?: string;
+  /** Fixed webpack cache root reused across jobs. */
+  cacheDir: string;
   pollIntervalMs: number;
   heartbeatIntervalMs: number;
 }
@@ -48,6 +52,11 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): RunnerConfig {
         ? env["RUNNER_ID"]
         : `runner-${process.pid}`,
     workDir,
+    remotionEntry:
+      env["REMOTION_ENTRY"] && env["REMOTION_ENTRY"].length > 0
+        ? env["REMOTION_ENTRY"]
+        : undefined,
+    cacheDir: path.resolve(env["CACHE_DIR"] && env["CACHE_DIR"].length > 0 ? env["CACHE_DIR"] : "./.cache"),
     pollIntervalMs: numberEnv("POLL_INTERVAL_MS", 10_000),
     heartbeatIntervalMs: numberEnv("HEARTBEAT_INTERVAL_MS", 10_000),
   };

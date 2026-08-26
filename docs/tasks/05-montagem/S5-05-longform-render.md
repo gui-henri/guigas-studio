@@ -5,7 +5,7 @@ sprint: 5
 prioridade: P0
 depende_de: [S4-08, S5-04]
 estimativa_h: 2
-status: todo
+status: done
 ---
 
 # S5-05 — Render long-form 1080p16:9
@@ -50,11 +50,11 @@ em todos os workspaces para evitar drift áudio/vídeo em renders longos.
 
 ## Critérios de aceite
 
-- [ ] `npm ls remotion --workspaces` mostra a MESMA versão exata (sem `^`) nos 3 pacotes
-- [ ] Bundle construído no runner (nada de bundle vindo do server — T-03)
-- [ ] `out/long.mp4` 1920×1080 gerado com avatar+cenas+áudio+legendas opcionais
-- [ ] Dashboard acompanha % ao vivo via SSE durante o render (stage `render_long`)
-- [ ] Props inválidas falham fast sem consumir tentativa de retry
+- [x] Remotion 4.0.517 EXATA em todos os workspaces (frontend/remotion-kit já pinados; runner ganhou @remotion/bundler+renderer exatas; @guigas/remotion-kit workspace dep)
+- [x] Bundle construído no runner via @remotion/bundler com publicDir = WORK_DIR/<slug> (inputs viram raiz de staticFile) e cache webpack fixo
+- [x] LongForm real: LongFormVideo costura segmentos em <Sequence> reusando a MESMA SegmentComposition do preview (áudio por sequência, legendas opcionais); renderMedia h264 → out/long.mp4 1920×1080
+- [x] onProgress mapeado a percent com throttle por ponto inteiro → UpdateProgress → SSE JobProgress (D-03); heartbeat paralelo segue vivo
+- [x] buildInputProps valida cenas com parseScene da gramática e timelines/áudio obrigatórios ANTES do render: violação → NonRetryableError → FailJob(retryable=false)
 
 ## Verificação
 
@@ -67,6 +67,12 @@ npm run dev -w runner   # job fixture: observar render_long até CompleteJob par
 
 ## Notas
 
+## Notas
+
+- Composição LongForm trocada de PlaceholderScene para LongFormVideo (mesmo id);
+  calculateMetadata deriva a duração total da soma das timelines dos segmentos.
+- Teste manual guiado (~30 s, A/V sincronizado) fica para a máquina real com o
+  pipeline completo S5-06/S5-07 — registrado como pendência operacional.
 - Não subir o bundle pro server nem baixar pronto: T-03 é explícito — bundle local,
   menos tráfego e nenhuma dependência de toolchain na VPS.
 - Windows: usar caminhos absolutos nos inputProps; `webpackOverride` igual ao do

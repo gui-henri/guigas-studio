@@ -3,7 +3,12 @@ import fs from "node:fs";
 
 import type { RunnerClient } from "./client.js";
 import { jobLogger } from "./logger.js";
-import { JobCancelled, type JobContext, type StageHandler } from "./stages/types.js";
+import {
+  JobCancelled,
+  type JobContext,
+  type StageHandler,
+} from "./stages/types.js";
+import { NonRetryableError } from "./stages/errors.js";
 
 export interface ClaimedJob {
   jobId: string;
@@ -88,9 +93,13 @@ export async function runStages(
       return "cancelled";
     }
     const message = err instanceof Error ? err.message : String(err);
-    log.error({ err_message: message }, "job failed; reporting retryable failure");
+    const retryable = !(err instanceof NonRetryableError);
+    log.error(
+      { err_message: message, retryable },
+      retryable ? "job failed; reporting retryable failure" : "non-retryable failure"
+    );
     try {
-      await client.jobs.failJob({ jobId: job.jobId, reason: message, retryable: true });
+      await client.jobs.failJob({ jobId: job.jobId, reason: message, retryable });
     } catch (reportErr) {
       log.error({ err_message: String(reportErr) }, "FailJob itself failed; server heartbeat expiry will reclaim");
     }

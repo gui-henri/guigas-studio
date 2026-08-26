@@ -1,40 +1,46 @@
+import path from "node:path";
+
 import type { InputFile } from "../gen/app/studio/v1/jobs_pb.js";
-import {
-  syncInputs,
-  type SyncManifestEntry,
-} from "./sync.js";
+import { syncInputs, type SyncManifestEntry } from "./sync.js";
 import type { StageHandler } from "./types.js";
+import { makeBundle } from "./bundle.js";
+import { makeRenderLongStage } from "./render-long.js";
 
 export interface StageEnv {
   baseUrl: string;
   bearerToken: string;
+  workDir: string;
+  cacheDir: string;
+  remotionEntry?: string;
 }
 
+/** Cross-stage handoff: the bundle URL produced by `bundle`. */
+const bundleRef = globalThis as unknown as { __guigasBundleUrl?: string };
+
 /**
- * Ordered stage pipeline. `sync` is REAL since S5-04 (downloads + sha256
- * verify); S5-05 plugs `bundle` + `render_long`, S5-06 `shorts`, S5-07
- * `upload`. Remaining placeholders report their progress slot and no-op.
+ * Ordered stage pipeline. sync/bundle/render_long are REAL since S5-04/05;
+ * S5-06 plugs `shorts`, S5-07 `upload`.
  */
 export function defaultStages(
   manifest: readonly InputFile[],
   env: StageEnv
 ): Array<[string, StageHandler]> {
-  // proto bytes (bigint) → plain number for the sync stage.
   const entries: SyncManifestEntry[] = manifest.map((f) => ({
     path: f.path,
     sha256: f.sha256,
     bytes: Number(f.bytes),
   }));
+
   const names = ["sync", "bundle", "render_long", "shorts", "upload"] as const;
 
   const syncStage: StageHandler = async (ctx) => {
     await ctx.checkCancelled();
-    if (manifest.length === 0) {
+    if (entries.length === 0) {
       ctx.log.info("no input manifest on job; skipping download");
       await ctx.report("sync", 100);
       return;
     }
-    ctx.log.info({ files: manifest.length }, "syncing inputs");
+    ctx.log.info({ files: entries.length }, "syncing inputs");
     const result = await syncInputs(ctx, entries, {
       baseUrl: env.baseUrl,
       videoId: ctx.videoId,
@@ -43,14 +49,29 @@ export function defaultStages(
     ctx.log.info(result, "inputs synced");
   };
 
+  const bundleStage: StageHandler = async (ctx) => {
+    const serveUrl = await makeBundle(ctx, {
+      entryPoint: env.remotionEntry ?? process.env["REMOTION_ENTRY"],
+      cacheDir: path.join(env.cacheDir, "webpack"),
+    });
+    bundleRef.__guigasBundleUrl = serveUrl;
+    await ctx.report("bundle", 100);
+  };
+
+  const renderLongStage = makeRenderLongStage();
+
   return names.map((name) => [
     name,
     name === "sync"
       ? syncStage
-      : async (ctx) => {
-          await ctx.checkCancelled();
-          ctx.log.info({ stage: name }, "stage placeholder");
-          await ctx.report(name, Math.round((names.indexOf(name) + 1) * (100 / names.length)));
-        },
+      : name === "bundle"
+        ? bundleStage
+        : name === "render_long"
+          ? renderLongStage
+          : async (ctx) => {
+              await ctx.checkCancelled();
+              ctx.log.info({ stage: name }, "stage placeholder");
+              await ctx.report(name, Math.round((names.indexOf(name) + 1) * (100 / names.length)));
+            },
   ]);
 }
