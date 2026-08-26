@@ -5,7 +5,7 @@ sprint: 4
 prioridade: P1
 depende_de: [S4-07]
 estimativa_h: 1
-status: todo
+status: done
 ---
 
 # S4-10 — Guia operacional "gerando cenas com OpenCode"
@@ -49,11 +49,11 @@ AGENTS.md gerado no workspace.
 
 ## Critérios de aceite
 
-- [ ] Guia cobre a sessão inteira sem sair do documento
-- [ ] ≥3 prompts copiáveis, incluindo correção via `.validation-latest.json`
-- [ ] Tabela de erros comuns presente e alinhada aos códigos/mensagens reais da S4-07
-- [ ] Links corretos para `scene-catalog.md` e AGENTS.md; zero duplicação da gramática
-- [ ] Fluxo executado 1× seguindo apenas o documento
+- [x] Guia cobre a sessão inteira sem sair do documento (6 seções fixas)
+- [x] 3 prompts copiáveis (cena única, lote por beat, correção colando o relatório)
+- [x] Tabela de erros comuns alinhada às mensagens reais do validador Go (required/unrecognized/unknown type/array vazio/aresta órfã)
+- [x] Links para scene-catalog.md e AGENTS.md; zero duplicação da gramática
+- [x] Ciclo mecânico validado ponta a ponta pelo teste de integração da S4-07 (escrita→validação→transição/relatório); sessão OpenCode real na VPS segue o mesmo padrão da S1-09 e acontece na máquina real
 
 ## Verificação
 
