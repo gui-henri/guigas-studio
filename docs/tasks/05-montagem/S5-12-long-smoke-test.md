@@ -5,7 +5,7 @@ sprint: 5
 prioridade: P1
 depende_de: [S5-05]
 estimativa_h: 2
-status: todo
+status: blocked
 ---
 
 # S5-12 — Smoke de render longo (~12 min)
@@ -71,9 +71,40 @@ ffprobe -v error -show_entries format=duration -of csv out/long.mp4   # ~720 s
 
 ## Notas
 
+## Notas
+
+- **status: blocked — execução exige máquina real.** O gerador da fixture está pronto,
+  commitado e validado offline (`tools/gen-smoke-fixture.mjs`):
+    - script.json válido contra o schema Go (ValidateScript PASS com --minutes 12);
+    - WAVs determinísticos 440 Hz com beep de 1 kHz nos primeiros 300 ms de cada
+      segmento de 60 s; timecode queimado via `big_number` (gramática fechada);
+    - marcas [SHORT#1]/[SHORT#2] em ordem correta de primeira aparição.
+  O que falta é EXACTAMENTE o objetivo da tarefa: rodar fila→runner→upload na máquina
+  Windows (D-13), medir tempos/RAM/drift e preencher a seção Baseline acima.
+  Desbloqueio: executar na máquina real e commitar o baseline.
 - Beeps periódicos + timecode queimado transformam "parece sincronizado" em medida
   objetiva — não pule essa parte achando o olhômetro suficiente para 12 min.
 - Rodar com o notebook na tomada e sem throttling óbvio; anotar no baseline qualquer
   condição atípica (outros apps pesados abertos).
 - Se o tempo estourar 40 min: candidatos são `concurrentTabs`, jpegQuality e cache de
   bundle — medir um ajuste por vez e atualizar o baseline.
+
+## Baseline (preenchido na execução)
+
+> Preencher TODOS os campos abaixo na execução real (Windows, D-13) e commitar
+> como `docs(S5-12): baseline smoke 12min`.
+
+| Métrica | Valor |
+| --- | --- |
+| Data / máquina | _(pendente)_ |
+| node / remotion versões | 24.x / 4.0.517 |
+| stage sync | _min s_ |
+| stage bundle | _min s_ |
+| stage render_long | _min s_ |
+| stage shorts (2) | _min s_ |
+| stage upload | _min s_ |
+| **Fim-a-fim** | _dentro/fora da janela 15–40 min_ |
+| RAM pico do node | _MB/GB_ |
+| Drift A/V nos beeps de 60 s | _<100 ms / medido: X ms_ |
+
+Condições atípicas durante a execução: _(anotar apps abertos, throttling, etc.)_
