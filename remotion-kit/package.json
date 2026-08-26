@@ -6,12 +6,14 @@
   "devDependencies": {
     "pngjs": "^7.0.0",
     "remotion": "4.0.517",
+    "tsx": "^4.23.12",
     "typescript": "5.9.3",
     "vitest": "^3.2.4"
   },
   "scripts": {
     "build": "tsc --noEmit",
     "test": "vitest run",
+    "scenes:schema": "tsx tools/generate-scene-schema.mjs",
     "still:avatar": "node tools/render-stills.mjs",
     "smoke:render": "node tools/smoke-render.mjs",
     "smoke:verify": "node tools/smoke-verify.mjs"
@@ -22,7 +24,9 @@
   },
   "dependencies": {
     "@bufbuild/protobuf": "2.14.0",
-    "@remotion/cli": "4.0.517"
+    "@remotion/cli": "4.0.517",
+    "zod": "^3.25.76",
+    "zod-to-json-schema": "^3.25.2"
   },
   "main": "src/index.tsx",
   "types": "src/index.tsx",

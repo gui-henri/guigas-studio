@@ -5,7 +5,7 @@ sprint: 4
 prioridade: P0
 depende_de: [S3-06]
 estimativa_h: 2
-status: todo
+status: done
 ---
 
 # S4-01 — Gramática fechada de cenas
@@ -61,11 +61,11 @@ S1-02 mantida no mesmo commit quando o contrato mudar.
 
 ## Critérios de aceite
 
-- [ ] Os 7 tipos validam; `type` desconhecido e prop extra falham com mensagem clara
-- [ ] `parseScene` reporta o caminho exato do prop problemático
-- [ ] `schema/scene-props.schema.json` gerado e commitado; o exemplo `scene` do SPEC §3 valida nele
-- [ ] Testes cobrindo válidos/inválidos/defaults por tipo (D-18)
-- [ ] Catálogo com entrada para cada um dos 7 componentes
+- [x] Os 7 tipos validam; `type` desconhecido e prop extra falham com mensagem clara
+- [x] `parseScene` reporta o caminho exato do prop problemático (nodes[0].label, unrecognized prop)
+- [x] `schema/scene-props.schema.json` gerado e commitado; exemplo `scene` do SPEC §3 atualizado p/ diff_view e valida nele
+- [x] Testes cobrindo válidos/inválidos/defaults (25 casos, D-18)
+- [x] Catálogo com entrada para cada um dos 7 componentes
 
 ## Verificação
 
@@ -77,6 +77,14 @@ npm run scenes:schema -w remotion-kit && git status --short remotion-kit/schema/
 
 ## Notas
 
+## Notas
+
+- Forma no disco segue o envelope do proto `SceneRef` ({type, props}) — o JSON Schema
+  valida o campo `scene` de script.json diretamente, sem merge no observador (S4-07).
+- `zod-to-json-schema` emite `exclusiveMinimum: true` (draft-07) mesmo com target
+  draft-2020-12; o gerador migra para a forma numérica pós-parse.
+- Exemplo `scene` do SPEC §3 estava inválido ("diff", props escalares); atualizado para
+  diff_view válido no mesmo commit, como manda a nota de paridade.
 - vitest é escolha registrada aqui (primeiro runner de testes JS do repo): alinha com o
   Vite já usado pelo frontend (D-09/D-16). Demais pacotes JS devem reutilizar.
 - Não validar Zod no backend Go — o observador consome o JSON Schema (D-01). Se o proto

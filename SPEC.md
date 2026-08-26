@@ -92,7 +92,10 @@ Arquivo versionado no workspace do vídeo, consumido por todos os estágios:
       "beat": "example",
       "emotion": "pensativo",
       "narration_pt": "...",
-      "scene": { "type": "diff", "props": { "before": "...", "after": "..." } },
+      "scene": {
+        "type": "diff_view",
+        "props": { "before": ["const x = 1;"], "after": ["let x = 1;"] }
+      },
       "short": { "id": 1, "hook": "...", "cta": "Post completo na bio" }
     }
   ],
