@@ -16,6 +16,7 @@ const STATS_INTERVAL_MS = 1000;
 type OutMessage =
   | { type: "ready"; delegate: "webgpu" | "cpu" }
   | { type: "samples"; batch: { t: number; bs: number[] }[] }
+  | { type: "live_sample"; bs: number[]; faceDetected: boolean }
   | { type: "stats"; fps: number }
   | { type: "error"; message: string };
 
@@ -97,7 +98,7 @@ self.onmessage = (ev: MessageEvent) => {
     case "frame": {
       const { bitmap, t } = msg;
       try {
-        if (!landmarker || t0 === null) {
+        if (!landmarker) {
           bitmap.close();
           return;
         }
@@ -112,24 +113,34 @@ self.onmessage = (ev: MessageEvent) => {
         inferred++;
 
         const categories = result.faceBlendshapes?.[0]?.categories;
-        if (categories) {
+        if (categories && categories.length > 0) {
           const bs = new Array<number>(categories.length);
           const names = new Array<string>(categories.length);
           for (let i = 0; i < categories.length; i++) {
             bs[i] = categories[i].score;
             names[i] = categories[i].categoryName ?? "";
           }
-          batch.push({ t, bs, names });
+          // Emit immediate live sample for real-time avatar animation & UI
+          post({ type: "live_sample", bs, faceDetected: true });
 
-          const now = performance.now();
-          if (now - lastStatsAt >= STATS_INTERVAL_MS) {
-            const fps = ((inferred - 0) * 1000) / Math.max(now - lastStatsAt, 1);
-            post({ type: "stats", fps: Math.round(fps * 10) / 10 });
-            lastStatsAt = now;
-            inferred = 0;
+          // If actively recording, accumulate into synchronized batch
+          if (t0 !== null) {
+            batch.push({ t, bs, names });
+            if (batch.length >= 32) flushBatch();
           }
-          if (now % BATCH_INTERVAL_MS < 20 || batch.length >= 32) flushBatch();
+        } else {
+          // No face detected in frame
+          post({ type: "live_sample", bs: [], faceDetected: false });
         }
+
+        const now = performance.now();
+        if (now - lastStatsAt >= STATS_INTERVAL_MS) {
+          const fps = (inferred * 1000) / Math.max(now - lastStatsAt, 1);
+          post({ type: "stats", fps: Math.round(fps * 10) / 10 });
+          lastStatsAt = now;
+          inferred = 0;
+        }
+        if (t0 !== null && now % BATCH_INTERVAL_MS < 20) flushBatch();
       } catch (err: unknown) {
         bitmap.close();
         post({ type: "error", message: String((err as Error)?.message ?? err) });
