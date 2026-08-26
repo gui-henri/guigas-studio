@@ -10,7 +10,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file app/studio/v1/events.proto.
  */
 export const file_app_studio_v1_events: GenFile = /*@__PURE__*/
-  fileDesc("ChphcHAvc3R1ZGlvL3YxL2V2ZW50cy5wcm90bxINYXBwLnN0dWRpby52MSJcChJWaWRlb1N0YXR1c0NoYW5nZWQSEAoIdmlkZW9faWQYASABKAkSDAoEc2x1ZxgCIAEoCRITCgtmcm9tX3N0YXR1cxgDIAEoCRIRCgl0b19zdGF0dXMYBCABKAkiQAoPU2NyaXB0VmFsaWRhdGVkEhAKCHZpZGVvX2lkGAEgASgJEgwKBHNsdWcYAiABKAkSDQoFdmFsaWQYAyABKAgiIAoQV2F0Y2hlclBvc3RGb3VuZBIMCgRzbHVnGAEgASgJItQBCgtTdHVkaW9FdmVudBJBChR2aWRlb19zdGF0dXNfY2hhbmdlZBgBIAEoCzIhLmFwcC5zdHVkaW8udjEuVmlkZW9TdGF0dXNDaGFuZ2VkSAASOgoQc2NyaXB0X3ZhbGlkYXRlZBgCIAEoCzIeLmFwcC5zdHVkaW8udjEuU2NyaXB0VmFsaWRhdGVkSAASPQoSd2F0Y2hlcl9wb3N0X2ZvdW5kGAMgASgLMh8uYXBwLnN0dWRpby52MS5XYXRjaGVyUG9zdEZvdW5kSABCBwoFZXZlbnRCR1pFZ2l0aHViLmNvbS9ndWktaGVucmkvZ3VpZ2FzLXN0dWRpby9iYWNrZW5kL2dlbi9hcHAvc3R1ZGlvL3YxO3N0dWRpb3YxYgZwcm90bzM");
+  fileDesc("ChphcHAvc3R1ZGlvL3YxL2V2ZW50cy5wcm90bxINYXBwLnN0dWRpby52MSJcChJWaWRlb1N0YXR1c0NoYW5nZWQSEAoIdmlkZW9faWQYASABKAkSDAoEc2x1ZxgCIAEoCRITCgtmcm9tX3N0YXR1cxgDIAEoCRIRCgl0b19zdGF0dXMYBCABKAkiQAoPU2NyaXB0VmFsaWRhdGVkEhAKCHZpZGVvX2lkGAEgASgJEgwKBHNsdWcYAiABKAkSDQoFdmFsaWQYAyABKAgiIAoQV2F0Y2hlclBvc3RGb3VuZBIMCgRzbHVnGAEgASgJIkAKD1NjZW5lc1ZhbGlkYXRlZBIQCgh2aWRlb19pZBgBIAEoCRIMCgRzbHVnGAIgASgJEg0KBXZhbGlkGAMgASgIIpACCgtTdHVkaW9FdmVudBJBChR2aWRlb19zdGF0dXNfY2hhbmdlZBgBIAEoCzIhLmFwcC5zdHVkaW8udjEuVmlkZW9TdGF0dXNDaGFuZ2VkSAASOgoQc2NyaXB0X3ZhbGlkYXRlZBgCIAEoCzIeLmFwcC5zdHVkaW8udjEuU2NyaXB0VmFsaWRhdGVkSAASPQoSd2F0Y2hlcl9wb3N0X2ZvdW5kGAMgASgLMh8uYXBwLnN0dWRpby52MS5XYXRjaGVyUG9zdEZvdW5kSAASOgoQc2NlbmVzX3ZhbGlkYXRlZBgEIAEoCzIeLmFwcC5zdHVkaW8udjEuU2NlbmVzVmFsaWRhdGVkSABCBwoFZXZlbnRCR1pFZ2l0aHViLmNvbS9ndWktaGVucmkvZ3VpZ2FzLXN0dWRpby9iYWNrZW5kL2dlbi9hcHAvc3R1ZGlvL3YxO3N0dWRpb3YxYgZwcm90bzM");
 
 /**
  * VideoStatusChanged is emitted whenever a video moves through the machine.
@@ -95,6 +95,36 @@ export const WatcherPostFoundSchema: GenMessage<WatcherPostFound> = /*@__PURE__*
   messageDesc(file_app_studio_v1_events, 2);
 
 /**
+ * ScenesValidated is emitted after scene grammar validation (valid or not).
+ * Rejected carries the workspace path of .validation-latest.json.
+ *
+ * @generated from message app.studio.v1.ScenesValidated
+ */
+export type ScenesValidated = Message<"app.studio.v1.ScenesValidated"> & {
+  /**
+   * @generated from field: string video_id = 1;
+   */
+  videoId: string;
+
+  /**
+   * @generated from field: string slug = 2;
+   */
+  slug: string;
+
+  /**
+   * @generated from field: bool valid = 3;
+   */
+  valid: boolean;
+};
+
+/**
+ * Describes the message app.studio.v1.ScenesValidated.
+ * Use `create(ScenesValidatedSchema)` to create a new message.
+ */
+export const ScenesValidatedSchema: GenMessage<ScenesValidated> = /*@__PURE__*/
+  messageDesc(file_app_studio_v1_events, 3);
+
+/**
  * StudioEvent is the typed envelope shared Go↔TS over SSE (protojson).
  *
  * @generated from message app.studio.v1.StudioEvent
@@ -121,6 +151,12 @@ export type StudioEvent = Message<"app.studio.v1.StudioEvent"> & {
      */
     value: WatcherPostFound;
     case: "watcherPostFound";
+  } | {
+    /**
+     * @generated from field: app.studio.v1.ScenesValidated scenes_validated = 4;
+     */
+    value: ScenesValidated;
+    case: "scenesValidated";
   } | { case: undefined; value?: undefined };
 };
 
@@ -129,5 +165,5 @@ export type StudioEvent = Message<"app.studio.v1.StudioEvent"> & {
  * Use `create(StudioEventSchema)` to create a new message.
  */
 export const StudioEventSchema: GenMessage<StudioEvent> = /*@__PURE__*/
-  messageDesc(file_app_studio_v1_events, 3);
+  messageDesc(file_app_studio_v1_events, 4);
 

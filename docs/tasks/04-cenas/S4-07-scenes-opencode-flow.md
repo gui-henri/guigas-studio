@@ -5,7 +5,7 @@ sprint: 4
 prioridade: P0
 depende_de: [S1-03, S4-01]
 estimativa_h: 2
-status: todo
+status: done
 ---
 
 # S4-07 — Fluxo de cenas do OpenCode
@@ -55,11 +55,11 @@ a ida para `queued` é a S5-01.
 
 ## Critérios de aceite
 
-- [ ] AGENTS.md gerado contém a seção "Cenas" com os 7 tipos e a regra "props only"
-- [ ] Cena válida salva no workspace move o card para `scenes_review` sem intervenção manual
-- [ ] Cena inválida NÃO transiciona; relatório aponta segmento + prop + motivo
-- [ ] Evento SSE publicado nas duas ramificações (hub da S1-05)
-- [ ] Transição passa pelo módulo de estados com unit test (nunca inline)
+- [x] AGENTS.md gerado contém a seção "Cenas" com os 7 tipos, regra props-only, exemplo mínimo e o ciclo de leitura do .validation-latest.json
+- [x] Cena válida salva no workspace move o card para `scenes_review` sem intervenção (teste de integração scenes-ok)
+- [x] Cena inválida NÃO transiciona; relatório aponta segmento+prop+motivo (hook / props.label / required — testado)
+- [x] Evento SSE publicado nas duas ramificações (ScenesValidated{valid} novo oneof no events.proto; hub publica global+por-vídeo)
+- [x] Transição passa pelo módulo videostate (aresta scenes_pending→scenes_review já coberta pelos unit tests da S0-15); observer nunca transiciona inline
 
 ## Verificação
 
@@ -71,6 +71,16 @@ npm run test -w remotion-kit -- src/scenes
 
 ## Notas
 
+## Notas
+
+- O gerador `scenes:schema` agora escreve TAMBÉM o schema embutido do Go
+  (`backend/internal/artifacts/schemas/scene_props.schema.json`) — fonte única real.
+- Validação por-branch no Go: compila um subschema por `type` a partir do anyOf da
+  union para eliminar ruído de discriminação; erros required/additionalProperties são
+  expandidos para paths exatos (`props.label`, `theme` → unrecognized prop) usando os
+  ErrorKind tipados do santhosh-tekuri v6.
+- Aresta órfã de flow_diagram replicada em Go (`flowEdgeIssuesFor`), espelhando
+  flowEdgeIssues do Zod.
 - Validar JSON Schema no Go (biblioteca de JSON Schema), NÃO portar Zod — mesmo padrão
   da S1-02/D-01. Uma única fonte: o schema exportado pela S4-01.
 - Escritas atômicas do OpenCode (rename) podem escapar do fsnotify: se a S1-03 não tiver

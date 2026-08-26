@@ -25,6 +25,7 @@ renders/
 *.mp4
 *.mkv
 *.webm
+.validation-latest.json
 `)
 )
 

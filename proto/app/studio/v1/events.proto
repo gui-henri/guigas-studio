@@ -24,11 +24,20 @@ message WatcherPostFound {
   string slug = 1;
 }
 
+// ScenesValidated is emitted after scene grammar validation (valid or not).
+// Rejected carries the workspace path of .validation-latest.json.
+message ScenesValidated {
+  string video_id = 1;
+  string slug = 2;
+  bool valid = 3;
+}
+
 // StudioEvent is the typed envelope shared Go↔TS over SSE (protojson).
 message StudioEvent {
   oneof event {
     VideoStatusChanged video_status_changed = 1;
     ScriptValidated script_validated = 2;
     WatcherPostFound watcher_post_found = 3;
+    ScenesValidated scenes_validated = 4;
   }
 }

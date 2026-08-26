@@ -11,6 +11,7 @@ import (
 
 	"github.com/fsnotify/fsnotify"
 
+	studiov1 "github.com/gui-henri/guigas-studio/backend/gen/app/studio/v1"
 	sqlc "github.com/gui-henri/guigas-studio/backend/internal/database/sqlc"
 	"github.com/gui-henri/guigas-studio/backend/internal/domain/videostate"
 )
@@ -160,7 +161,7 @@ func (o *Observer) ProcessScriptPath(ctx context.Context, scriptPath string) {
 		return
 	}
 
-	_, vErrors := ValidateScript(data)
+	script, vErrors := ValidateScript(data)
 	video, dbErr := o.queries.GetVideoBySlug(ctx, slug)
 	if dbErr != nil {
 		o.logger.Warn("artifacts.video_not_found",
@@ -188,6 +189,13 @@ func (o *Observer) ProcessScriptPath(ctx context.Context, scriptPath string) {
 			slog.Any("errors", vErrors),
 		)
 		return // status stays script_pending
+	}
+
+	// Scene grammar gate (S4-07): only evaluated while scenes_pending —
+	// earlier states still owe a recording; later ones keep their status.
+	if script != nil && videostate.State(video.Status) == videostate.StateScenesPending {
+		o.processScenes(ctx, scriptPath, video, script)
+		return
 	}
 
 	from := videostate.State(video.Status)
@@ -252,4 +260,59 @@ func marshalParseErrors(errs []error) []byte {
 		return []byte(`["failed to marshal errors"]`)
 	}
 	return b
+}
+
+
+// processScenes validates segment scenes and moves scenes_pending videos to
+// scenes_review. Rejections persist .validation-latest.json for the agent
+// loop and never transition the card (D-14).
+func (o *Observer) processScenes(
+	ctx context.Context,
+	scriptPath string,
+	video sqlc.Video,
+	script *studiov1.StudioScript,
+) {
+	videoID := video.ID.String()
+	issues := ValidateScenes(script)
+	workspaceRoot := filepath.Dir(scriptPath)
+
+	if err := WriteSceneValidationReport(workspaceRoot, len(issues) == 0, issues); err != nil {
+		o.logger.Warn("artifacts.scene_report_failed",
+			slog.String("slug", video.Slug), slog.Any("error", err))
+	}
+
+	if len(issues) > 0 {
+		o.logger.Warn("artifacts.scenes_invalid",
+			slog.String("video_id", videoID),
+			slog.Any("issues", issues),
+		)
+		o.publisher.PublishScenesValidated(videoID, video.Slug, false)
+		return
+	}
+
+	if err := videostate.Transition(
+		videostate.State(video.Status), videostate.StateScenesReview,
+	); err != nil {
+		o.logger.Debug("artifacts.scenes_transition_skipped",
+			slog.String("video_id", videoID), slog.Any("reason", err))
+		return
+	}
+	if err := o.queries.UpdateVideoStatus(ctx, sqlc.UpdateVideoStatusParams{
+		ID:     video.ID,
+		Status: string(videostate.StateScenesReview),
+	}); err != nil {
+		o.logger.Error("artifacts.status_update_failed",
+			slog.String("video_id", videoID), slog.Any("error", err))
+		return
+	}
+	if err := o.queries.InsertStatusChange(ctx, sqlc.InsertStatusChangeParams{
+		VideoID: video.ID,
+		Status:  string(videostate.StateScenesReview),
+		Reason:  fmt.Sprintf("scenes validated (%s)", video.Slug),
+		Actor:   "opencode",
+	}); err != nil {
+		o.logger.Warn("artifacts.history_insert_failed",
+			slog.String("video_id", videoID), slog.Any("error", err))
+	}
+	o.publisher.PublishScenesValidated(videoID, video.Slug, true)
 }

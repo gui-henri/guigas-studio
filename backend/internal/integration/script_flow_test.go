@@ -77,6 +77,8 @@ func (r *recordingPublisher) PublishScriptValidated(videoID, slug string) {
 	r.events = append(r.events, slug)
 }
 
+func (r *recordingPublisher) PublishScenesValidated(videoID, slug string, valid bool) {}
+
 func (r *recordingPublisher) count() int {
 	r.mu.Lock()
 	defer r.mu.Unlock()

@@ -61,8 +61,21 @@ func TestDebouncerIndependentPaths(t *testing.T) {
 
 // fakePublisher records PublishScriptValidated calls.
 type fakePublisher struct {
-	mu     sync.Mutex
-	called []string // "videoID|slug"
+	mu          sync.Mutex
+	called      []string // "videoID|slug"
+	scenesCalls []scenesCall
+}
+
+func (f *fakePublisher) PublishScenesValidated(videoID, slug string, valid bool) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.scenesCalls = append(f.scenesCalls, scenesCall{videoID: videoID, slug: slug, valid: valid})
+}
+
+type scenesCall struct {
+	videoID string
+	slug    string
+	valid   bool
 }
 
 func (f *fakePublisher) PublishScriptValidated(videoID, slug string) {

@@ -196,6 +196,68 @@ func (x *WatcherPostFound) GetSlug() string {
 	return ""
 }
 
+// ScenesValidated is emitted after scene grammar validation (valid or not).
+// Rejected carries the workspace path of .validation-latest.json.
+type ScenesValidated struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	VideoId       string                 `protobuf:"bytes,1,opt,name=video_id,json=videoId,proto3" json:"video_id,omitempty"`
+	Slug          string                 `protobuf:"bytes,2,opt,name=slug,proto3" json:"slug,omitempty"`
+	Valid         bool                   `protobuf:"varint,3,opt,name=valid,proto3" json:"valid,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ScenesValidated) Reset() {
+	*x = ScenesValidated{}
+	mi := &file_app_studio_v1_events_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ScenesValidated) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ScenesValidated) ProtoMessage() {}
+
+func (x *ScenesValidated) ProtoReflect() protoreflect.Message {
+	mi := &file_app_studio_v1_events_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ScenesValidated.ProtoReflect.Descriptor instead.
+func (*ScenesValidated) Descriptor() ([]byte, []int) {
+	return file_app_studio_v1_events_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *ScenesValidated) GetVideoId() string {
+	if x != nil {
+		return x.VideoId
+	}
+	return ""
+}
+
+func (x *ScenesValidated) GetSlug() string {
+	if x != nil {
+		return x.Slug
+	}
+	return ""
+}
+
+func (x *ScenesValidated) GetValid() bool {
+	if x != nil {
+		return x.Valid
+	}
+	return false
+}
+
 // StudioEvent is the typed envelope shared Go↔TS over SSE (protojson).
 type StudioEvent struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
@@ -204,6 +266,7 @@ type StudioEvent struct {
 	//	*StudioEvent_VideoStatusChanged
 	//	*StudioEvent_ScriptValidated
 	//	*StudioEvent_WatcherPostFound
+	//	*StudioEvent_ScenesValidated
 	Event         isStudioEvent_Event `protobuf_oneof:"event"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -211,7 +274,7 @@ type StudioEvent struct {
 
 func (x *StudioEvent) Reset() {
 	*x = StudioEvent{}
-	mi := &file_app_studio_v1_events_proto_msgTypes[3]
+	mi := &file_app_studio_v1_events_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -223,7 +286,7 @@ func (x *StudioEvent) String() string {
 func (*StudioEvent) ProtoMessage() {}
 
 func (x *StudioEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_app_studio_v1_events_proto_msgTypes[3]
+	mi := &file_app_studio_v1_events_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -236,7 +299,7 @@ func (x *StudioEvent) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StudioEvent.ProtoReflect.Descriptor instead.
 func (*StudioEvent) Descriptor() ([]byte, []int) {
-	return file_app_studio_v1_events_proto_rawDescGZIP(), []int{3}
+	return file_app_studio_v1_events_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *StudioEvent) GetEvent() isStudioEvent_Event {
@@ -273,6 +336,15 @@ func (x *StudioEvent) GetWatcherPostFound() *WatcherPostFound {
 	return nil
 }
 
+func (x *StudioEvent) GetScenesValidated() *ScenesValidated {
+	if x != nil {
+		if x, ok := x.Event.(*StudioEvent_ScenesValidated); ok {
+			return x.ScenesValidated
+		}
+	}
+	return nil
+}
+
 type isStudioEvent_Event interface {
 	isStudioEvent_Event()
 }
@@ -289,11 +361,17 @@ type StudioEvent_WatcherPostFound struct {
 	WatcherPostFound *WatcherPostFound `protobuf:"bytes,3,opt,name=watcher_post_found,json=watcherPostFound,proto3,oneof"`
 }
 
+type StudioEvent_ScenesValidated struct {
+	ScenesValidated *ScenesValidated `protobuf:"bytes,4,opt,name=scenes_validated,json=scenesValidated,proto3,oneof"`
+}
+
 func (*StudioEvent_VideoStatusChanged) isStudioEvent_Event() {}
 
 func (*StudioEvent_ScriptValidated) isStudioEvent_Event() {}
 
 func (*StudioEvent_WatcherPostFound) isStudioEvent_Event() {}
+
+func (*StudioEvent_ScenesValidated) isStudioEvent_Event() {}
 
 var File_app_studio_v1_events_proto protoreflect.FileDescriptor
 
@@ -311,11 +389,16 @@ const file_app_studio_v1_events_proto_rawDesc = "" +
 	"\x04slug\x18\x02 \x01(\tR\x04slug\x12\x14\n" +
 	"\x05valid\x18\x03 \x01(\bR\x05valid\"&\n" +
 	"\x10WatcherPostFound\x12\x12\n" +
-	"\x04slug\x18\x01 \x01(\tR\x04slug\"\x8b\x02\n" +
+	"\x04slug\x18\x01 \x01(\tR\x04slug\"V\n" +
+	"\x0fScenesValidated\x12\x19\n" +
+	"\bvideo_id\x18\x01 \x01(\tR\avideoId\x12\x12\n" +
+	"\x04slug\x18\x02 \x01(\tR\x04slug\x12\x14\n" +
+	"\x05valid\x18\x03 \x01(\bR\x05valid\"\xd8\x02\n" +
 	"\vStudioEvent\x12U\n" +
 	"\x14video_status_changed\x18\x01 \x01(\v2!.app.studio.v1.VideoStatusChangedH\x00R\x12videoStatusChanged\x12K\n" +
 	"\x10script_validated\x18\x02 \x01(\v2\x1e.app.studio.v1.ScriptValidatedH\x00R\x0fscriptValidated\x12O\n" +
-	"\x12watcher_post_found\x18\x03 \x01(\v2\x1f.app.studio.v1.WatcherPostFoundH\x00R\x10watcherPostFoundB\a\n" +
+	"\x12watcher_post_found\x18\x03 \x01(\v2\x1f.app.studio.v1.WatcherPostFoundH\x00R\x10watcherPostFound\x12K\n" +
+	"\x10scenes_validated\x18\x04 \x01(\v2\x1e.app.studio.v1.ScenesValidatedH\x00R\x0fscenesValidatedB\a\n" +
 	"\x05eventBGZEgithub.com/gui-henri/guigas-studio/backend/gen/app/studio/v1;studiov1b\x06proto3"
 
 var (
@@ -330,22 +413,24 @@ func file_app_studio_v1_events_proto_rawDescGZIP() []byte {
 	return file_app_studio_v1_events_proto_rawDescData
 }
 
-var file_app_studio_v1_events_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_app_studio_v1_events_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_app_studio_v1_events_proto_goTypes = []any{
 	(*VideoStatusChanged)(nil), // 0: app.studio.v1.VideoStatusChanged
 	(*ScriptValidated)(nil),    // 1: app.studio.v1.ScriptValidated
 	(*WatcherPostFound)(nil),   // 2: app.studio.v1.WatcherPostFound
-	(*StudioEvent)(nil),        // 3: app.studio.v1.StudioEvent
+	(*ScenesValidated)(nil),    // 3: app.studio.v1.ScenesValidated
+	(*StudioEvent)(nil),        // 4: app.studio.v1.StudioEvent
 }
 var file_app_studio_v1_events_proto_depIdxs = []int32{
 	0, // 0: app.studio.v1.StudioEvent.video_status_changed:type_name -> app.studio.v1.VideoStatusChanged
 	1, // 1: app.studio.v1.StudioEvent.script_validated:type_name -> app.studio.v1.ScriptValidated
 	2, // 2: app.studio.v1.StudioEvent.watcher_post_found:type_name -> app.studio.v1.WatcherPostFound
-	3, // [3:3] is the sub-list for method output_type
-	3, // [3:3] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	3, // 3: app.studio.v1.StudioEvent.scenes_validated:type_name -> app.studio.v1.ScenesValidated
+	4, // [4:4] is the sub-list for method output_type
+	4, // [4:4] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_app_studio_v1_events_proto_init() }
@@ -353,10 +438,11 @@ func file_app_studio_v1_events_proto_init() {
 	if File_app_studio_v1_events_proto != nil {
 		return
 	}
-	file_app_studio_v1_events_proto_msgTypes[3].OneofWrappers = []any{
+	file_app_studio_v1_events_proto_msgTypes[4].OneofWrappers = []any{
 		(*StudioEvent_VideoStatusChanged)(nil),
 		(*StudioEvent_ScriptValidated)(nil),
 		(*StudioEvent_WatcherPostFound)(nil),
+		(*StudioEvent_ScenesValidated)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -364,7 +450,7 @@ func file_app_studio_v1_events_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_app_studio_v1_events_proto_rawDesc), len(file_app_studio_v1_events_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

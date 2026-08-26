@@ -35,9 +35,24 @@ function migrateExclusiveMinimum(node) {
 }
 migrateExclusiveMinimum(jsonSchema);
 
+const rendered = JSON.stringify(jsonSchema, null, 2) + "\n";
+
 fs.mkdirSync(new URL("../schema/", import.meta.url), { recursive: true });
 fs.writeFileSync(
   new URL("../schema/scene-props.schema.json", import.meta.url),
-  JSON.stringify(jsonSchema, null, 2) + "\n"
+  rendered
 );
-console.log("wrote schema/scene-props.schema.json");
+
+// Single source of truth: the Go observer embeds the same file.
+fs.mkdirSync(new URL("../../backend/internal/artifacts/schemas/", import.meta.url), {
+  recursive: true,
+});
+fs.writeFileSync(
+  new URL(
+    "../../backend/internal/artifacts/schemas/scene_props.schema.json",
+    import.meta.url
+  ),
+  rendered
+);
+
+console.log("wrote schema/scene-props.schema.json + backend embedded copy");
