@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strings"
 	"syscall"
 	"time"
 
@@ -35,8 +36,12 @@ func newHandler(cfg config.Config, db *database.DB, appHub *events.Hub, watchers
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
 		w.WriteHeader(http.StatusOK)
-		_ = json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
+		_ = json.NewEncoder(w).Encode(map[string]string{
+			"status":  "ok",
+			"version": "v1.1-rss-sync",
+		})
 	})
 
 	interceptors := []connect.Interceptor{
@@ -110,8 +115,9 @@ func spaHandler(staticDir string) http.Handler {
 	fileServer := http.FileServer(fs)
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		cleanPath := filepath.Clean(r.URL.Path)
-		if cleanPath == "/" {
+		cleanPath := filepath.Clean(filepath.ToSlash(r.URL.Path))
+		if cleanPath == "/" || cleanPath == "" || cleanPath == "." {
+			w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
 			http.ServeFile(w, r, filepath.Join(staticDir, "index.html"))
 			return
 		}
@@ -121,11 +127,15 @@ func spaHandler(staticDir string) http.Handler {
 			defer f.Close()
 			stat, err := f.Stat()
 			if err == nil && !stat.IsDir() {
+				if strings.HasPrefix(cleanPath, "/assets/") {
+					w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+				}
 				fileServer.ServeHTTP(w, r)
 				return
 			}
 		}
 
+		w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
 		http.ServeFile(w, r, filepath.Join(staticDir, "index.html"))
 	})
 }
