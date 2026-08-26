@@ -4,8 +4,7 @@ titulo: "Stills de snapshot dos componentes (regressão visual)"
 sprint: 4
 prioridade: P2
 depende_de: [S4-02, S4-03, S4-04]
-estimativa_h: 2
-status: todo
+estimativa_h: 2status: done
 ---
 
 # S4-09 — Stills de snapshot dos componentes
@@ -51,11 +50,11 @@ de fonte diverge das baselines.
 
 ## Critérios de aceite
 
-- [ ] `npm run snapshots -w remotion-kit` verde com baselines atuais
-- [ ] Mudança proposital de um token quebra o snapshot do(s) componente(s) afetado(s)
-- [ ] Tolerância ajustável sem tocar em código (`SNAPSHOT_TOLERANCE`)
-- [ ] Baselines commitadas e entry de snapshots isolado do preview
-- [ ] Catálogo exibe print real para os 7 componentes
+- [x] `npm run snapshots -w remotion-kit` verde com baselines atuais (7/7, 0.00%)
+- [x] Mudança proposital de token quebra os snapshots afetados (accent→verde: flow-diagram 0.61% e big-number 0.75% falham; exit 1)
+- [x] Tolerância ajustável via `SNAPSHOT_TOLERANCE` (default 0.5% — 10% inicial não pegava regressões de cor)
+- [x] Baselines commitadas (`__snapshots__/baseline/`, 960×540) e entry isolado (src/snapshots/index.ts, ids sem underscore por exigência do Remotion)
+- [x] Catálogo exibe print real para os 7 componentes (placeholders substituídos)
 
 ## Verificação
 
@@ -67,6 +66,11 @@ ls remotion-kit/__snapshots__/baseline | wc -l   # ≥ 7
 
 ## Notas
 
+## Notas
+
+- Tolerância default calibrada de 0.1 → 0.005 após teste: com 10% a mudança do token
+  accent passava despercebida. Antialiasing entre renders da MESMA máquina é ~0%.
+- Composition ids usam hífen (Remotion rejeita underscore).
 - Antialiasing varia entre SO/GPU/driver: por isso comparação com tolerância e execução
   SEMPRE na mesma máquina que gerou as baselines (local, D-13). Se mudar de máquina,
   regenerar baselines uma vez com `snapshots:update` e committar explicando o motivo.

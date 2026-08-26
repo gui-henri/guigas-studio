@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "devDependencies": {
+    "pixelmatch": "^6.0.0",
     "pngjs": "^7.0.0",
     "remotion": "4.0.517",
     "tsx": "^4.23.12",
@@ -16,7 +17,9 @@
     "scenes:schema": "tsx tools/generate-scene-schema.mjs",
     "still:avatar": "node tools/render-stills.mjs",
     "smoke:render": "node tools/smoke-render.mjs",
-    "smoke:verify": "node tools/smoke-verify.mjs"
+    "smoke:verify": "node tools/smoke-verify.mjs",
+    "snapshots": "node tools/snapshot.mjs",
+    "snapshots:update": "node tools/snapshot.mjs --update"
   },
   "peerDependencies": {
     "react": ">=18",

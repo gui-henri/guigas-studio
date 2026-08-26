@@ -34,7 +34,7 @@ Código digitado progressivamente com highlight, cursor piscando.
 { "type": "code_typing", "props": { "code": "const x = 1;" } }
 ```
 
-<!-- print pendente: S4-09 -->
+![print code_typing](../../remotion-kit/__snapshots__/baseline/snap-code-typing.png)
 
 ## `diff_view`
 
@@ -54,7 +54,7 @@ Antes/depois lado a lado com linhas removidas/adicionadas destacadas.
 }
 ```
 
-<!-- print pendente: S4-09 -->
+![print diff_view](../../remotion-kit/__snapshots__/baseline/snap-diff-view.png)
 
 ## `terminal_run`
 
@@ -81,7 +81,7 @@ Cada linha: `kind` ∈ `command` (digitado char a char) \| `output` \| `success`
 }
 ```
 
-<!-- print pendente: S4-09 -->
+![print terminal_run](../../remotion-kit/__snapshots__/baseline/snap-terminal-run.png)
 
 ## `flow_diagram`
 
@@ -107,7 +107,7 @@ Aresta referenciando id inexistente = erro apontando este catálogo.
 }
 ```
 
-<!-- print pendente: S4-09 -->
+![print flow_diagram](../../remotion-kit/__snapshots__/baseline/snap-flow-diagram.png)
 
 ## `big_number`
 
@@ -123,7 +123,7 @@ Número gigante de impacto com rótulo e contexto opcional.
 { "type": "big_number", "props": { "value": "10x", "label": "mais rápido" } }
 ```
 
-<!-- print pendente: S4-09 -->
+![print big_number](../../remotion-kit/__snapshots__/baseline/snap-big-number.png)
 
 ## `timeline`
 
@@ -140,7 +140,7 @@ Linha do tempo horizontal com marcos revelados em sequência.
 }
 ```
 
-<!-- print pendente: S4-09 -->
+![print timeline](../../remotion-kit/__snapshots__/baseline/snap-timeline.png)
 
 ## `callout`
 
@@ -160,7 +160,7 @@ Caixa de destaque para avisos, armadilhas e confirmações.
 }
 ```
 
-<!-- print pendente: S4-09 -->
+![print callout](../../remotion-kit/__snapshots__/baseline/snap-callout-info.png)
 
 ---
 
