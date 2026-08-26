@@ -5,7 +5,7 @@ sprint: 5
 prioridade: P0
 depende_de: [S5-02]
 estimativa_h: 2
-status: todo
+status: done
 ---
 
 # S5-03 — Runner daemon local (Windows)
@@ -57,11 +57,11 @@ transport Connect para Node.
 
 ## Critérios de aceite
 
-- [ ] Runner ocioso polla a cada ~10 s e loga "no job" sem spam
-- [ ] Com job enfileirado: claim, heartbeat visível no PG (`heartbeat_at` atualizando)
-- [ ] `cancel_requested=true` entre stages aborta o job cooperativamente
-- [ ] Logs JSON estruturados com `job_id`/`stage` em todas as linhas relevantes
-- [ ] Roda em Windows nativo apenas com npm/node (sem WSL — D-13)
+- [x] Runner ocioso polla a cada POLL_INTERVAL_MS (default 10 s) e loga "no job" em level debug (sem spam)
+- [x] Com job enfileirado: claim + heartbeat paralelo ao trabalho via UpdateProgress keepalive (`setInterval` independente; progresso persiste no PG — migration 0009)
+- [x] `cancel_requested=true` entre stages aborta cooperativamente (GetJob antes de cada stage → JobCancelled, sem marcar falha)
+- [x] Logs JSON estruturados pino com child logger {job_id}/{stage}
+- [x] Roda com npm/node nativo (tsx; README cobre PowerShell + schtasks auto-start opcional)
 
 ## Verificação
 
@@ -73,6 +73,11 @@ npm run dev -w runner   # terminal 1 (com server dev no ar)
 
 ## Notas
 
+## Notas
+
+- buf.gen.yaml agora gera stubs TS também em runner/src/gen.
+- Falha de stage → FailJob(retryable=true) SEM retry local (fila da S5-01 é dona do
+  backoff); SIGINT para o polling e deixa o job claimed até a expiração do heartbeat.
 - Heartbeat enquanto um stage longo roda precisa ser paralelo ao trabalho
   (`setInterval` independente), senão renders de minutos parecem mortos pro server.
 - Não implementar retry local: FailJob/retry é responsabilidade da fila (S5-01).
