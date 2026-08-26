@@ -26,7 +26,8 @@ func TestAllMatchesCanonicalOrder(t *testing.T) {
 func TestTransitionsExhaustive(t *testing.T) {
 	// Task-mandated reverse edges (each added by its own task, never inline):
 	reverseEdges := map[State]map[State]bool{
-		StateScriptReview: {StateScriptPending: true}, // RejectScript (S1-04)
+		StateScriptReview: {StateScriptPending: true},  // RejectScript (S1-04)
+		StateFinalReview:  {StateQueued: true},         // RequestRerender (S5-07)
 	}
 
 	legal := make(map[[2]State]bool)
@@ -132,5 +133,11 @@ func TestProtoSync(t *testing.T) {
 	}
 	if len(protoStates) != len(All()) {
 		t.Errorf("proto has %d values, domain has %d — drift detected", len(protoStates), len(All()))
+	}
+}
+
+func TestFinalReviewToQueuedRerender(t *testing.T) {
+	if err := Transition(StateFinalReview, StateQueued); err != nil {
+		t.Fatalf("re-render edge missing: %v", err)
 	}
 }

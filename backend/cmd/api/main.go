@@ -64,6 +64,9 @@ func newHandler(cfg config.Config, db *database.DB, appHub *events.Hub) http.Han
 	mux.Handle("GET /api/v1/videos/{videoID}/artifacts/{path...}", artifactDownload)
 	filesHandler := artifacts.NewFilesHandler(cfg.DataDir, cfg.Auth.JWTSecret)
 	mux.Handle("GET /api/v1/videos/{videoSlug}/files/{path...}", filesHandler)
+	rendersUpload := artifacts.NewRendersUploadHandler(cfg.DataDir, cfg.Auth.JWTSecret, cfg.Auth.RunnerToken)
+	mux.Handle("PUT /api/v1/videos/{videoSlug}/renders/{file}/chunks", rendersUpload)
+	mux.Handle("POST /api/v1/videos/{slug}/renders/{file}/finalize", rendersUpload)
 
 	takeUpload.SetAfterUpsert(func(videoSlug string) {
 		go func() {

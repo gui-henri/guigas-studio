@@ -458,6 +458,111 @@ func mustJSON(v any) []byte {
 	return raw
 }
 
+// RequestRerender returns a final_review video to queued and re-enqueues the
+// render job with payload.rerender=true (S5-07).
+func (s *VideoService) RequestRerender(
+	ctx context.Context,
+	req *connect.Request[studiov1.RequestRerenderRequest],
+) (*connect.Response[studiov1.RequestRerenderResponse], error) {
+	if s.pool == nil {
+		return nil, connect.NewError(connect.CodeInternal, errors.New("service not configured for transactions"))
+	}
+	videoID, err := parseUUID(req.Msg.GetVideoId())
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("invalid video id"))
+	}
+	video, err := s.queries.GetVideo(ctx, videoID)
+	if err != nil {
+		if errors.Is(err, errNoRows) {
+			return nil, connect.NewError(connect.CodeNotFound, errors.New("video not found"))
+		}
+		return nil, connect.NewError(connect.CodeInternal, errors.New("failed to load video"))
+	}
+	from := videostate.State(video.Status)
+	if from != videostate.StateFinalReview {
+		return nil, connect.NewError(connect.CodeFailedPrecondition,
+			fmt.Errorf("video is %s; re-render requires final_review", from))
+	}
+
+	scriptPath := filepath.Join(s.workspaceRoot(video.Slug), artifacts.ScriptFileName)
+	rawScript, readErr := os.ReadFile(scriptPath)
+	if readErr != nil {
+		return nil, connect.NewError(connect.CodeFailedPrecondition, errors.New("script.json missing"))
+	}
+	payload := JobPayload{
+		Slug:           video.Slug,
+		ExpectedShorts: CountShortMarkers(rawScript),
+		InputManifest:  BuildJobManifest(s.dataDir, video.Slug),
+		Rerender:       true,
+	}
+	payloadRaw, _ := json.Marshal(payload)
+
+	actor := auth.ActorFromContext(ctx)
+	tx, txErr := s.pool.Begin(ctx)
+	if txErr != nil {
+		return nil, connect.NewError(connect.CodeInternal, errors.New("transaction failed"))
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+	q := s.queries.WithTx(tx)
+
+	if err := videostate.Transition(from, videostate.StateQueued); err != nil {
+		return nil, connect.NewError(connect.CodeFailedPrecondition, err)
+	}
+	if err := q.UpdateVideoStatus(ctx, sqlc.UpdateVideoStatusParams{ID: video.ID, Status: string(videostate.StateQueued)}); err != nil {
+		return nil, connect.NewError(connect.CodeInternal, errors.New("failed to update status"))
+	}
+	if err := q.InsertStatusChange(ctx, sqlc.InsertStatusChangeParams{
+		VideoID: video.ID, Status: string(videostate.StateQueued),
+		Reason: "re-render requested", Actor: actor,
+	}); err != nil {
+		slog.Warn("history insert failed", "error", err)
+	}
+	if _, err := q.EnqueueJob(ctx, sqlc.EnqueueJobParams{VideoID: video.ID, Type: JobTypeRenderLongShorts, Payload: payloadRaw}); err != nil {
+		return nil, connect.NewError(connect.CodeInternal, errors.New("failed to enqueue job"))
+	}
+	if err := tx.Commit(ctx); err != nil {
+		return nil, connect.NewError(connect.CodeInternal, errors.New("transaction failed"))
+	}
+	s.publishStatusChanged(video.ID.String(), video.Slug, string(from), string(videostate.StateQueued))
+
+	updated, gErr := s.queries.GetVideo(ctx, video.ID)
+	if gErr != nil {
+		return nil, connect.NewError(connect.CodeInternal, errors.New("failed to reload video"))
+	}
+	return connect.NewResponse(&studiov1.RequestRerenderResponse{Video: videoToProto(&updated)}), nil
+}
+
+// ApproveFinalCut records the human approval of the cut; release packaging is
+// S5-09/S5-11 — this stub exists so the UI flow is complete end to end.
+func (s *VideoService) ApproveFinalCut(
+	ctx context.Context,
+	req *connect.Request[studiov1.ApproveFinalCutRequest],
+) (*connect.Response[studiov1.ApproveFinalCutResponse], error) {
+	videoID, err := parseUUID(req.Msg.GetVideoId())
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("invalid video id"))
+	}
+	video, err := s.queries.GetVideo(ctx, videoID)
+	if err != nil {
+		if errors.Is(err, errNoRows) {
+			return nil, connect.NewError(connect.CodeNotFound, errors.New("video not found"))
+		}
+		return nil, connect.NewError(connect.CodeInternal, errors.New("failed to load video"))
+	}
+	if videostate.State(video.Status) != videostate.StateFinalReview {
+		return nil, connect.NewError(connect.CodeFailedPrecondition,
+			errors.New("final cut approval requires final_review"))
+	}
+	actor := auth.ActorFromContext(ctx)
+	if err := s.queries.InsertStatusChange(ctx, sqlc.InsertStatusChangeParams{
+		VideoID: video.ID, Status: string(videostate.StateFinalReview),
+		Reason: "final cut approved", Actor: actor,
+	}); err != nil {
+		return nil, connect.NewError(connect.CodeInternal, errors.New("failed to record approval"))
+	}
+	return connect.NewResponse(&studiov1.ApproveFinalCutResponse{Video: videoToProto(&video)}), nil
+}
+
 // videoForReview loads a video by id; nil (with error already handled) when absent.
 func (s *VideoService) videoForReview(ctx context.Context, rawID string) (*sqlc.Video, func()) {
 	id, err := parseUUID(rawID)

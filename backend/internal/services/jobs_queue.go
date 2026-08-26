@@ -27,9 +27,10 @@ var errNoJob = pgx.ErrNoRows
 // the allow-listed files (path/sha256/bytes) computed at enqueue time so the
 // runner verifies checksums while downloading (S5-04).
 type JobPayload struct {
-	Slug           string                            `json:"slug"`
-	ExpectedShorts int                               `json:"expected_shorts"`
-	InputManifest  []FileManifestEntry               `json:"input_manifest,omitempty"`
+	Slug           string              `json:"slug"`
+	ExpectedShorts int                 `json:"expected_shorts"`
+	InputManifest  []FileManifestEntry `json:"input_manifest,omitempty"`
+	Rerender       bool                `json:"rerender,omitempty"`
 }
 
 var shortMarkerRe = regexp.MustCompile(`\[SHORT#(\d+)\]`)

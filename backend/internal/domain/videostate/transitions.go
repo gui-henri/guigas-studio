@@ -27,7 +27,7 @@ var transitions = map[State][]State{
 	StateScenesReview:   {StateQueued, StateBlocked},
 	StateQueued:         {StateRendering, StateBlocked},
 	StateRendering:      {StateFinalReview, StateBlocked},
-	StateFinalReview:    {StateReleased, StateBlocked},
+	StateFinalReview:    {StateReleased, StateQueued, StateBlocked}, // queued = RequestRerender (S5-07)
 	StateReleased:       {StateBlocked},
 	StateBlocked:        All(),
 }

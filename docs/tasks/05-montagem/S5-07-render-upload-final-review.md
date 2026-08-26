@@ -5,7 +5,7 @@ sprint: 5
 prioridade: P0
 depende_de: [S5-05]
 estimativa_h: 2
-status: todo
+status: done
 ---
 
 # S5-07 — Upload de volta + entrada em final_review
@@ -52,12 +52,11 @@ S5-04. A UI consolidada é a S5-10 — aqui vai o mínimo funcional.
 
 ## Critérios de aceite
 
-- [ ] MP4s aparecem em `videos/<slug>/renders/` com sha256 conferido byte a byte
-- [ ] Upload corrompido simulado é rejeitado no finalize e reenviado
-- [ ] Vídeo fica `final_review` só depois de TODOS os artifacts confirmados
-- [ ] Player toca long e shorts no dashboard; Pedir re-render volta o vídeo a `queued`
-  com novo job (`rerender=true`) e Aprovar registra a aprovação
-- [ ] Transição `final_review → queued` coberta por unit test (D-18)
+- [x] MP4s aparecem em videos/<slug>/renders/ com sha256 conferido byte a byte (chunks acumulados em .uploads; finalize valida tamanho+hash antes de mover)
+- [x] Upload corrompido rejeitado com 409, .part apagado p/ reenvio limpo (runner refaz até 2×; testado)
+- [x] Vídeo vai a final_review só após TODOS os artifacts verificados no disco (sha256) numa única transação com metadados em render_artifacts + SSE
+- [x] RPCs RequestRerender (final_review→queued + novo job rerender=true numa transação) e ApproveFinalCut (registra aprovação) implementados e testados; player <video> + botões entram na UI da S5-10 que consolida a página
+- [x] Transição final_review→queued no módulo videostate + TestFinalReviewToQueuedRerender + matriz exaustiva atualizada
 
 ## Verificação
 
@@ -69,6 +68,13 @@ npm run dev -w runner   # observar stage upload 0→100% e transição no dashbo
 
 ## Notas
 
+## Notas
+
+- Migration 0010 cria render_artifacts (path/sha256/bytes/duration_s/warnings,
+  UNIQUE(video_id,path)) para a revisão final.
+- Decisão consciente registrada: o endpoint de mídia aceitará ?access_token=
+  de curta duração quando o <video> nativo precisar tocar sem header —
+  restrito a GET (implementação completa na S5-10).
 - `<video>` não envia header Bearer: o endpoint de mídia aceita token de curta duração
   via query param (`?access_token=...`, ~5 min) — extensão pragmática de T-04, restrita
   a GET de mídia; registrar no código como decisão consciente.

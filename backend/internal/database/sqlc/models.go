@@ -31,6 +31,17 @@ type Job struct {
 	ProgressStage   string             `json:"progress_stage"`
 }
 
+type RenderArtifact struct {
+	ID        uuid.UUID `json:"id"`
+	VideoID   uuid.UUID `json:"video_id"`
+	Path      string    `json:"path"`
+	Sha256    string    `json:"sha256"`
+	Bytes     int64     `json:"bytes"`
+	DurationS float64   `json:"duration_s"`
+	Warnings  []string  `json:"warnings"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
 type RssItem struct {
 	Guid    string      `json:"guid"`
 	VideoID pgtype.UUID `json:"video_id"`

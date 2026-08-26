@@ -43,3 +43,13 @@ export const listTakes = VideoService.method.listTakes;
  * @generated from rpc app.studio.v1.VideoService.ApproveScenes
  */
 export const approveScenes = VideoService.method.approveScenes;
+
+/**
+ * @generated from rpc app.studio.v1.VideoService.RequestRerender
+ */
+export const requestRerender = VideoService.method.requestRerender;
+
+/**
+ * @generated from rpc app.studio.v1.VideoService.ApproveFinalCut
+ */
+export const approveFinalCut = VideoService.method.approveFinalCut;

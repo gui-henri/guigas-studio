@@ -54,6 +54,12 @@ const (
 	// VideoServiceApproveScenesProcedure is the fully-qualified name of the VideoService's
 	// ApproveScenes RPC.
 	VideoServiceApproveScenesProcedure = "/app.studio.v1.VideoService/ApproveScenes"
+	// VideoServiceRequestRerenderProcedure is the fully-qualified name of the VideoService's
+	// RequestRerender RPC.
+	VideoServiceRequestRerenderProcedure = "/app.studio.v1.VideoService/RequestRerender"
+	// VideoServiceApproveFinalCutProcedure is the fully-qualified name of the VideoService's
+	// ApproveFinalCut RPC.
+	VideoServiceApproveFinalCutProcedure = "/app.studio.v1.VideoService/ApproveFinalCut"
 )
 
 // VideoServiceClient is a client for the app.studio.v1.VideoService service.
@@ -66,6 +72,8 @@ type VideoServiceClient interface {
 	RejectScript(context.Context, *connect.Request[v1.RejectScriptRequest]) (*connect.Response[v1.RejectScriptResponse], error)
 	ListTakes(context.Context, *connect.Request[v1.ListTakesRequest]) (*connect.Response[v1.ListTakesResponse], error)
 	ApproveScenes(context.Context, *connect.Request[v1.ApproveScenesRequest]) (*connect.Response[v1.ApproveScenesResponse], error)
+	RequestRerender(context.Context, *connect.Request[v1.RequestRerenderRequest]) (*connect.Response[v1.RequestRerenderResponse], error)
+	ApproveFinalCut(context.Context, *connect.Request[v1.ApproveFinalCutRequest]) (*connect.Response[v1.ApproveFinalCutResponse], error)
 }
 
 // NewVideoServiceClient constructs a client for the app.studio.v1.VideoService service. By default,
@@ -127,19 +135,33 @@ func NewVideoServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			connect.WithSchema(videoServiceMethods.ByName("ApproveScenes")),
 			connect.WithClientOptions(opts...),
 		),
+		requestRerender: connect.NewClient[v1.RequestRerenderRequest, v1.RequestRerenderResponse](
+			httpClient,
+			baseURL+VideoServiceRequestRerenderProcedure,
+			connect.WithSchema(videoServiceMethods.ByName("RequestRerender")),
+			connect.WithClientOptions(opts...),
+		),
+		approveFinalCut: connect.NewClient[v1.ApproveFinalCutRequest, v1.ApproveFinalCutResponse](
+			httpClient,
+			baseURL+VideoServiceApproveFinalCutProcedure,
+			connect.WithSchema(videoServiceMethods.ByName("ApproveFinalCut")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // videoServiceClient implements VideoServiceClient.
 type videoServiceClient struct {
-	listVideos    *connect.Client[v1.ListVideosRequest, v1.ListVideosResponse]
-	getVideo      *connect.Client[v1.GetVideoRequest, v1.GetVideoResponse]
-	createVideo   *connect.Client[v1.CreateVideoRequest, v1.CreateVideoResponse]
-	updateScript  *connect.Client[v1.UpdateScriptRequest, v1.UpdateScriptResponse]
-	approveScript *connect.Client[v1.ApproveScriptRequest, v1.ApproveScriptResponse]
-	rejectScript  *connect.Client[v1.RejectScriptRequest, v1.RejectScriptResponse]
-	listTakes     *connect.Client[v1.ListTakesRequest, v1.ListTakesResponse]
-	approveScenes *connect.Client[v1.ApproveScenesRequest, v1.ApproveScenesResponse]
+	listVideos      *connect.Client[v1.ListVideosRequest, v1.ListVideosResponse]
+	getVideo        *connect.Client[v1.GetVideoRequest, v1.GetVideoResponse]
+	createVideo     *connect.Client[v1.CreateVideoRequest, v1.CreateVideoResponse]
+	updateScript    *connect.Client[v1.UpdateScriptRequest, v1.UpdateScriptResponse]
+	approveScript   *connect.Client[v1.ApproveScriptRequest, v1.ApproveScriptResponse]
+	rejectScript    *connect.Client[v1.RejectScriptRequest, v1.RejectScriptResponse]
+	listTakes       *connect.Client[v1.ListTakesRequest, v1.ListTakesResponse]
+	approveScenes   *connect.Client[v1.ApproveScenesRequest, v1.ApproveScenesResponse]
+	requestRerender *connect.Client[v1.RequestRerenderRequest, v1.RequestRerenderResponse]
+	approveFinalCut *connect.Client[v1.ApproveFinalCutRequest, v1.ApproveFinalCutResponse]
 }
 
 // ListVideos calls app.studio.v1.VideoService.ListVideos.
@@ -182,6 +204,16 @@ func (c *videoServiceClient) ApproveScenes(ctx context.Context, req *connect.Req
 	return c.approveScenes.CallUnary(ctx, req)
 }
 
+// RequestRerender calls app.studio.v1.VideoService.RequestRerender.
+func (c *videoServiceClient) RequestRerender(ctx context.Context, req *connect.Request[v1.RequestRerenderRequest]) (*connect.Response[v1.RequestRerenderResponse], error) {
+	return c.requestRerender.CallUnary(ctx, req)
+}
+
+// ApproveFinalCut calls app.studio.v1.VideoService.ApproveFinalCut.
+func (c *videoServiceClient) ApproveFinalCut(ctx context.Context, req *connect.Request[v1.ApproveFinalCutRequest]) (*connect.Response[v1.ApproveFinalCutResponse], error) {
+	return c.approveFinalCut.CallUnary(ctx, req)
+}
+
 // VideoServiceHandler is an implementation of the app.studio.v1.VideoService service.
 type VideoServiceHandler interface {
 	ListVideos(context.Context, *connect.Request[v1.ListVideosRequest]) (*connect.Response[v1.ListVideosResponse], error)
@@ -192,6 +224,8 @@ type VideoServiceHandler interface {
 	RejectScript(context.Context, *connect.Request[v1.RejectScriptRequest]) (*connect.Response[v1.RejectScriptResponse], error)
 	ListTakes(context.Context, *connect.Request[v1.ListTakesRequest]) (*connect.Response[v1.ListTakesResponse], error)
 	ApproveScenes(context.Context, *connect.Request[v1.ApproveScenesRequest]) (*connect.Response[v1.ApproveScenesResponse], error)
+	RequestRerender(context.Context, *connect.Request[v1.RequestRerenderRequest]) (*connect.Response[v1.RequestRerenderResponse], error)
+	ApproveFinalCut(context.Context, *connect.Request[v1.ApproveFinalCutRequest]) (*connect.Response[v1.ApproveFinalCutResponse], error)
 }
 
 // NewVideoServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -249,6 +283,18 @@ func NewVideoServiceHandler(svc VideoServiceHandler, opts ...connect.HandlerOpti
 		connect.WithSchema(videoServiceMethods.ByName("ApproveScenes")),
 		connect.WithHandlerOptions(opts...),
 	)
+	videoServiceRequestRerenderHandler := connect.NewUnaryHandler(
+		VideoServiceRequestRerenderProcedure,
+		svc.RequestRerender,
+		connect.WithSchema(videoServiceMethods.ByName("RequestRerender")),
+		connect.WithHandlerOptions(opts...),
+	)
+	videoServiceApproveFinalCutHandler := connect.NewUnaryHandler(
+		VideoServiceApproveFinalCutProcedure,
+		svc.ApproveFinalCut,
+		connect.WithSchema(videoServiceMethods.ByName("ApproveFinalCut")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/app.studio.v1.VideoService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case VideoServiceListVideosProcedure:
@@ -267,6 +313,10 @@ func NewVideoServiceHandler(svc VideoServiceHandler, opts ...connect.HandlerOpti
 			videoServiceListTakesHandler.ServeHTTP(w, r)
 		case VideoServiceApproveScenesProcedure:
 			videoServiceApproveScenesHandler.ServeHTTP(w, r)
+		case VideoServiceRequestRerenderProcedure:
+			videoServiceRequestRerenderHandler.ServeHTTP(w, r)
+		case VideoServiceApproveFinalCutProcedure:
+			videoServiceApproveFinalCutHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -306,4 +356,12 @@ func (UnimplementedVideoServiceHandler) ListTakes(context.Context, *connect.Requ
 
 func (UnimplementedVideoServiceHandler) ApproveScenes(context.Context, *connect.Request[v1.ApproveScenesRequest]) (*connect.Response[v1.ApproveScenesResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("app.studio.v1.VideoService.ApproveScenes is not implemented"))
+}
+
+func (UnimplementedVideoServiceHandler) RequestRerender(context.Context, *connect.Request[v1.RequestRerenderRequest]) (*connect.Response[v1.RequestRerenderResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("app.studio.v1.VideoService.RequestRerender is not implemented"))
+}
+
+func (UnimplementedVideoServiceHandler) ApproveFinalCut(context.Context, *connect.Request[v1.ApproveFinalCutRequest]) (*connect.Response[v1.ApproveFinalCutResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("app.studio.v1.VideoService.ApproveFinalCut is not implemented"))
 }

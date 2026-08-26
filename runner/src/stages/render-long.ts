@@ -132,3 +132,28 @@ export function makeRenderLongStage(deps: RenderLongDeps = {}) {
     ctx.log.info({ output, bytes: stat.size }, "long-form rendered");
   };
 }
+
+/**
+ * Lists rendered outputs present in WORK_DIR/<slug>/out for the upload stage
+ * (long.mp4 + short-N.mp4).
+ */
+export function collectRenderFiles(root: string): Array<{ fileName: string; sha256: string; bytes: number }> {
+  const outDir = path.join(root, "out");
+  if (!fs.existsSync(outDir)) return [];
+  const files: Array<{ fileName: string; sha256: string; bytes: number }> = [];
+  for (const name of fs.readdirSync(outDir)) {
+    if (!name.endsWith(".mp4")) continue;
+    const data = fs.readFileSync(path.join(outDir, name));
+    files.push({
+      fileName: name,
+      sha256: shaOf(data),
+      bytes: data.length,
+    });
+  }
+  return files;
+}
+
+import { createHash } from "node:crypto";
+function shaOf(data: Buffer): string {
+  return createHash("sha256").update(data).digest("hex");
+}

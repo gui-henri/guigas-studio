@@ -6,9 +6,14 @@ package services
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"log/slog"
+	"os"
+	"path/filepath"
+	"strings"
 
 	"connectrpc.com/connect"
 	"github.com/google/uuid"
@@ -26,14 +31,16 @@ import (
 type JobService struct {
 	queries *sqlc.Queries
 	pool    *pgxpool.Pool // transactional claim→rendering transition
+	dataDir string        // workspace root for artifact verification (S5-07)
 	hub     *events.Hub   // optional; nil disables SSE publishing
 	jobs    *JobsQueue
 }
 
-func NewJobService(queries *sqlc.Queries, pool *pgxpool.Pool, hub *events.Hub) studiov1connect.JobServiceHandler {
+func NewJobService(queries *sqlc.Queries, pool *pgxpool.Pool, dataDir string, hub *events.Hub) studiov1connect.JobServiceHandler {
 	return &JobService{
 		queries: queries,
 		pool:    pool,
+		dataDir: dataDir,
 		hub:     hub,
 		jobs:    NewJobsQueue(queries),
 	}
@@ -219,8 +226,10 @@ func (s *JobService) UpdateProgress(
 	return connect.NewResponse(&studiov1.UpdateProgressResponse{}), nil
 }
 
-// CompleteJob settles a claimed job as completed; the final_review video
-// transition belongs to S5-07 (upload verification), not here.
+// CompleteJob settles a claimed job as completed. When the runner reports
+// artifacts, EVERY one is verified on disk (sha256) before the video moves
+// rendering → final_review in one transaction with metadata registration —
+// "upload verificado" is the canonical trigger (ROADMAP).
 func (s *JobService) CompleteJob(
 	ctx context.Context,
 	req *connect.Request[studiov1.CompleteJobRequest],
@@ -234,10 +243,12 @@ func (s *JobService) CompleteJob(
 		slog.Error("complete failed", "error", cErr)
 		return nil, connect.NewError(connect.CodeFailedPrecondition, errors.New("cannot complete job"))
 	}
-	for _, a := range req.Msg.GetArtifacts() {
-		slog.Info("render artifact",
-			"job_id", done.ID.String(), "path", a.GetPath(),
-			"bytes", a.GetBytes(), "sha256", a.GetSha256(), "duration_s", a.GetDurationS())
+
+	artifactsIn := req.Msg.GetArtifacts()
+	if len(artifactsIn) > 0 {
+		if err := s.finalizeRenderArtifacts(ctx, done.VideoID, done.ID.String(), artifactsIn); err != nil {
+			return nil, err
+		}
 	}
 	return connect.NewResponse(&studiov1.CompleteJobResponse{}), nil
 }
@@ -266,6 +277,98 @@ func (s *JobService) FailJob(
 		"job_id", failed.ID.String(), "status", failed.Status,
 		"attempts", failed.Attempts, "reason", req.Msg.GetReason())
 	return connect.NewResponse(&studiov1.FailJobResponse{}), nil
+}
+
+// finalizeRenderArtifacts verifies every uploaded file byte-for-byte against
+// its reported sha256, registers render metadata and transitions
+// rendering → final_review inside ONE transaction.
+func (s *JobService) finalizeRenderArtifacts(
+	ctx context.Context,
+	videoID uuid.UUID,
+	jobID string,
+	artifacts []*studiov1.Artifact,
+) error {
+	video, err := s.queries.GetVideo(ctx, videoID)
+	if err != nil {
+		return connect.NewError(connect.CodeInternal, errors.New("failed to load video"))
+	}
+	from := videostate.State(video.Status)
+	if from != videostate.StateRendering {
+		return connect.NewError(connect.CodeFailedPrecondition,
+			fmt.Errorf("video is %s; artifact completion requires rendering", from))
+	}
+
+	// Verify on disk BEFORE any state change.
+	type verified struct {
+		path      string
+		sha256    string
+		bytes     int64
+		duration  float64
+		warnings  []string
+	}
+	files := make([]verified, 0, len(artifacts))
+	for _, a := range artifacts {
+		full := filepath.Join(s.dataDir, "videos", video.Slug, filepath.FromSlash(a.GetPath()))
+		data, rErr := os.ReadFile(full)
+		if rErr != nil {
+			return connect.NewError(connect.CodeFailedPrecondition,
+				fmt.Errorf("artifact missing on server: %s", a.GetPath()))
+		}
+		sum := sha256.Sum256(data)
+		if hex.EncodeToString(sum[:]) != strings.ToLower(a.GetSha256()) ||
+			int64(len(data)) != int64(a.GetBytes()) {
+			return connect.NewError(connect.CodeFailedPrecondition,
+				fmt.Errorf("artifact checksum mismatch: %s", a.GetPath()))
+		}
+		files = append(files, verified{
+			path:     a.GetPath(),
+			sha256:   strings.ToLower(a.GetSha256()),
+			bytes:    int64(a.GetBytes()),
+			duration: a.GetDurationS(),
+		})
+	}
+
+	tx, txErr := s.pool.Begin(ctx)
+	if txErr != nil {
+		return connect.NewError(connect.CodeInternal, errors.New("transaction failed"))
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+	q := s.queries.WithTx(tx)
+
+	if err := videostate.Transition(from, videostate.StateFinalReview); err != nil {
+		return connect.NewError(connect.CodeFailedPrecondition, err)
+	}
+	if err := q.UpdateVideoStatus(ctx, sqlc.UpdateVideoStatusParams{
+		ID:     videoID,
+		Status: string(videostate.StateFinalReview),
+	}); err != nil {
+		slog.Error("finalize: status update failed", "error", err)
+		return connect.NewError(connect.CodeInternal, errors.New("failed to update status"))
+	}
+	if err := q.InsertStatusChange(ctx, sqlc.InsertStatusChangeParams{
+		VideoID: videoID,
+		Status:  string(videostate.StateFinalReview),
+		Reason:  fmt.Sprintf("%d render artifacts verified", len(files)),
+		Actor:   "runner",
+	}); err != nil {
+		slog.Warn("finalize: history insert failed", "error", err)
+	}
+	for _, f := range files {
+		if _, uErr := q.UpsertRenderArtifact(ctx, sqlc.UpsertRenderArtifactParams{
+			VideoID: videoID, Path: f.path, Sha256: f.sha256,
+			Bytes: f.bytes, DurationS: f.duration, Warnings: []string{},
+		}); uErr != nil {
+			slog.Error("finalize: artifact upsert failed", "error", uErr)
+			return connect.NewError(connect.CodeInternal, errors.New("failed to register artifact"))
+		}
+	}
+	if err := tx.Commit(ctx); err != nil {
+		return connect.NewError(connect.CodeInternal, errors.New("transaction failed"))
+	}
+
+	s.publishStatusChanged(videoID.String(), string(from), string(videostate.StateFinalReview))
+	slog.Info("render finalized", "job_id", jobID, "artifacts", len(files))
+	return nil
 }
 
 // GetJob exposes status + cancel_requested (cooperative cancel-check base).

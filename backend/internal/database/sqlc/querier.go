@@ -28,6 +28,7 @@ type Querier interface {
 	FailJobTerminal(ctx context.Context, arg FailJobTerminalParams) (Job, error)
 	GetJob(ctx context.Context, id uuid.UUID) (Job, error)
 	GetOriginalScript(ctx context.Context, id uuid.UUID) ([]byte, error)
+	GetRenderArtifactByPath(ctx context.Context, arg GetRenderArtifactByPathParams) (RenderArtifact, error)
 	GetUserByUsername(ctx context.Context, username string) (User, error)
 	GetVideo(ctx context.Context, id uuid.UUID) (Video, error)
 	GetVideoBySlug(ctx context.Context, slug string) (Video, error)
@@ -37,6 +38,7 @@ type Querier interface {
 	InsertStatusChange(ctx context.Context, arg InsertStatusChangeParams) error
 	ListJobsByVideo(ctx context.Context, videoID uuid.UUID) ([]Job, error)
 	ListParsesByVideo(ctx context.Context, videoID uuid.UUID) ([]VideoArtifactParse, error)
+	ListRenderArtifacts(ctx context.Context, videoID uuid.UUID) ([]RenderArtifact, error)
 	ListStatusHistoryByVideo(ctx context.Context, videoID uuid.UUID) ([]VideoStatusHistory, error)
 	ListTakesByVideo(ctx context.Context, videoSlug string) ([]Take, error)
 	ListVideos(ctx context.Context) ([]Video, error)
@@ -50,6 +52,7 @@ type Querier interface {
 	SetRssItemVideo(ctx context.Context, arg SetRssItemVideoParams) error
 	UpdateJobProgress(ctx context.Context, arg UpdateJobProgressParams) (Job, error)
 	UpdateVideoStatus(ctx context.Context, arg UpdateVideoStatusParams) error
+	UpsertRenderArtifact(ctx context.Context, arg UpsertRenderArtifactParams) (RenderArtifact, error)
 	UpsertTake(ctx context.Context, arg UpsertTakeParams) (Take, error)
 }
 

@@ -25,6 +25,7 @@ function makeCtx(root: string) {
       slug: "demo",
       expectedShorts: 0,
       warnings: [],
+      artifacts: [],
       log: {
         info() {}, warn() {}, error() {}, debug() {}, child() { return this; },
       } as never,

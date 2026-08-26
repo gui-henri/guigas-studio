@@ -58,6 +58,7 @@ export async function runStages(
     slug: job.slug,
     expectedShorts: job.expectedShorts,
     warnings,
+    artifacts: [],
     log,
     async report(stage, percent) {
       progress.stage = stage;
@@ -86,8 +87,17 @@ export async function runStages(
       await handler(ctx);
       log.info({ stage: stageName }, "stage done");
     }
-    await client.jobs.completeJob({ jobId: job.jobId, warnings });
-    log.info({ warnings: warnings.length }, "job completed");
+    await client.jobs.completeJob({
+      jobId: job.jobId,
+      warnings,
+      artifacts: ctx.artifacts.map((a) => ({
+        path: a.path,
+        sha256: a.sha256,
+        bytes: BigInt(a.bytes),
+        durationS: a.durationS ?? 0,
+      })),
+    });
+    log.info({ warnings: warnings.length, artifacts: ctx.artifacts.length }, "job completed");
     return "completed";
   } catch (err) {
     if (err instanceof JobCancelled) {

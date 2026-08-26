@@ -11,6 +11,8 @@ export interface JobContext {
   expectedShorts: number;
   /** Accumulated non-fatal warnings shipped with CompleteJob. */
   warnings: string[];
+  /** Rendered outputs registered by the upload stage (S5-07). */
+  artifacts: Array<{ path: string; sha256: string; bytes: number; durationS?: number }>;
   log: Logger;
   /** Report progress to the server (persisted + mirrored over SSE). */
   report(stage: string, percent: number): Promise<number>;
