@@ -152,7 +152,18 @@ func (s *JobService) ClaimJob(
 	if gErr != nil {
 		fresh = job
 	}
-	return connect.NewResponse(&studiov1.ClaimJobResponse{Job: jobToView(fresh)}), nil
+	view := jobToView(fresh)
+	if payload, pErr := DecodePayload(fresh); pErr == nil && len(payload.InputManifest) > 0 {
+		for i := range payload.InputManifest {
+			f := payload.InputManifest[i]
+			view.InputManifest = append(view.InputManifest, &studiov1.InputFile{
+				Path:   f.Path,
+				Sha256: f.Sha256,
+				Bytes:  f.Bytes,
+			})
+		}
+	}
+	return connect.NewResponse(&studiov1.ClaimJobResponse{Job: view}), nil
 }
 
 func (s *JobService) loadOwnedClaimed(ctx context.Context, rawID string) (sqlc.Job, error) {

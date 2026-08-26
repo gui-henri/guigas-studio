@@ -62,6 +62,8 @@ func newHandler(cfg config.Config, db *database.DB, appHub *events.Hub) http.Han
 		return auth.ParseToken(cfg.Auth.JWTSecret, raw)
 	})
 	mux.Handle("GET /api/v1/videos/{videoID}/artifacts/{path...}", artifactDownload)
+	filesHandler := artifacts.NewFilesHandler(cfg.DataDir, cfg.Auth.JWTSecret)
+	mux.Handle("GET /api/v1/videos/{videoSlug}/files/{path...}", filesHandler)
 
 	takeUpload.SetAfterUpsert(func(videoSlug string) {
 		go func() {

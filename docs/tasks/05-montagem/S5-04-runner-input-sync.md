@@ -5,7 +5,7 @@ sprint: 5
 prioridade: P0
 depende_de: [S5-03]
 estimativa_h: 2
-status: todo
+status: done
 ---
 
 # S5-04 — Sync de inputs do job
@@ -51,10 +51,10 @@ de cada arquivo é calculado no enqueue (S5-01) e vai no payload do job.
 
 ## Critérios de aceite
 
-- [ ] Runner reproduz localmente a árvore de inputs do job (script/audios/timelines/sprite/subtitles)
-- [ ] Todos os checksums batem antes do stage seguinte iniciar
-- [ ] Endpoint de download rejeita token ausente/errado e paths fora do slug
-- [ ] Falha de rede em um arquivo não corrompe os já validados (refetch/erro limpo)
+- [x] Runner reproduz a árvore de inputs localmente (stage sync baixa o input_manifest do claim para WORK_DIR/<slug>/ com paths POSIX)
+- [x] Todos os checksums batem antes do stage seguinte (sha256 stream-wise por arquivo; divergência → refetch 1× → erro limpo)
+- [x] Endpoint rejeita token ausente/errado e paths fora do slug (401 anônimo/PAT errado; traversal bloqueado via filepath.Rel; JWT ou RUNNER_TOKEN aceitos — matriz testada)
+- [x] Falha em um arquivo não corrompe os validados (arquivo só é gravado após hash ok; teste cobre refetch e erro final)
 
 ## Verificação
 
@@ -68,6 +68,14 @@ npm run dev -w runner   # observar stage sync 0→100%
 
 ## Notas
 
+## Notas
+
+- Manifest calculado no ApproveScenes (enqueue) por allow-list explícita
+  (script.json, audio/, timelines/, assets/) e embutido no payload jsonb;
+  ClaimJobResponse.job.input_manifest entrega tudo numa única chamada.
+- Runner grava manifest.local.json como trilha de auditoria do sync.
+- Endpoint: GET /api/v1/videos/{slug}/files/{path...} com http.ServeContent
+  (Range de graça para o player da S5-10).
 - Manifest gerado por allow-list (nunca "todo o diretório"): evita vazar `.env`/renders
   antigos e barateia o claim.
 - Usar sempre barras `/` nos paths do manifest (POSIX); converter com `path.join` só ao

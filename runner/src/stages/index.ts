@@ -1,20 +1,56 @@
+import type { InputFile } from "../gen/app/studio/v1/jobs_pb.js";
+import {
+  syncInputs,
+  type SyncManifestEntry,
+} from "./sync.js";
 import type { StageHandler } from "./types.js";
 
+export interface StageEnv {
+  baseUrl: string;
+  bearerToken: string;
+}
+
 /**
- * Ordered stage pipeline for the render job. S5-04 plugs `sync`, S5-05
- * `bundle` + `render_long`, S5-06 `shorts`, S5-07 `upload`. Until then each
- * stage reports its slot's progress slice and no-ops.
+ * Ordered stage pipeline. `sync` is REAL since S5-04 (downloads + sha256
+ * verify); S5-05 plugs `bundle` + `render_long`, S5-06 `shorts`, S5-07
+ * `upload`. Remaining placeholders report their progress slot and no-op.
  */
-export function defaultStages(): Array<[string, StageHandler]> {
+export function defaultStages(
+  manifest: readonly InputFile[],
+  env: StageEnv
+): Array<[string, StageHandler]> {
+  // proto bytes (bigint) → plain number for the sync stage.
+  const entries: SyncManifestEntry[] = manifest.map((f) => ({
+    path: f.path,
+    sha256: f.sha256,
+    bytes: Number(f.bytes),
+  }));
   const names = ["sync", "bundle", "render_long", "shorts", "upload"] as const;
+
+  const syncStage: StageHandler = async (ctx) => {
+    await ctx.checkCancelled();
+    if (manifest.length === 0) {
+      ctx.log.info("no input manifest on job; skipping download");
+      await ctx.report("sync", 100);
+      return;
+    }
+    ctx.log.info({ files: manifest.length }, "syncing inputs");
+    const result = await syncInputs(ctx, entries, {
+      baseUrl: env.baseUrl,
+      videoId: ctx.videoId,
+      bearerToken: env.bearerToken,
+    });
+    ctx.log.info(result, "inputs synced");
+  };
 
   return names.map((name) => [
     name,
-    async (ctx) => {
-      await ctx.checkCancelled();
-      ctx.log.info({ stage: name }, "stage placeholder");
-      // Placeholder slice of the progress bar until the real handler lands.
-      await ctx.report(name, Math.round((names.indexOf(name) + 1) * (100 / names.length)));
-    },
+    name === "sync"
+      ? syncStage
+      : async (ctx) => {
+          await ctx.checkCancelled();
+          ctx.log.info({ stage: name }, "stage placeholder");
+          await ctx.report(name, Math.round((names.indexOf(name) + 1) * (100 / names.length)));
+        },
   ]);
 }

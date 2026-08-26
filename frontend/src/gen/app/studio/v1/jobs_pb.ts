@@ -10,11 +10,41 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file app/studio/v1/jobs.proto.
  */
 export const file_app_studio_v1_jobs: GenFile = /*@__PURE__*/
-  fileDesc("ChhhcHAvc3R1ZGlvL3YxL2pvYnMucHJvdG8SDWFwcC5zdHVkaW8udjEizwEKB0pvYlZpZXcSCgoCaWQYASABKAkSEAoIdmlkZW9faWQYAiABKAkSDAoEdHlwZRgDIAEoCRIOCgZzdGF0dXMYBCABKAkSEAoIYXR0ZW1wdHMYBSABKAUSFAoMbWF4X2F0dGVtcHRzGAYgASgFEhQKDHBheWxvYWRfanNvbhgHIAEoCRIYChBjYW5jZWxfcmVxdWVzdGVkGAggASgIEhgKEHByb2dyZXNzX3BlcmNlbnQYCSABKAUSFgoOcHJvZ3Jlc3Nfc3RhZ2UYCiABKAkiSwoIQXJ0aWZhY3QSDAoEcGF0aBgBIAEoCRIOCgZzaGEyNTYYAiABKAkSDQoFYnl0ZXMYAyABKAQSEgoKZHVyYXRpb25fcxgEIAEoASIkCg9DbGFpbUpvYlJlcXVlc3QSEQoJcnVubmVyX2lkGAEgASgJIjcKEENsYWltSm9iUmVzcG9uc2USIwoDam9iGAEgASgLMhYuYXBwLnN0dWRpby52MS5Kb2JWaWV3IkcKFVVwZGF0ZVByb2dyZXNzUmVxdWVzdBIOCgZqb2JfaWQYASABKAkSDwoHcGVyY2VudBgCIAEoBRINCgVzdGFnZRgDIAEoCSIYChZVcGRhdGVQcm9ncmVzc1Jlc3BvbnNlImIKEkNvbXBsZXRlSm9iUmVxdWVzdBIOCgZqb2JfaWQYASABKAkSKgoJYXJ0aWZhY3RzGAIgAygLMhcuYXBwLnN0dWRpby52MS5BcnRpZmFjdBIQCgh3YXJuaW5ncxgDIAMoCSIVChNDb21wbGV0ZUpvYlJlc3BvbnNlIkMKDkZhaWxKb2JSZXF1ZXN0Eg4KBmpvYl9pZBgBIAEoCRIOCgZyZWFzb24YAiABKAkSEQoJcmV0cnlhYmxlGAMgASgIIhEKD0ZhaWxKb2JSZXNwb25zZSIfCg1HZXRKb2JSZXF1ZXN0Eg4KBmpvYl9pZBgBIAEoCSI1Cg5HZXRKb2JSZXNwb25zZRIjCgNqb2IYASABKAsyFi5hcHAuc3R1ZGlvLnYxLkpvYlZpZXcynwMKCkpvYlNlcnZpY2USSwoIQ2xhaW1Kb2ISHi5hcHAuc3R1ZGlvLnYxLkNsYWltSm9iUmVxdWVzdBofLmFwcC5zdHVkaW8udjEuQ2xhaW1Kb2JSZXNwb25zZRJdCg5VcGRhdGVQcm9ncmVzcxIkLmFwcC5zdHVkaW8udjEuVXBkYXRlUHJvZ3Jlc3NSZXF1ZXN0GiUuYXBwLnN0dWRpby52MS5VcGRhdGVQcm9ncmVzc1Jlc3BvbnNlElQKC0NvbXBsZXRlSm9iEiEuYXBwLnN0dWRpby52MS5Db21wbGV0ZUpvYlJlcXVlc3QaIi5hcHAuc3R1ZGlvLnYxLkNvbXBsZXRlSm9iUmVzcG9uc2USSAoHRmFpbEpvYhIdLmFwcC5zdHVkaW8udjEuRmFpbEpvYlJlcXVlc3QaHi5hcHAuc3R1ZGlvLnYxLkZhaWxKb2JSZXNwb25zZRJFCgZHZXRKb2ISHC5hcHAuc3R1ZGlvLnYxLkdldEpvYlJlcXVlc3QaHS5hcHAuc3R1ZGlvLnYxLkdldEpvYlJlc3BvbnNlQkdaRWdpdGh1Yi5jb20vZ3VpLWhlbnJpL2d1aWdhcy1zdHVkaW8vYmFja2VuZC9nZW4vYXBwL3N0dWRpby92MTtzdHVkaW92MWIGcHJvdG8z");
+  fileDesc("ChhhcHAvc3R1ZGlvL3YxL2pvYnMucHJvdG8SDWFwcC5zdHVkaW8udjEiOAoJSW5wdXRGaWxlEgwKBHBhdGgYASABKAkSDgoGc2hhMjU2GAIgASgJEg0KBWJ5dGVzGAMgASgEIoECCgdKb2JWaWV3EgoKAmlkGAEgASgJEhAKCHZpZGVvX2lkGAIgASgJEgwKBHR5cGUYAyABKAkSDgoGc3RhdHVzGAQgASgJEhAKCGF0dGVtcHRzGAUgASgFEhQKDG1heF9hdHRlbXB0cxgGIAEoBRIUCgxwYXlsb2FkX2pzb24YByABKAkSGAoQY2FuY2VsX3JlcXVlc3RlZBgIIAEoCBIYChBwcm9ncmVzc19wZXJjZW50GAkgASgFEhYKDnByb2dyZXNzX3N0YWdlGAogASgJEjAKDmlucHV0X21hbmlmZXN0GAsgAygLMhguYXBwLnN0dWRpby52MS5JbnB1dEZpbGUiSwoIQXJ0aWZhY3QSDAoEcGF0aBgBIAEoCRIOCgZzaGEyNTYYAiABKAkSDQoFYnl0ZXMYAyABKAQSEgoKZHVyYXRpb25fcxgEIAEoASIkCg9DbGFpbUpvYlJlcXVlc3QSEQoJcnVubmVyX2lkGAEgASgJIjcKEENsYWltSm9iUmVzcG9uc2USIwoDam9iGAEgASgLMhYuYXBwLnN0dWRpby52MS5Kb2JWaWV3IkcKFVVwZGF0ZVByb2dyZXNzUmVxdWVzdBIOCgZqb2JfaWQYASABKAkSDwoHcGVyY2VudBgCIAEoBRINCgVzdGFnZRgDIAEoCSIYChZVcGRhdGVQcm9ncmVzc1Jlc3BvbnNlImIKEkNvbXBsZXRlSm9iUmVxdWVzdBIOCgZqb2JfaWQYASABKAkSKgoJYXJ0aWZhY3RzGAIgAygLMhcuYXBwLnN0dWRpby52MS5BcnRpZmFjdBIQCgh3YXJuaW5ncxgDIAMoCSIVChNDb21wbGV0ZUpvYlJlc3BvbnNlIkMKDkZhaWxKb2JSZXF1ZXN0Eg4KBmpvYl9pZBgBIAEoCRIOCgZyZWFzb24YAiABKAkSEQoJcmV0cnlhYmxlGAMgASgIIhEKD0ZhaWxKb2JSZXNwb25zZSIfCg1HZXRKb2JSZXF1ZXN0Eg4KBmpvYl9pZBgBIAEoCSI1Cg5HZXRKb2JSZXNwb25zZRIjCgNqb2IYASABKAsyFi5hcHAuc3R1ZGlvLnYxLkpvYlZpZXcynwMKCkpvYlNlcnZpY2USSwoIQ2xhaW1Kb2ISHi5hcHAuc3R1ZGlvLnYxLkNsYWltSm9iUmVxdWVzdBofLmFwcC5zdHVkaW8udjEuQ2xhaW1Kb2JSZXNwb25zZRJdCg5VcGRhdGVQcm9ncmVzcxIkLmFwcC5zdHVkaW8udjEuVXBkYXRlUHJvZ3Jlc3NSZXF1ZXN0GiUuYXBwLnN0dWRpby52MS5VcGRhdGVQcm9ncmVzc1Jlc3BvbnNlElQKC0NvbXBsZXRlSm9iEiEuYXBwLnN0dWRpby52MS5Db21wbGV0ZUpvYlJlcXVlc3QaIi5hcHAuc3R1ZGlvLnYxLkNvbXBsZXRlSm9iUmVzcG9uc2USSAoHRmFpbEpvYhIdLmFwcC5zdHVkaW8udjEuRmFpbEpvYlJlcXVlc3QaHi5hcHAuc3R1ZGlvLnYxLkZhaWxKb2JSZXNwb25zZRJFCgZHZXRKb2ISHC5hcHAuc3R1ZGlvLnYxLkdldEpvYlJlcXVlc3QaHS5hcHAuc3R1ZGlvLnYxLkdldEpvYlJlc3BvbnNlQkdaRWdpdGh1Yi5jb20vZ3VpLWhlbnJpL2d1aWdhcy1zdHVkaW8vYmFja2VuZC9nZW4vYXBwL3N0dWRpby92MTtzdHVkaW92MWIGcHJvdG8z");
 
 /**
  * JobView is the runner-facing projection of a queued job row (S5-02).
+ * InputFile is one workspace file the runner must download (S5-04).
  *
+ * @generated from message app.studio.v1.InputFile
+ */
+export type InputFile = Message<"app.studio.v1.InputFile"> & {
+  /**
+   * POSIX, relative to videos/<slug>/
+   *
+   * @generated from field: string path = 1;
+   */
+  path: string;
+
+  /**
+   * @generated from field: string sha256 = 2;
+   */
+  sha256: string;
+
+  /**
+   * @generated from field: uint64 bytes = 3;
+   */
+  bytes: bigint;
+};
+
+/**
+ * Describes the message app.studio.v1.InputFile.
+ * Use `create(InputFileSchema)` to create a new message.
+ */
+export const InputFileSchema: GenMessage<InputFile> = /*@__PURE__*/
+  messageDesc(file_app_studio_v1_jobs, 0);
+
+/**
  * @generated from message app.studio.v1.JobView
  */
 export type JobView = Message<"app.studio.v1.JobView"> & {
@@ -69,6 +99,11 @@ export type JobView = Message<"app.studio.v1.JobView"> & {
    * @generated from field: string progress_stage = 10;
    */
   progressStage: string;
+
+  /**
+   * @generated from field: repeated app.studio.v1.InputFile input_manifest = 11;
+   */
+  inputManifest: InputFile[];
 };
 
 /**
@@ -76,7 +111,7 @@ export type JobView = Message<"app.studio.v1.JobView"> & {
  * Use `create(JobViewSchema)` to create a new message.
  */
 export const JobViewSchema: GenMessage<JobView> = /*@__PURE__*/
-  messageDesc(file_app_studio_v1_jobs, 0);
+  messageDesc(file_app_studio_v1_jobs, 1);
 
 /**
  * Artifact describes one rendered output file (S5-09 consumes duration_s).
@@ -110,7 +145,7 @@ export type Artifact = Message<"app.studio.v1.Artifact"> & {
  * Use `create(ArtifactSchema)` to create a new message.
  */
 export const ArtifactSchema: GenMessage<Artifact> = /*@__PURE__*/
-  messageDesc(file_app_studio_v1_jobs, 1);
+  messageDesc(file_app_studio_v1_jobs, 2);
 
 /**
  * @generated from message app.studio.v1.ClaimJobRequest
@@ -129,7 +164,7 @@ export type ClaimJobRequest = Message<"app.studio.v1.ClaimJobRequest"> & {
  * Use `create(ClaimJobRequestSchema)` to create a new message.
  */
 export const ClaimJobRequestSchema: GenMessage<ClaimJobRequest> = /*@__PURE__*/
-  messageDesc(file_app_studio_v1_jobs, 2);
+  messageDesc(file_app_studio_v1_jobs, 3);
 
 /**
  * @generated from message app.studio.v1.ClaimJobResponse
@@ -148,7 +183,7 @@ export type ClaimJobResponse = Message<"app.studio.v1.ClaimJobResponse"> & {
  * Use `create(ClaimJobResponseSchema)` to create a new message.
  */
 export const ClaimJobResponseSchema: GenMessage<ClaimJobResponse> = /*@__PURE__*/
-  messageDesc(file_app_studio_v1_jobs, 3);
+  messageDesc(file_app_studio_v1_jobs, 4);
 
 /**
  * @generated from message app.studio.v1.UpdateProgressRequest
@@ -179,7 +214,7 @@ export type UpdateProgressRequest = Message<"app.studio.v1.UpdateProgressRequest
  * Use `create(UpdateProgressRequestSchema)` to create a new message.
  */
 export const UpdateProgressRequestSchema: GenMessage<UpdateProgressRequest> = /*@__PURE__*/
-  messageDesc(file_app_studio_v1_jobs, 4);
+  messageDesc(file_app_studio_v1_jobs, 5);
 
 /**
  * @generated from message app.studio.v1.UpdateProgressResponse
@@ -192,7 +227,7 @@ export type UpdateProgressResponse = Message<"app.studio.v1.UpdateProgressRespon
  * Use `create(UpdateProgressResponseSchema)` to create a new message.
  */
 export const UpdateProgressResponseSchema: GenMessage<UpdateProgressResponse> = /*@__PURE__*/
-  messageDesc(file_app_studio_v1_jobs, 5);
+  messageDesc(file_app_studio_v1_jobs, 6);
 
 /**
  * @generated from message app.studio.v1.CompleteJobRequest
@@ -219,7 +254,7 @@ export type CompleteJobRequest = Message<"app.studio.v1.CompleteJobRequest"> & {
  * Use `create(CompleteJobRequestSchema)` to create a new message.
  */
 export const CompleteJobRequestSchema: GenMessage<CompleteJobRequest> = /*@__PURE__*/
-  messageDesc(file_app_studio_v1_jobs, 6);
+  messageDesc(file_app_studio_v1_jobs, 7);
 
 /**
  * @generated from message app.studio.v1.CompleteJobResponse
@@ -232,7 +267,7 @@ export type CompleteJobResponse = Message<"app.studio.v1.CompleteJobResponse"> &
  * Use `create(CompleteJobResponseSchema)` to create a new message.
  */
 export const CompleteJobResponseSchema: GenMessage<CompleteJobResponse> = /*@__PURE__*/
-  messageDesc(file_app_studio_v1_jobs, 7);
+  messageDesc(file_app_studio_v1_jobs, 8);
 
 /**
  * @generated from message app.studio.v1.FailJobRequest
@@ -261,7 +296,7 @@ export type FailJobRequest = Message<"app.studio.v1.FailJobRequest"> & {
  * Use `create(FailJobRequestSchema)` to create a new message.
  */
 export const FailJobRequestSchema: GenMessage<FailJobRequest> = /*@__PURE__*/
-  messageDesc(file_app_studio_v1_jobs, 8);
+  messageDesc(file_app_studio_v1_jobs, 9);
 
 /**
  * @generated from message app.studio.v1.FailJobResponse
@@ -274,7 +309,7 @@ export type FailJobResponse = Message<"app.studio.v1.FailJobResponse"> & {
  * Use `create(FailJobResponseSchema)` to create a new message.
  */
 export const FailJobResponseSchema: GenMessage<FailJobResponse> = /*@__PURE__*/
-  messageDesc(file_app_studio_v1_jobs, 9);
+  messageDesc(file_app_studio_v1_jobs, 10);
 
 /**
  * @generated from message app.studio.v1.GetJobRequest
@@ -291,7 +326,7 @@ export type GetJobRequest = Message<"app.studio.v1.GetJobRequest"> & {
  * Use `create(GetJobRequestSchema)` to create a new message.
  */
 export const GetJobRequestSchema: GenMessage<GetJobRequest> = /*@__PURE__*/
-  messageDesc(file_app_studio_v1_jobs, 10);
+  messageDesc(file_app_studio_v1_jobs, 11);
 
 /**
  * @generated from message app.studio.v1.GetJobResponse
@@ -308,7 +343,7 @@ export type GetJobResponse = Message<"app.studio.v1.GetJobResponse"> & {
  * Use `create(GetJobResponseSchema)` to create a new message.
  */
 export const GetJobResponseSchema: GenMessage<GetJobResponse> = /*@__PURE__*/
-  messageDesc(file_app_studio_v1_jobs, 11);
+  messageDesc(file_app_studio_v1_jobs, 12);
 
 /**
  * Unary-only API consumed by the local runner (D-10): claim, report progress,

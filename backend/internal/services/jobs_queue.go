@@ -7,12 +7,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"path/filepath"
 	"regexp"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 
+	"github.com/gui-henri/guigas-studio/backend/internal/artifacts"
 	sqlc "github.com/gui-henri/guigas-studio/backend/internal/database/sqlc"
 )
 
@@ -21,10 +23,13 @@ const JobTypeRenderLongShorts = "render_long_shorts"
 
 var errNoJob = pgx.ErrNoRows
 
-// JobPayload travels inside the jsonb payload column.
+// JobPayload travels inside the jsonb payload column. InputManifest carries
+// the allow-listed files (path/sha256/bytes) computed at enqueue time so the
+// runner verifies checksums while downloading (S5-04).
 type JobPayload struct {
-	Slug           string `json:"slug"`
-	ExpectedShorts int    `json:"expected_shorts"`
+	Slug           string                            `json:"slug"`
+	ExpectedShorts int                               `json:"expected_shorts"`
+	InputManifest  []FileManifestEntry               `json:"input_manifest,omitempty"`
 }
 
 var shortMarkerRe = regexp.MustCompile(`\[SHORT#(\d+)\]`)
@@ -42,6 +47,21 @@ func CountShortMarkers(scriptJSON []byte) int {
 func textParam(s string) pgtype.Text {
 	return pgtype.Text{String: s, Valid: s != ""}
 }
+
+// BuildJobManifest walks the slug workspace (allow-listed dirs) and returns
+// the manifest entries stored in the job payload.
+func BuildJobManifest(dataDir, slug string) []FileManifestEntry {
+	workspace := filepath.Join(dataDir, "videos", slug)
+	entries, err := artifacts.BuildManifest(workspace)
+	if err != nil {
+		return nil
+	}
+	return entries
+}
+
+// FileManifestEntry is re-exported here so service-layer code stays inside
+// the services package boundary.
+type FileManifestEntry = artifacts.FileManifestEntry
 
 // JobsQueue is a thin typed façade over the generated queries.
 type JobsQueue struct {

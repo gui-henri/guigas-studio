@@ -41,10 +41,21 @@ async function main(): Promise<void> {
       };
       log.info({ job_id: job.jobId, slug: job.slug }, "job claimed");
 
-      const outcome = await runStages(client, job, defaultStages(), {
-        workDir: config.workDir,
-        heartbeatIntervalMs: config.heartbeatIntervalMs,
-      });
+      const manifest = response.job.inputManifest ?? [];
+      const outcome = await runStages(
+        client,
+        job,
+        defaultStages(manifest, {
+          baseUrl: config.studioUrl,
+          bearerToken: config.runnerToken,
+        }),
+        {
+          baseUrl: config.studioUrl,
+          bearerToken: config.runnerToken,
+          workDir: config.workDir,
+          heartbeatIntervalMs: config.heartbeatIntervalMs,
+        }
+      );
       log.info({ outcome }, "job cycle finished");
     } catch (err) {
       // Transport-level failure (server down / network): back off and retry.

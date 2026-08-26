@@ -15,6 +15,9 @@ export interface ClaimedJob {
 export interface RunOptions {
   workDir: string;
   heartbeatIntervalMs: number;
+  /** Server base + runner token for authenticated file downloads (S5-04). */
+  baseUrl: string;
+  bearerToken: string;
 }
 
 /**

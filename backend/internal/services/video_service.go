@@ -393,6 +393,7 @@ func (s *VideoService) ApproveScenes(
 	payload := JobPayload{
 		Slug:           video.Slug,
 		ExpectedShorts: CountShortMarkers(rawScript),
+		InputManifest:  BuildJobManifest(s.dataDir, video.Slug),
 	}
 
 	actor := auth.ActorFromContext(ctx)

@@ -5,6 +5,13 @@ package app.studio.v1;
 option go_package = "github.com/gui-henri/guigas-studio/backend/gen/app/studio/v1;studiov1";
 
 // JobView is the runner-facing projection of a queued job row (S5-02).
+// InputFile is one workspace file the runner must download (S5-04).
+message InputFile {
+  string path = 1;   // POSIX, relative to videos/<slug>/
+  string sha256 = 2;
+  uint64 bytes = 3;
+}
+
 message JobView {
   string id = 1;
   string video_id = 2;
@@ -17,6 +24,7 @@ message JobView {
   bool cancel_requested = 8;
   int32 progress_percent = 9;
   string progress_stage = 10;
+  repeated InputFile input_manifest = 11;
 }
 
 // Artifact describes one rendered output file (S5-09 consumes duration_s).
