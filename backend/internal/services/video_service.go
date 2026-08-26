@@ -162,11 +162,16 @@ func (s *VideoService) GetVideo(
 	ctx context.Context,
 	req *connect.Request[studiov1.GetVideoRequest],
 ) (*connect.Response[studiov1.GetVideoResponse], error) {
-	id, err := parseUUID(req.Msg.GetId())
-	if err != nil {
-		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("invalid video id"))
+	var (
+		video sqlc.Video
+		err   error
+	)
+	id, uErr := parseUUID(req.Msg.GetId())
+	if uErr == nil {
+		video, err = s.queries.GetVideo(ctx, id)
+	} else {
+		video, err = s.queries.GetVideoBySlug(ctx, req.Msg.GetId())
 	}
-	video, err := s.queries.GetVideo(ctx, id)
 	if err != nil {
 		if errors.Is(err, errNoRows) {
 			return nil, connect.NewError(connect.CodeNotFound, errors.New("video not found"))

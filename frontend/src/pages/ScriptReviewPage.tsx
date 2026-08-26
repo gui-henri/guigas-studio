@@ -187,7 +187,18 @@ export default function ScriptReviewPage() {
         >
           {presentStatus(video.status).label}
         </span>
-        <nav className="ml-auto flex gap-2 text-sm">
+        <nav className="ml-auto flex items-center gap-2 text-sm">
+          <Link
+            to={`/videos/${video.slug}/studio`}
+            className={`rounded-md border px-3 py-1.5 font-medium transition ${
+              video.status === VideoStatus.RECORDING ||
+              video.status === VideoStatus.SCRIPT_APPROVED
+                ? "bg-neutral-900 text-white border-neutral-900 shadow-sm hover:bg-neutral-800"
+                : "border-line text-neutral-700 hover:border-accent hover:text-accent"
+            }`}
+          >
+            Estúdio 🎙️
+          </Link>
           <Link
             to={`/videos/${video.id}/voz`}
             className="rounded-md border border-line px-3 py-1.5 hover:border-accent hover:text-accent"
@@ -240,6 +251,24 @@ export default function ScriptReviewPage() {
           </div>
         )}
       </header>
+
+      {(video.status === VideoStatus.RECORDING ||
+        video.status === VideoStatus.SCRIPT_APPROVED) && (
+        <div className="flex items-center justify-between rounded-lg border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-900 shadow-sm">
+          <div>
+            <p className="font-medium">🎬 Roteiro aprovado! O estúdio de gravação está pronto.</p>
+            <p className="text-xs text-emerald-700 mt-0.5">
+              Conecte seu microfone e câmera para gravar os takes e blendshapes.
+            </p>
+          </div>
+          <Link
+            to={`/videos/${video.slug}/studio`}
+            className="rounded-lg bg-emerald-700 px-4 py-2 text-xs font-semibold text-white shadow hover:bg-emerald-800"
+          >
+            Abrir Estúdio de Gravação →
+          </Link>
+        </div>
+      )}
 
       {toast && (
         <div className="rounded border border-emerald-300 bg-emerald-50 px-4 py-2 text-sm text-emerald-900">
