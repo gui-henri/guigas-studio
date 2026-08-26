@@ -94,6 +94,15 @@ export { Callout } from "./scenes/callout/Callout";
 export { FlowDiagram } from "./scenes/flow-diagram/FlowDiagram";
 export { BigNumber } from "./scenes/big-number/BigNumber";
 export { Timeline } from "./scenes/timeline/Timeline";
+export { SegmentComposition, type SegmentCompositionProps } from "./compositions/SegmentComposition";
+export { selectLayout, type SegmentLayout } from "./compositions/layout";
+export {
+  createSceneResolver,
+  defaultSceneRegistry,
+  resolveSceneComponent,
+  type SceneComponent,
+  type SceneRegistry,
+} from "./compositions/registry";
 export {
   parseScene,
   sceneSchema,

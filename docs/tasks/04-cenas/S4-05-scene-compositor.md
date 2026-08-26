@@ -5,7 +5,7 @@ sprint: 4
 prioridade: P0
 depende_de: [S3-07, S4-02]
 estimativa_h: 2
-status: todo
+status: done
 ---
 
 # S4-05 — Compositor de cena (SegmentComposition)
@@ -53,12 +53,12 @@ da S3-04) — nunca estimada por caractere.
 
 ## Critérios de aceite
 
-- [ ] Segmento sem cena renderiza avatar fullscreen narrando (decisão #4 do SPEC)
-- [ ] Segmento com cena respeita `layout` sem tocar nos componentes visuais
-- [ ] Trocar um componente no registry não exige mudança no compositor
-- [ ] Legendas só renderizam com toggle ligado
-- [ ] Composição roda tanto no `<Player>` (SPA) quanto num `renderMedia()` futuro —
-      sem APIs fora do runtime Remotion
+- [x] Segmento sem cena renderiza avatar fullscreen narrando (decisão #4; layout prop ignorado nesse caso)
+- [x] Segmento com cena respeita `layout` sem tocar nos componentes visuais (split default ~40% avatar à esquerda; overlay card flutuante)
+- [x] Trocar um componente no registry não exige mudança no compositor (override testado)
+- [x] Legendas só renderizam com toggle ligado (showSubtitles default OFF; cue lookup por ms do frame — S4-06 substitui pelo componente dedicado)
+- [x] Composição roda tanto no `<Player>` (SPA) quanto num `renderMedia()` futuro —
+      só useCurrentFrame/useVideoConfig/Audio/AbsoluteFill; áudio via prop audioSrc
 
 ## Verificação
 
@@ -69,6 +69,11 @@ npm run test -w remotion-kit -- src/compositions
 
 ## Notas
 
+## Notas
+
+- Cena inválida → card de erro explícito com issues de parseScene (nunca tela vazia);
+  layout="fullscreen" + cena é rejeitado no seletor (o autor deve remover a cena).
+- Aresta órfã/erros de schema aparecem no card — mesmo caminho que o observador Go usará.
 - Abstrair a fonte do áudio atrás da prop `audioSrc`: `staticFile()` só existe dentro do
   bundle Remotion; no preview (S3-08/S4-08) a URL vem autenticada do server. Não chamar
   `staticFile` dentro do compositor.
