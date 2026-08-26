@@ -20,7 +20,8 @@ COPY remotion-kit/ ./remotion-kit/
 RUN npm run build -w frontend
 
 # Stage 2: Build do Backend Go
-FROM golang:1.24-alpine AS backend-builder
+FROM golang:alpine AS backend-builder
+ENV GOTOOLCHAIN=auto
 WORKDIR /src/backend
 
 COPY backend/go.mod backend/go.sum ./
