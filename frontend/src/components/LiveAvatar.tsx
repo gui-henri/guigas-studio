@@ -50,7 +50,7 @@ export default function LiveAvatar({
       sheetRef.current = sheet;
     });
 
-    const clamp = (v: number) => Math.min(720, Math.max(240, v));
+    const clamp = (v: number) => Math.min(720, Math.max(96, v));
     const draw = () => {
       raf = requestAnimationFrame(draw);
       const canvas = canvasRef.current;
@@ -68,13 +68,6 @@ export default function LiveAvatar({
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
 
-      // Current state: demo cycles, otherwise read the ref (no React re-render).
-      const current =
-        demo && !demoTimer
-          ? DEMO_CYCLE[0]
-          : (stateRef.current ?? "idle");
-      void current;
-
       if (demo) {
         if (demoTimer === null) {
           demoTimer = setInterval(() => {
@@ -91,7 +84,7 @@ export default function LiveAvatar({
         ? DEMO_CYCLE[demoIdx]
         : (stateRef.current ?? "idle");
       const row = rowForState(sheet, activeState);
-      const cellKey = `${activeState}/0/${mirror}/${canvas.width}`;
+      const cellKey = `${activeState}/${row}/0/${mirror}/${canvas.width}`;
       if (cellKey === lastCellRef.current) return; // nothing changed this frame
       lastCellRef.current = cellKey;
 

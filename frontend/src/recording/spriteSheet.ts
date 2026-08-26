@@ -37,8 +37,28 @@ export function loadSpriteSheet(): Promise<SpriteSheet> {
   return cached;
 }
 
+const STATE_ROW_MAP: Record<string, number> = {
+  idle: 0,
+  neutro: 0,
+  falando: 1,
+  talking: 1,
+  speech: 1,
+  feliz: 2,
+  happy: 2,
+  smile: 2,
+  sorriso: 2,
+  pensativo: 3,
+  thoughtful: 3,
+  thinking: 3,
+  surpreso: 4,
+  surprised: 4,
+};
+
 /** Row index for a state name (contract order), or 0 when unknown. */
 export function rowForState(sheet: SpriteSheet, state: string): number {
+  if (state in STATE_ROW_MAP) {
+    return STATE_ROW_MAP[state];
+  }
   const idx = sheet.states.indexOf(state);
   return idx >= 0 ? idx : 0;
 }

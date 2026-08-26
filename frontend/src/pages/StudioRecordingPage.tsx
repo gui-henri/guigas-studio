@@ -68,7 +68,9 @@ export default function StudioRecordingPage() {
 
   useEffect(() => {
     if (activeSegment && videoRef.current && streamRef.current) {
-      videoRef.current.srcObject = streamRef.current;
+      if (videoRef.current.srcObject !== streamRef.current) {
+        videoRef.current.srcObject = streamRef.current;
+      }
       void videoRef.current.play().catch(() => {});
     }
   }, [activeSegment]);
@@ -108,6 +110,7 @@ export default function StudioRecordingPage() {
     setDeletingTake(true);
     try {
       await deleteTake(slug, activeSegment);
+      await takesQuery.refetch();
       await queryClient.invalidateQueries({
         predicate: (q) => String(q.queryKey[0]).includes("VideoService"),
       });
@@ -415,80 +418,82 @@ export default function StudioRecordingPage() {
           />
 
           {/* Barra de Controles Principais */}
-          <div className="flex flex-wrap items-center justify-between gap-4 border-t border-neutral-100 pt-4">
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                disabled={
-                  !cameraReady ||
-                  recorder.phase === "encoding" ||
-                  recorder.phase === "uploading"
-                }
-                onClick={toggleRecording}
-                className={`flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold text-white shadow-sm transition ${
-                  recorder.phase === "recording"
-                    ? "bg-red-600 hover:bg-red-700 animate-pulse"
-                    : "bg-neutral-900 hover:bg-neutral-800"
-                } disabled:opacity-40`}
-              >
-                {recorder.phase === "recording" ? (
-                  <>⏹️ Parar e Salvar Take (Espaço)</>
-                ) : recorder.phase === "encoding" ? (
-                  <>Codificando take…</>
-                ) : recorder.phase === "uploading" ? (
-                  <>Enviando ({Math.round(recorder.progress * 100)}%)…</>
-                ) : (
-                  <>🔴 Gravar Segmento (Espaço)</>
-                )}
-              </button>
+          {(() => {
+            const hasAudioRecorded = !!(activeSegment && recorded.get(activeSegment)?.audio);
+            const activeAudioUrl =
+              recorder.lastSavedAudioUrl ||
+              (hasAudioRecorded ? `/api/v1/videos/${slug}/files/audio/${activeSegment}.wav` : null);
 
-              <span className="text-xs text-neutral-400 hidden sm:inline">
-                ou aperte{" "}
-                <kbd className="rounded border bg-neutral-100 px-1.5 py-0.5 font-mono text-[11px] text-neutral-700">
-                  Espaço
-                </kbd>
-              </span>
-            </div>
+            return (
+              <div className="flex flex-col gap-4 border-t border-neutral-100 pt-5 lg:flex-row lg:items-center lg:justify-between">
+                {/* Botão de Ação Primária (Gravar / Parar) */}
+                <div className="flex items-center">
+                  <button
+                    type="button"
+                    disabled={
+                      !cameraReady ||
+                      recorder.phase === "encoding" ||
+                      recorder.phase === "uploading"
+                    }
+                    onClick={toggleRecording}
+                    className={`flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold text-white shadow-sm transition ${
+                      recorder.phase === "recording"
+                        ? "bg-red-600 hover:bg-red-700 animate-pulse"
+                        : "bg-neutral-900 hover:bg-neutral-800"
+                    } disabled:opacity-40`}
+                  >
+                    {recorder.phase === "recording" ? (
+                      <>⏹️ Parar e Salvar Take (Espaço)</>
+                    ) : recorder.phase === "encoding" ? (
+                      <>Codificando take…</>
+                    ) : recorder.phase === "uploading" ? (
+                      <>Enviando ({Math.round(recorder.progress * 100)}%)…</>
+                    ) : (
+                      <>🔴 Gravar Segmento (Espaço)</>
+                    )}
+                  </button>
+                </div>
 
-            {/* Replay do Take Gravado, Descartar & Próximo Segmento */}
-            <div className="flex flex-wrap items-center gap-3">
-              {recorded.get(activeSegment)?.audio && recorder.phase !== "recording" && (
-                <button
-                  type="button"
-                  disabled={deletingTake || recorder.phase === "uploading"}
-                  onClick={handleDiscardTake}
-                  className="flex items-center gap-1.5 rounded-xl border border-red-200 bg-red-50 px-3.5 py-2.5 text-xs font-semibold text-red-700 hover:bg-red-100 disabled:opacity-40 transition shadow-xs"
-                >
-                  {deletingTake ? "Descartando…" : "🗑️ Descartar Gravação"}
-                </button>
-              )}
+                {/* Replay do Take Gravado, Descartar & Próximo Segmento */}
+                <div className="flex flex-1 flex-wrap items-center justify-start gap-3 sm:gap-4 lg:justify-end">
+                  {activeAudioUrl && recorder.phase !== "recording" && (
+                    <div className="flex flex-1 min-w-[280px] max-w-[440px] items-center gap-2.5 rounded-xl border border-neutral-200 bg-neutral-50 px-3 py-1.5 shadow-xs">
+                      <span className="text-xs font-medium text-neutral-600 whitespace-nowrap">
+                        🎧 Ouvir take:
+                      </span>
+                      <audio
+                        controls
+                        src={activeAudioUrl}
+                        className="h-8 w-full min-w-[200px]"
+                      />
+                    </div>
+                  )}
 
-              {recorder.lastSavedAudioUrl &&
-                recorder.phase !== "recording" && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-neutral-500 font-medium">
-                      Ouvir:
-                    </span>
-                    <audio
-                      controls
-                      src={recorder.lastSavedAudioUrl}
-                      className="h-8 max-w-[180px]"
-                    />
-                  </div>
-                )}
+                  {hasAudioRecorded && recorder.phase !== "recording" && (
+                    <button
+                      type="button"
+                      disabled={deletingTake || recorder.phase === "uploading"}
+                      onClick={handleDiscardTake}
+                      className="flex items-center gap-1.5 rounded-xl border border-red-200 bg-red-50 px-3.5 py-2.5 text-xs font-semibold text-red-700 hover:bg-red-100 disabled:opacity-40 transition shadow-xs whitespace-nowrap"
+                    >
+                      {deletingTake ? "Descartando…" : "🗑️ Descartar Gravação"}
+                    </button>
+                  )}
 
-              {nextSegment && (
-                <button
-                  type="button"
-                  disabled={recorder.phase === "recording"}
-                  onClick={() => setActiveSegment(nextSegment.id)}
-                  className="rounded-xl border border-neutral-300 bg-white px-4 py-2.5 text-xs font-semibold text-neutral-800 shadow-sm hover:bg-neutral-50 disabled:opacity-40"
-                >
-                  Próximo ({nextSegment.id}) →
-                </button>
-              )}
-            </div>
-          </div>
+                  {nextSegment && (
+                    <button
+                      type="button"
+                      disabled={recorder.phase === "recording"}
+                      onClick={() => setActiveSegment(nextSegment.id)}
+                      className="rounded-xl border border-neutral-300 bg-white px-4 py-2.5 text-xs font-semibold text-neutral-800 shadow-sm hover:bg-neutral-50 disabled:opacity-40 whitespace-nowrap"
+                    >
+                      Próximo ({nextSegment.id}) →
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })()}
         </section>
       )}
 

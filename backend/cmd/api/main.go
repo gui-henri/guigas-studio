@@ -82,6 +82,7 @@ func newHandler(cfg config.Config, db *database.DB, appHub *events.Hub, watchers
 	})
 	mux.Handle("POST /api/v1/videos/{videoSlug}/takes", takeUpload)
 	mux.Handle("GET /api/v1/videos/{videoSlug}/takes", takeUpload)
+	mux.Handle("DELETE /api/v1/videos/{videoSlug}/takes", takeUpload)
 	mux.Handle("GET /api/events", events.HTTPHandler(hub, func(raw string) (*auth.Claims, error) {
 		return auth.ParseToken(cfg.Auth.JWTSecret, raw)
 	}))

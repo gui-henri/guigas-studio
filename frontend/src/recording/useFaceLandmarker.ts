@@ -18,24 +18,30 @@ export interface BlendshapeBatchItem {
 type WorkerOut =
   | { type: "ready"; delegate: "webgpu" | "cpu" }
   | { type: "samples"; batch: BlendshapeBatchItem[] }
-  | { type: "live_sample"; bs: number[]; faceDetected: boolean }
+  | { type: "live_sample"; bs: number[]; names?: string[]; faceDetected: boolean }
   | { type: "stats"; fps: number }
   | { type: "error"; message: string };
 
+type HTMLVideoElementWithCallback = HTMLVideoElement & {
+  requestVideoFrameCallback?: (cb: () => void) => number;
+  cancelVideoFrameCallback?: (id: number) => void;
+};
+
 /**
  * Owns the face-landmarker worker lifecycle and feeds it frames from the
- * attached <video> via requestVideoFrameCallback (transferable ImageBitmaps).
+ * attached <video> via requestVideoFrameCallback / requestAnimationFrame (transferable ImageBitmaps).
  * `onSamples` receives blendshape batches; `t` is relative to the t0 passed
  * into `start()`.
  */
 export function useFaceLandmarker(
   videoRef: React.RefObject<HTMLVideoElement | null>,
   onSamples?: (batch: BlendshapeBatchItem[]) => void,
-  onLiveSample?: (sample: { bs: number[]; faceDetected: boolean }) => void,
+  onLiveSample?: (sample: { bs: number[]; names?: string[]; faceDetected: boolean }) => void,
   enabled = true
 ): FaceLandmarkerState {
   const workerRef = useRef<Worker | null>(null);
   const rafRef = useRef<number>(0);
+  const rvfcRef = useRef<number | null>(null);
   const samplesRef = useRef(onSamples);
   const liveSampleRef = useRef(onLiveSample);
   const [delegate, setDelegate] = useState<"webgpu" | "cpu" | null>(null);
@@ -97,6 +103,7 @@ export function useFaceLandmarker(
     if (!ready || !enabled) return;
     let cancelled = false;
     let inFlight = false;
+    const currentVideo = videoRef.current as HTMLVideoElementWithCallback | null;
 
     const pump = () => {
       if (cancelled) return;
@@ -124,19 +131,36 @@ export function useFaceLandmarker(
               [bm]
             );
           })
-          .catch(() => {})
+          .catch((err) => {
+            console.debug("createImageBitmap skipped frame:", err);
+          })
           .finally(() => {
             inFlight = false;
           });
       }
-      rafRef.current = requestAnimationFrame(pump);
+
+      const videoEl = videoRef.current as HTMLVideoElementWithCallback | null;
+      if (videoEl && typeof videoEl.requestVideoFrameCallback === "function") {
+        rvfcRef.current = videoEl.requestVideoFrameCallback(() => {
+          pump();
+        });
+      } else {
+        rafRef.current = requestAnimationFrame(pump);
+      }
     };
 
     rafRef.current = requestAnimationFrame(pump);
 
     return () => {
       cancelled = true;
-      cancelAnimationFrame(rafRef.current);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      if (
+        rvfcRef.current !== null &&
+        currentVideo &&
+        typeof currentVideo.cancelVideoFrameCallback === "function"
+      ) {
+        currentVideo.cancelVideoFrameCallback(rvfcRef.current);
+      }
     };
   }, [ready, enabled, videoRef]);
 

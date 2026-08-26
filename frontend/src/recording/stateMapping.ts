@@ -44,21 +44,28 @@ export const BLENDSHAPE_NAMES = [
   'eyeBlinkLeft', 'eyeBlinkRight', 'eyeLookDownLeft', 'eyeLookDownRight',
   'eyeLookInLeft', 'eyeLookInRight', 'eyeLookOutLeft', 'eyeLookOutRight',
   'eyeLookUpLeft', 'eyeLookUpRight', 'eyeSquintLeft', 'eyeSquintRight',
-  'jawForward', 'jawOpen', 'jawLeft', 'jawRight', 'mouthClose',
+  'jawForward', 'jawLeft', 'jawOpen', 'jawRight', 'mouthClose',
   'mouthDimpleLeft', 'mouthDimpleRight', 'mouthFrownLeft', 'mouthFrownRight',
   'mouthFunnel', 'mouthLeft', 'mouthLowerDownLeft', 'mouthLowerDownRight',
   'mouthPressLeft', 'mouthPressRight', 'mouthPucker', 'mouthRight',
   'mouthRollLower', 'mouthRollUpper', 'mouthShrugLower', 'mouthShrugUpper',
   'mouthSmileLeft', 'mouthSmileRight', 'mouthStretchLeft', 'mouthStretchRight',
   'mouthUpperUpLeft', 'mouthUpperUpRight', 'noseSneerLeft', 'noseSneerRight',
+  'tongueOut',
 ] as const;
 
 export const BLENDSHAPE_COUNT = 52;
 
 /** Convert the positional array emitted by the worker into a named record.
- *  Unknown positions are ignored; mapped names must be within range. */
-export function bsArrayToRecord(bs: number[]): Record<string, number> {
+ *  If category names are provided by MediaPipe, they are used directly. */
+export function bsArrayToRecord(bs: number[], names?: string[]): Record<string, number> {
   const out: Record<string, number> = {};
+  if (names && names.length === bs.length) {
+    for (let i = 0; i < bs.length; i++) {
+      if (names[i]) out[names[i]] = bs[i];
+    }
+    return out;
+  }
   for (let i = 0; i < BLENDSHAPE_NAMES.length && i < bs.length; i++) {
     out[BLENDSHAPE_NAMES[i]] = bs[i];
   }
@@ -73,7 +80,12 @@ export function mapBlendshapesToState(
   bs: Record<string, number>,
   th: StateThresholds = DEFAULT_THRESHOLDS
 ): SpriteState {
-  if ((bs.browInnerUp ?? 0) >= th.surpriseBrow) return 'surprised';
+  if (
+    (bs.browInnerUp ?? 0) >= th.surpriseBrow ||
+    maxOf(bs.browOuterUpLeft ?? 0, bs.browOuterUpRight ?? 0) >= th.surpriseBrow
+  ) {
+    return 'surprised';
+  }
   if (maxOf(bs.mouthSmileLeft ?? 0, bs.mouthSmileRight ?? 0) >= th.smile) return 'happy';
   if (
     maxOf(bs.browDownLeft ?? 0, bs.browDownRight ?? 0) >= th.thoughtfulBrowDown ||
@@ -81,15 +93,21 @@ export function mapBlendshapesToState(
   ) {
     return 'thoughtful';
   }
-  if ((bs.jawOpen ?? 0) >= th.talkJawOpen) return 'talking';
+  if (
+    (bs.jawOpen ?? 0) >= th.talkJawOpen ||
+    maxOf(bs.mouthFunnel ?? 0, bs.mouthPucker ?? 0) >= th.talkJawOpen
+  ) {
+    return 'talking';
+  }
   return 'idle';
 }
 
 export function mapSampleToState(
   bs: number[],
-  th: StateThresholds = DEFAULT_THRESHOLDS
+  th: StateThresholds = DEFAULT_THRESHOLDS,
+  names?: string[]
 ): SpriteState {
-  return mapBlendshapesToState(bsArrayToRecord(bs), th);
+  return mapBlendshapesToState(bsArrayToRecord(bs, names), th);
 }
 
 /**
@@ -149,7 +167,7 @@ export function serializeBlendshapes(
 
   const stateSamples: StateSample[] = samples.map((s) => ({
     t: Math.round(s.t),
-    state: mapSampleToState(s.bs, th),
+    state: mapSampleToState(s.bs, th, names),
   }));
   const smoothed = smoothStates(stateSamples, th);
 

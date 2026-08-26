@@ -15,8 +15,8 @@ const STATS_INTERVAL_MS = 1000;
 
 type OutMessage =
   | { type: "ready"; delegate: "webgpu" | "cpu" }
-  | { type: "samples"; batch: { t: number; bs: number[] }[] }
-  | { type: "live_sample"; bs: number[]; faceDetected: boolean }
+  | { type: "samples"; batch: { t: number; bs: number[]; names?: string[] }[] }
+  | { type: "live_sample"; bs: number[]; names?: string[]; faceDetected: boolean }
   | { type: "stats"; fps: number }
   | { type: "error"; message: string };
 
@@ -26,36 +26,75 @@ function post(msg: OutMessage, transfer?: Transferable[]): void {
 
 /** Fetch the model through the Cache API so it is downloaded only once. */
 async function loadModelBuffer(url: string): Promise<ArrayBuffer> {
-  const cache = await caches.open(MODEL_CACHE);
-  const hit = await cache.match(url);
-  if (hit) return hit.arrayBuffer();
-  const resp = await fetch(url); // default caching; never no-store here
+  try {
+    if (typeof caches !== "undefined") {
+      const cache = await caches.open(MODEL_CACHE);
+      const hit = await cache.match(url);
+      if (hit) return hit.arrayBuffer();
+      const resp = await fetch(url);
+      if (!resp.ok) throw new Error(`model fetch failed: ${resp.status}`);
+      try {
+        await cache.put(url, resp.clone());
+      } catch (putErr) {
+        void putErr;
+      }
+      return resp.arrayBuffer();
+    }
+  } catch (e) {
+    console.warn("Cache API unavailable in worker, fetching directly:", e);
+  }
+  const resp = await fetch(url);
   if (!resp.ok) throw new Error(`model fetch failed: ${resp.status}`);
-  await cache.put(url, resp.clone());
   return resp.arrayBuffer();
 }
 
 let landmarker: FaceLandmarker | null = null;
+let currentDelegate: "GPU" | "CPU" = "GPU";
 
-async function init(): Promise<"webgpu" | "cpu"> {
+async function makeLandmarker(delegate: "GPU" | "CPU"): Promise<FaceLandmarker> {
   const fileset = await FilesetResolver.forVisionTasks(WASM_BASE);
   const modelBuffer = await loadModelBuffer(MODEL_URL);
+  return FaceLandmarker.createFromOptions(fileset, {
+    baseOptions: { modelAssetBuffer: new Uint8Array(modelBuffer.slice(0)), delegate },
+    runningMode: "VIDEO",
+    numFaces: 1,
+    outputFaceBlendshapes: true,
+    outputFacialTransformationMatrixes: false,
+  });
+}
 
-  const make = async (delegate: "GPU" | "CPU") =>
-    FaceLandmarker.createFromOptions(fileset, {
-      baseOptions: { modelAssetBuffer: new Uint8Array(modelBuffer.slice(0)), delegate },
-      runningMode: "VIDEO",
-      numFaces: 1,
-      outputFaceBlendshapes: true,
-      outputFacialTransformationMatrixes: false,
-    });
-
+async function init(): Promise<"webgpu" | "cpu"> {
   try {
-    landmarker = await make("GPU");
+    landmarker = await makeLandmarker("GPU");
+    currentDelegate = "GPU";
     return "webgpu";
-  } catch {
-    landmarker = await make("CPU");
+  } catch (gpuErr) {
+    console.warn("GPU init failed, falling back to CPU:", gpuErr);
+    landmarker = await makeLandmarker("CPU");
+    currentDelegate = "CPU";
     return "cpu";
+  }
+}
+
+async function fallbackToCpu(): Promise<boolean> {
+  if (currentDelegate === "CPU") return false;
+  try {
+    console.warn("GPU inference failed at runtime in worker; switching to CPU delegate...");
+    if (landmarker) {
+      try {
+        landmarker.close();
+      } catch (closeErr) {
+        void closeErr;
+      }
+      landmarker = null;
+    }
+    landmarker = await makeLandmarker("CPU");
+    currentDelegate = "CPU";
+    post({ type: "ready", delegate: "cpu" });
+    return true;
+  } catch (e) {
+    console.error("CPU fallback also failed:", e);
+    return false;
   }
 }
 
@@ -73,7 +112,7 @@ function flushBatch(force = false): void {
   batch = [];
 }
 
-self.onmessage = (ev: MessageEvent) => {
+self.onmessage = async (ev: MessageEvent) => {
   const msg = ev.data as
     | { type: "init" }
     | { type: "start"; t0: number }
@@ -108,7 +147,22 @@ self.onmessage = (ev: MessageEvent) => {
           return;
         }
         lastTimestamp = t;
-        const result = landmarker.detectForVideo(bitmap, t);
+
+        let result;
+        try {
+          result = landmarker.detectForVideo(bitmap, t);
+        } catch (inferErr) {
+          if (currentDelegate === "GPU") {
+            const recovered = await fallbackToCpu();
+            if (recovered && landmarker) {
+              result = landmarker.detectForVideo(bitmap, t);
+            } else {
+              throw inferErr;
+            }
+          } else {
+            throw inferErr;
+          }
+        }
         bitmap.close(); // free immediately — no accumulation
         inferred++;
 
@@ -120,8 +174,8 @@ self.onmessage = (ev: MessageEvent) => {
             bs[i] = categories[i].score;
             names[i] = categories[i].categoryName ?? "";
           }
-          // Emit immediate live sample for real-time avatar animation & UI
-          post({ type: "live_sample", bs, faceDetected: true });
+          // Emit immediate live sample with names for real-time avatar animation & UI
+          post({ type: "live_sample", bs, names, faceDetected: true });
 
           // If actively recording, accumulate into synchronized batch
           if (t0 !== null) {
@@ -130,7 +184,7 @@ self.onmessage = (ev: MessageEvent) => {
           }
         } else {
           // No face detected in frame
-          post({ type: "live_sample", bs: [], faceDetected: false });
+          post({ type: "live_sample", bs: [], names: [], faceDetected: false });
         }
 
         const now = performance.now();

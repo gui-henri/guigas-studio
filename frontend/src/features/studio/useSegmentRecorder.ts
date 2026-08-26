@@ -85,7 +85,7 @@ export function useSegmentRecorder(
     },
     (live) => {
       if (live.faceDetected && live.bs.length > 0) {
-        stateRef.current = mapSampleToState(live.bs);
+        stateRef.current = mapSampleToState(live.bs, undefined, live.names);
       } else {
         stateRef.current = "idle";
       }
