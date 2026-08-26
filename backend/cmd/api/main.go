@@ -31,7 +31,7 @@ import (
 	"github.com/gui-henri/guigas-studio/backend/internal/watcher"
 )
 
-func newHandler(cfg config.Config, db *database.DB, appHub *events.Hub) http.Handler {
+func newHandler(cfg config.Config, db *database.DB, appHub *events.Hub, watchers ...*watcher.Watcher) http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -82,7 +82,12 @@ func newHandler(cfg config.Config, db *database.DB, appHub *events.Hub) http.Han
 	}))
 	mux.Handle(studiov1connect.NewHealthServiceHandler(services.NewHealthService(), connect.WithInterceptors(interceptors...)))
 	mux.Handle(studiov1connect.NewAuthServiceHandler(services.NewAuthService(db.Pool, cfg.Auth.JWTSecret), connect.WithInterceptors(interceptors...)))
-	mux.Handle(studiov1connect.NewVideoServiceHandler(services.NewVideoService(db.Queries, cfg.DataDir, hub, db.Pool), connect.WithInterceptors(interceptors...)))
+
+	videoSvc := services.NewVideoService(db.Queries, cfg.DataDir, hub, db.Pool)
+	if len(watchers) > 0 && watchers[0] != nil {
+		videoSvc.SetWatcher(watchers[0])
+	}
+	mux.Handle(studiov1connect.NewVideoServiceHandler(videoSvc, connect.WithInterceptors(interceptors...)))
 	mux.Handle(studiov1connect.NewJobServiceHandler(services.NewJobService(db.Queries, db.Pool, cfg.DataDir, hub), connect.WithInterceptors(interceptors...)))
 
 	staticDir := os.Getenv("STATIC_DIR")
@@ -188,7 +193,7 @@ func main() {
 
 	server := &http.Server{
 		Addr:    ":" + cfg.Port,
-		Handler: newHandler(cfg, db, appHub),
+		Handler: newHandler(cfg, db, appHub, rssWatcher),
 	}
 
 	errCh := make(chan error, 1)

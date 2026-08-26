@@ -63,3 +63,8 @@ export const getReleaseChecklist = VideoService.method.getReleaseChecklist;
  * @generated from rpc app.studio.v1.VideoService.SetChecklistItemPublished
  */
 export const setChecklistItemPublished = VideoService.method.setChecklistItemPublished;
+
+/**
+ * @generated from rpc app.studio.v1.VideoService.TriggerRssPoll
+ */
+export const triggerRssPoll = VideoService.method.triggerRssPoll;

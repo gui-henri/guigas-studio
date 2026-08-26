@@ -23,6 +23,7 @@ import (
 	sqlc "github.com/gui-henri/guigas-studio/backend/internal/database/sqlc"
 	"github.com/gui-henri/guigas-studio/backend/internal/domain/videostate"
 	"github.com/gui-henri/guigas-studio/backend/internal/events"
+	"github.com/gui-henri/guigas-studio/backend/internal/watcher"
 	"github.com/gui-henri/guigas-studio/backend/internal/workspace"
 )
 
@@ -51,6 +52,8 @@ func statusToProto(status string) studiov1.VideoStatus {
 	return studiov1.VideoStatus_VIDEO_STATUS_UNSPECIFIED
 }
 
+var _ studiov1connect.VideoServiceHandler = (*VideoService)(nil)
+
 // VideoService implements studio.v1.VideoService, including the script review
 // flow (S1-04).
 type VideoService struct {
@@ -59,11 +62,12 @@ type VideoService struct {
 	dataDir string
 	hub     *events.Hub // optional; nil disables SSE publishing
 	jobs    *JobsQueue
+	watcher *watcher.Watcher
 }
 
 // NewVideoService returns the Connect handler for VideoService. The pool may
 // be nil in tests that never hit transactional paths (ApproveScenes).
-func NewVideoService(queries *sqlc.Queries, dataDir string, hub *events.Hub, pool *pgxpool.Pool) studiov1connect.VideoServiceHandler {
+func NewVideoService(queries *sqlc.Queries, dataDir string, hub *events.Hub, pool *pgxpool.Pool) *VideoService {
 	return &VideoService{
 		queries: queries,
 		pool:    pool,
@@ -71,6 +75,32 @@ func NewVideoService(queries *sqlc.Queries, dataDir string, hub *events.Hub, poo
 		hub:     hub,
 		jobs:    NewJobsQueue(queries),
 	}
+}
+
+// SetWatcher configures the optional RSS watcher instance for manual polling.
+func (s *VideoService) SetWatcher(w *watcher.Watcher) {
+	s.watcher = w
+}
+
+func (s *VideoService) TriggerRssPoll(
+	ctx context.Context,
+	req *connect.Request[studiov1.TriggerRssPollRequest],
+) (*connect.Response[studiov1.TriggerRssPollResponse], error) {
+	if s.watcher == nil {
+		return nil, connect.NewError(connect.CodeFailedPrecondition, errors.New("rss watcher not configured"))
+	}
+	created, err := s.watcher.Poll(ctx)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("rss poll failed: %w", err))
+	}
+	protoVideos := make([]*studiov1.Video, 0, len(created))
+	for i := range created {
+		protoVideos = append(protoVideos, videoToProto(&created[i]))
+	}
+	return connect.NewResponse(&studiov1.TriggerRssPollResponse{
+		NewPostsCount: int32(len(created)),
+		CreatedVideos: protoVideos,
+	}), nil
 }
 
 // publishStatusChanged emits video.status_changed to global + per-video topics.

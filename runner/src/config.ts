@@ -39,6 +39,24 @@ function numberEnv(name: string, fallback: number): number {
 }
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): RunnerConfig {
+  // Try loading .env automatically from current dir or monorepo root
+  if (typeof process.loadEnvFile === "function") {
+    const candidates = [
+      path.resolve(process.cwd(), ".env"),
+      path.resolve(process.cwd(), "runner/.env"),
+      path.resolve(process.cwd(), "../../.env"),
+    ];
+    for (const envPath of candidates) {
+      if (fs.existsSync(envPath)) {
+        try {
+          process.loadEnvFile(envPath);
+        } catch {
+          // ignore
+        }
+      }
+    }
+  }
+
   const workDir = path.resolve(
     env["WORK_DIR"] && env["WORK_DIR"].length > 0 ? env["WORK_DIR"] : "./work"
   );
