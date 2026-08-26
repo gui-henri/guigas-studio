@@ -38,6 +38,7 @@ export async function runStages(
 ): Promise<"completed" | "cancelled" | "failed"> {
   const log = jobLogger({ job_id: job.jobId });
   const progress = { stage: "start", percent: 0 };
+  const warnings: string[] = [];
 
   const heartbeat = setInterval(() => {
     void client.jobs
@@ -56,6 +57,7 @@ export async function runStages(
     videoId: job.videoId,
     slug: job.slug,
     expectedShorts: job.expectedShorts,
+    warnings,
     log,
     async report(stage, percent) {
       progress.stage = stage;
@@ -84,8 +86,8 @@ export async function runStages(
       await handler(ctx);
       log.info({ stage: stageName }, "stage done");
     }
-    await client.jobs.completeJob({ jobId: job.jobId });
-    log.info("job completed");
+    await client.jobs.completeJob({ jobId: job.jobId, warnings });
+    log.info({ warnings: warnings.length }, "job completed");
     return "completed";
   } catch (err) {
     if (err instanceof JobCancelled) {

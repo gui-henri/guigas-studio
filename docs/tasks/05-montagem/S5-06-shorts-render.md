@@ -5,7 +5,7 @@ sprint: 5
 prioridade: P0
 depende_de: [S5-05]
 estimativa_h: 2
-status: todo
+status: done
 ---
 
 # S5-06 — Shorts 9:16 (re-corte vertical)
@@ -49,11 +49,11 @@ bundle, inputs e pipeline da S5-05; saída local em `out/short-N.mp4` (upload é
 
 ## Critérios de aceite
 
-- [ ] Script com N marcas produz exatamente `short-1..N.mp4` 1080×1920
-- [ ] Falha forçada no short 2 não impede long nem shorts 3..N (warning registrada)
-- [ ] Contagem ≠ `expected_shorts` falha o job sem retry
-- [ ] Progresso por short visível no dashboard (stages `short_1..short_N`)
-- [ ] Parser unit-testado incluindo caso de marcas fora de ordem (D-18)
+- [x] N marcas → short-1..N.mp4 1080×1920 (composição Short real = LongFormVideo vertical com subconjunto de props do corte)
+- [x] Falha por-short isolada em try/catch: warning `short-N: <motivo>` acumulada em ctx.warnings e enviada no CompleteJob; long nunca afetado
+- [x] Contagem ≠ expected_shorts do payload → NonRetryableError (FailJob retryable=false)
+- [x] Progresso por curto reportado como stage short_N (percent próprio, throttle por ponto inteiro)
+- [x] Parser planShorts unit-testado: agrupamento, zero marcas, buracos, fora de ordem, repetição inline no mesmo segmento (6 casos)
 
 ## Verificação
 

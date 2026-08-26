@@ -9,6 +9,8 @@ export interface JobContext {
   videoId: string;
   slug: string;
   expectedShorts: number;
+  /** Accumulated non-fatal warnings shipped with CompleteJob. */
+  warnings: string[];
   log: Logger;
   /** Report progress to the server (persisted + mirrored over SSE). */
   report(stage: string, percent: number): Promise<number>;

@@ -24,6 +24,7 @@ function makeCtx(root: string) {
       videoId: "vid-1",
       slug: "demo",
       expectedShorts: 0,
+      warnings: [],
       log: {
         info() {}, warn() {}, error() {}, debug() {}, child() { return this; },
       } as never,

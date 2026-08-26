@@ -52,20 +52,22 @@ const Root: React.FC = () => (
     />
     <Composition
       id="Short"
-      component={scene}
+      component={longFormScene}
       durationInFrames={FPS * 30}
       fps={FPS}
       width={1080}
       height={1920}
-      defaultProps={defaultProps}
+      defaultProps={{ title: "Guigas Studio", segments: [], timelines: {}, audioFiles: {}, spriteSheetUrl: "", spriteMeta: {}, showSubtitles: false, subtitleWordsBySeg: {} } as unknown as Record<string, never>}
       calculateMetadata={({ props }) => {
-        const videoProps = props as unknown as StudioVideoProps;
-        return {
-          durationInFrames: Math.max(
-            FPS,
-            Math.round((videoProps.durationMs / 1000) * FPS)
-          ),
+        const p = props as unknown as {
+          segments?: Array<{ id: string }>;
+          timelines?: Record<string, { durationMs?: number }>;
         };
+        const totalMs = (p.segments ?? []).reduce(
+          (sum, s) => sum + (Number(p.timelines?.[s.id]?.durationMs ?? 0) || 1000),
+          0
+        );
+        return { durationInFrames: Math.max(FPS, Math.round((totalMs / 1000) * FPS)) };
       }}
     />
     <Composition

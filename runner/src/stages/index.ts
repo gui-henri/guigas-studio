@@ -5,6 +5,7 @@ import { syncInputs, type SyncManifestEntry } from "./sync.js";
 import type { StageHandler } from "./types.js";
 import { makeBundle } from "./bundle.js";
 import { makeRenderLongStage } from "./render-long.js";
+import { makeShortsStage } from "./shorts.js";
 
 export interface StageEnv {
   baseUrl: string;
@@ -59,6 +60,7 @@ export function defaultStages(
   };
 
   const renderLongStage = makeRenderLongStage();
+  const shortsStage = makeShortsStage();
 
   return names.map((name) => [
     name,
@@ -68,10 +70,12 @@ export function defaultStages(
         ? bundleStage
         : name === "render_long"
           ? renderLongStage
-          : async (ctx) => {
+          : name === "shorts"
+            ? shortsStage
+            : async (ctx) => {
               await ctx.checkCancelled();
-              ctx.log.info({ stage: name }, "stage placeholder");
-              await ctx.report(name, Math.round((names.indexOf(name) + 1) * (100 / names.length)));
-            },
+                ctx.log.info({ stage: name }, "stage placeholder");
+                await ctx.report(name, Math.round((names.indexOf(name) + 1) * (100 / names.length)));
+              },
   ]);
 }
