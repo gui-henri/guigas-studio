@@ -71,6 +71,12 @@ Evidências desta tarefa operacional:
 
 ## Notas
 
+## Notas
+
+- Runbook completo pré-preparado em `docs/guides/backup-offsite.md` (script com flock,
+  cron, retenção restic/rclone e passos de restauração). Execução real (destino,
+  credenciais, teste de restauração e 2ª confirmação do cron) exige SSH na VPS +
+  conta offsite — passo humano pendente.
 - Restic é a opção mais simples alinhada: versões + criptografia num binário só; rclone
   serve se o destino escolhido não suportar restic (ex.: SFTP puro).
 - Restaurar `/data` restaura também o histórico git dos vídeos (T-07) — não é preciso
