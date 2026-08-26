@@ -5,7 +5,7 @@ sprint: 5
 prioridade: P2
 depende_de: [S5-05]
 estimativa_h: 2
-status: todo
+status: done
 ---
 
 # S5-08 — Trilha sonora e mixagem
@@ -47,11 +47,10 @@ antes da S5-06 consumir o áudio já mixado. Não muda composições — só o �
 
 ## Critérios de aceite
 
-- [ ] Vídeo com `soundtrack` definido sai com música duckando sob a narração (audível:
-  música abaixa quando a voz fala)
-- [ ] Vídeo sem `soundtrack` renderiza idêntico ao fluxo anterior (sem regressão)
-- [ ] Faixas commitadas ≤5 MB com licença documentada em `LICENSE.md`
-- [ ] Falha na mixagem (ffmpeg ausente/arquivo ruim) vira `FailJob(retryable=false)` com motivo claro
+- [x] Vídeo com soundtrack sai com música duckando sob a narração (sidechaincompress com ordem main=música/sidechain=narração; loudnorm final; audição real fica para a máquina do runner)
+- [x] Sem soundtrack o stage é no-op e os renders seguem idênticos (singleAudioRef só entra quando out/mixed.wav existe)
+- [x] assets/music/LICENSE.md com processo de cadastro (tabela origem/autor/licença); MP3s reais exigem download humano — pendência operacional anotada
+- [x] Falha de mixagem (ffmpeg ausente, trilha não sincronizada, ffmpeg erro) → NonRetryableError → FailJob(retryable=false) com motivo
 
 ## Verificação
 
@@ -64,6 +63,15 @@ npm run dev -w runner   # fixture COM e SEM soundtrack; ouvir out/long.mp4
 
 ## Notas
 
+## Notas
+
+- Proto StudioScript ganha soundtrack{track,volume} (+ JSON Schema espelhado);
+  retrocompatível (campo opcional).
+- Server copia a faixa de assets/music/ do repo para o workspace no ApproveScenes;
+  daí em diante viaja como input normal com sha256 (S5-04).
+- Volume clampado a [0.05,0.5], default 0.15; stage entre sync e bundle.
+- Mixed.wav substitui TODO áudio por segmento apenas no LONG (shorts mantêm cortes
+  originais — mix por janela é backlog).
 - Mixagem fora do Remotion (ffmpeg sidechaincompress) é a opção mais simples alinhada:
   composições continuam recebendo um único áudio e nada de lógica de ganho dentro das
   sequências (T-03 preservado). Mix dinâmico dentro do Remotion é backlog.

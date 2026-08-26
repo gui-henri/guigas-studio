@@ -1,6 +1,7 @@
 import React from "react";
 import {
   AbsoluteFill,
+  Audio,
   Sequence,
   staticFile,
   useCurrentFrame,
@@ -43,6 +44,11 @@ export interface LongFormProps {
     string,
     Array<{ text: string; startMs: number; endMs: number }>
   >;
+  /**
+   * When present (S5-08 mixed soundtrack), replaces ALL per-segment audio
+   * with one full-length track aligned to the segment clock.
+   */
+  singleAudioRef?: string;
 }
 
 const SPRITE_SCALE = 1080;
@@ -62,6 +68,7 @@ export const LongFormVideo: React.FC<LongFormProps> = ({
   spriteMeta,
   showSubtitles,
   subtitleWordsBySeg,
+  singleAudioRef,
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
@@ -96,7 +103,13 @@ export const LongFormVideo: React.FC<LongFormProps> = ({
           >
             <SegmentComposition
               avatarTimeline={piece.timeline as never}
-              audioSrc={piece.wavRef ? resolveMediaUrl(piece.wavRef) : null}
+              audioSrc={
+                singleAudioRef
+                  ? null
+                  : piece.wavRef
+                    ? resolveMediaUrl(piece.wavRef)
+                    : null
+              }
               scene={piece.segment.scene ?? null}
               layout="split"
               showSubtitles={showSubtitles && piece.words.length > 0}
@@ -108,6 +121,10 @@ export const LongFormVideo: React.FC<LongFormProps> = ({
           </Sequence>
         ) : null
       )}
+
+      {singleAudioRef ? (
+        <Audio src={resolveMediaUrl(singleAudioRef)} />
+      ) : null}
 
       {frame < fps ? (
         <div

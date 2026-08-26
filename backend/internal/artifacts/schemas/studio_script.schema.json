@@ -5,48 +5,101 @@
   "description": "Single source of truth of a Guigas Studio video (SPEC §3). Hand-maintained mirror of proto/app/studio/v1/script.proto — keep both in sync.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["post", "language", "target", "segments"],
+  "required": [
+    "post",
+    "language",
+    "target",
+    "segments"
+  ],
   "properties": {
-    "post": { "type": "string", "minLength": 1 },
+    "post": {
+      "type": "string",
+      "minLength": 1
+    },
     "language": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["spoken", "subtitles"],
+      "required": [
+        "spoken",
+        "subtitles"
+      ],
       "properties": {
-        "spoken": { "type": "string", "const": "pt-BR" },
-        "subtitles": { "type": "string", "const": "en" }
+        "spoken": {
+          "type": "string",
+          "const": "pt-BR"
+        },
+        "subtitles": {
+          "type": "string",
+          "const": "en"
+        }
       }
     },
     "target": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["durationMin"],
+      "required": [
+        "durationMin"
+      ],
       "properties": {
-        "durationMin": { "type": "integer", "minimum": 4, "maximum": 30 }
+        "durationMin": {
+          "type": "integer",
+          "minimum": 4,
+          "maximum": 30
+        }
       }
     },
     "related": {
       "type": "array",
-      "items": { "type": "string" }
+      "items": {
+        "type": "string"
+      }
     },
     "segments": {
       "type": "array",
       "minItems": 1,
-      "items": { "$ref": "#/$defs/Segment" }
+      "items": {
+        "$ref": "#/$defs/Segment"
+      }
     },
     "social": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "x_thread": { "type": "array", "items": { "type": "string" } },
-        "linkedin": { "type": "string" },
-        "instagram_caption": { "type": "string" }
+        "x_thread": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "linkedin": {
+          "type": "string"
+        },
+        "instagram_caption": {
+          "type": "string"
+        }
       }
+    },
+    "soundtrack": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Soundtrack"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Optional background track with ducking under narration (S5-08)."
     }
   },
   "$defs": {
     "Beat": {
-      "enum": ["BEAT_HOOK", "BEAT_SETUP", "BEAT_EXAMPLE", "BEAT_PAYOFF", "BEAT_CTA"]
+      "enum": [
+        "BEAT_HOOK",
+        "BEAT_SETUP",
+        "BEAT_EXAMPLE",
+        "BEAT_PAYOFF",
+        "BEAT_CTA"
+      ]
     },
     "Emotion": {
       "enum": [
@@ -59,29 +112,52 @@
     },
     "SceneRef": {
       "anyOf": [
-        { "type": "null" },
+        {
+          "type": "null"
+        },
         {
           "type": "object",
           "additionalProperties": false,
-          "required": ["type"],
+          "required": [
+            "type"
+          ],
           "properties": {
-            "type": { "type": "string" },
-            "props": { "type": "object" }
+            "type": {
+              "type": "string"
+            },
+            "props": {
+              "type": "object"
+            }
           }
         }
       ]
     },
     "ShortMarker": {
       "anyOf": [
-        { "type": "null" },
+        {
+          "type": "null"
+        },
         {
           "type": "object",
           "additionalProperties": false,
-          "required": ["id", "hook", "cta"],
+          "required": [
+            "id",
+            "hook",
+            "cta"
+          ],
           "properties": {
-            "id": { "type": "integer", "minimum": 1 },
-            "hook": { "type": "string", "minLength": 1 },
-            "cta": { "type": "string", "minLength": 1 }
+            "id": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "hook": {
+              "type": "string",
+              "minLength": 1
+            },
+            "cta": {
+              "type": "string",
+              "minLength": 1
+            }
           }
         }
       ]
@@ -89,19 +165,53 @@
     "Segment": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "beat", "emotion", "narration_pt"],
+      "required": [
+        "id",
+        "beat",
+        "emotion",
+        "narration_pt"
+      ],
       "properties": {
         "id": {
           "type": "string",
           "pattern": "^[a-z0-9][a-z0-9-]*$",
           "maxLength": 64
         },
-        "beat": { "$ref": "#/$defs/Beat" },
-        "emotion": { "$ref": "#/$defs/Emotion" },
-        "narration_pt": { "type": "string", "minLength": 1 },
-        "scene": { "$ref": "#/$defs/SceneRef" },
-        "short": { "$ref": "#/$defs/ShortMarker" }
+        "beat": {
+          "$ref": "#/$defs/Beat"
+        },
+        "emotion": {
+          "$ref": "#/$defs/Emotion"
+        },
+        "narration_pt": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scene": {
+          "$ref": "#/$defs/SceneRef"
+        },
+        "short": {
+          "$ref": "#/$defs/ShortMarker"
+        }
       }
+    },
+    "Soundtrack": {
+      "type": "object",
+      "properties": {
+        "track": {
+          "type": "string",
+          "minLength": 1
+        },
+        "volume": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+        }
+      },
+      "required": [
+        "track"
+      ],
+      "additionalProperties": false
     }
   }
 }

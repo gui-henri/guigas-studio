@@ -51,6 +51,13 @@ message SocialCopy {
   string instagram_caption = 3 [json_name = "instagram_caption"];
 }
 
+message Soundtrack {
+  // File name inside assets/music/ (repo), e.g. "calm-loop.mp3".
+  string track = 1;
+  // Background volume under narration; runner clamps to [0.05, 0.5].
+  double volume = 2;
+}
+
 message StudioScript {
   string post = 1;
   Language language = 2;
@@ -58,6 +65,8 @@ message StudioScript {
   repeated string related = 4;
   repeated Segment segments = 5;
   SocialCopy social = 6;
+  // Optional background track with ducking (S5-08). Absent = no soundtrack.
+  Soundtrack soundtrack = 7;
 }
 
 enum Beat {

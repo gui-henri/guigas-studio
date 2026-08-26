@@ -11,7 +11,7 @@ import type { JsonObject, Message } from "@bufbuild/protobuf";
  * Describes the file app/studio/v1/script.proto.
  */
 export const file_app_studio_v1_script: GenFile = /*@__PURE__*/
-  fileDesc("ChphcHAvc3R1ZGlvL3YxL3NjcmlwdC5wcm90bxINYXBwLnN0dWRpby52MSItCghMYW5ndWFnZRIOCgZzcG9rZW4YASABKAkSEQoJc3VidGl0bGVzGAIgASgJIh4KBlRhcmdldBIUCgxkdXJhdGlvbl9taW4YASABKAUiQAoIU2NlbmVSZWYSDAoEdHlwZRgBIAEoCRImCgVwcm9wcxgCIAEoCzIXLmdvb2dsZS5wcm90b2J1Zi5TdHJ1Y3QiNAoLU2hvcnRNYXJrZXISCgoCaWQYASABKA0SDAoEaG9vaxgCIAEoCRILCgNjdGEYAyABKAki2AEKB1NlZ21lbnQSCgoCaWQYASABKAkSIQoEYmVhdBgCIAEoDjITLmFwcC5zdHVkaW8udjEuQmVhdBInCgdlbW90aW9uGAMgASgOMhYuYXBwLnN0dWRpby52MS5FbW90aW9uEiIKDG5hcnJhdGlvbl9wdBgEIAEoCVIMbmFycmF0aW9uX3B0EiYKBXNjZW5lGAUgASgLMhcuYXBwLnN0dWRpby52MS5TY2VuZVJlZhIpCgVzaG9ydBgGIAEoCzIaLmFwcC5zdHVkaW8udjEuU2hvcnRNYXJrZXIiaAoKU29jaWFsQ29weRIaCgh4X3RocmVhZBgBIAMoCVIIeF90aHJlYWQSEAoIbGlua2VkaW4YAiABKAkSLAoRaW5zdGFncmFtX2NhcHRpb24YAyABKAlSEWluc3RhZ3JhbV9jYXB0aW9uItQBCgxTdHVkaW9TY3JpcHQSDAoEcG9zdBgBIAEoCRIpCghsYW5ndWFnZRgCIAEoCzIXLmFwcC5zdHVkaW8udjEuTGFuZ3VhZ2USJQoGdGFyZ2V0GAMgASgLMhUuYXBwLnN0dWRpby52MS5UYXJnZXQSDwoHcmVsYXRlZBgEIAMoCRIoCghzZWdtZW50cxgFIAMoCzIWLmFwcC5zdHVkaW8udjEuU2VnbWVudBIpCgZzb2NpYWwYBiABKAsyGS5hcHAuc3R1ZGlvLnYxLlNvY2lhbENvcHkqbAoEQmVhdBIUChBCRUFUX1VOU1BFQ0lGSUVEEAASDQoJQkVBVF9IT09LEAESDgoKQkVBVF9TRVRVUBACEhAKDEJFQVRfRVhBTVBMRRADEg8KC0JFQVRfUEFZT0ZGEAQSDAoIQkVBVF9DVEEQBSqMAQoHRW1vdGlvbhIXChNFTU9USU9OX1VOU1BFQ0lGSUVEEAASEAoMRU1PVElPTl9JRExFEAESFAoQRU1PVElPTl9TUEVBS0lORxACEhEKDUVNT1RJT05fSEFQUFkQAxIWChJFTU9USU9OX1RIT1VHSFRGVUwQBBIVChFFTU9USU9OX1NVUlBSSVNFRBAFQkdaRWdpdGh1Yi5jb20vZ3VpLWhlbnJpL2d1aWdhcy1zdHVkaW8vYmFja2VuZC9nZW4vYXBwL3N0dWRpby92MTtzdHVkaW92MWIGcHJvdG8z", [file_google_protobuf_struct]);
+  fileDesc("ChphcHAvc3R1ZGlvL3YxL3NjcmlwdC5wcm90bxINYXBwLnN0dWRpby52MSItCghMYW5ndWFnZRIOCgZzcG9rZW4YASABKAkSEQoJc3VidGl0bGVzGAIgASgJIh4KBlRhcmdldBIUCgxkdXJhdGlvbl9taW4YASABKAUiQAoIU2NlbmVSZWYSDAoEdHlwZRgBIAEoCRImCgVwcm9wcxgCIAEoCzIXLmdvb2dsZS5wcm90b2J1Zi5TdHJ1Y3QiNAoLU2hvcnRNYXJrZXISCgoCaWQYASABKA0SDAoEaG9vaxgCIAEoCRILCgNjdGEYAyABKAki2AEKB1NlZ21lbnQSCgoCaWQYASABKAkSIQoEYmVhdBgCIAEoDjITLmFwcC5zdHVkaW8udjEuQmVhdBInCgdlbW90aW9uGAMgASgOMhYuYXBwLnN0dWRpby52MS5FbW90aW9uEiIKDG5hcnJhdGlvbl9wdBgEIAEoCVIMbmFycmF0aW9uX3B0EiYKBXNjZW5lGAUgASgLMhcuYXBwLnN0dWRpby52MS5TY2VuZVJlZhIpCgVzaG9ydBgGIAEoCzIaLmFwcC5zdHVkaW8udjEuU2hvcnRNYXJrZXIiaAoKU29jaWFsQ29weRIaCgh4X3RocmVhZBgBIAMoCVIIeF90aHJlYWQSEAoIbGlua2VkaW4YAiABKAkSLAoRaW5zdGFncmFtX2NhcHRpb24YAyABKAlSEWluc3RhZ3JhbV9jYXB0aW9uIisKClNvdW5kdHJhY2sSDQoFdHJhY2sYASABKAkSDgoGdm9sdW1lGAIgASgBIoMCCgxTdHVkaW9TY3JpcHQSDAoEcG9zdBgBIAEoCRIpCghsYW5ndWFnZRgCIAEoCzIXLmFwcC5zdHVkaW8udjEuTGFuZ3VhZ2USJQoGdGFyZ2V0GAMgASgLMhUuYXBwLnN0dWRpby52MS5UYXJnZXQSDwoHcmVsYXRlZBgEIAMoCRIoCghzZWdtZW50cxgFIAMoCzIWLmFwcC5zdHVkaW8udjEuU2VnbWVudBIpCgZzb2NpYWwYBiABKAsyGS5hcHAuc3R1ZGlvLnYxLlNvY2lhbENvcHkSLQoKc291bmR0cmFjaxgHIAEoCzIZLmFwcC5zdHVkaW8udjEuU291bmR0cmFjaypsCgRCZWF0EhQKEEJFQVRfVU5TUEVDSUZJRUQQABINCglCRUFUX0hPT0sQARIOCgpCRUFUX1NFVFVQEAISEAoMQkVBVF9FWEFNUExFEAMSDwoLQkVBVF9QQVlPRkYQBBIMCghCRUFUX0NUQRAFKowBCgdFbW90aW9uEhcKE0VNT1RJT05fVU5TUEVDSUZJRUQQABIQCgxFTU9USU9OX0lETEUQARIUChBFTU9USU9OX1NQRUFLSU5HEAISEQoNRU1PVElPTl9IQVBQWRADEhYKEkVNT1RJT05fVEhPVUdIVEZVTBAEEhUKEUVNT1RJT05fU1VSUFJJU0VEEAVCR1pFZ2l0aHViLmNvbS9ndWktaGVucmkvZ3VpZ2FzLXN0dWRpby9iYWNrZW5kL2dlbi9hcHAvc3R1ZGlvL3YxO3N0dWRpb3YxYgZwcm90bzM", [file_google_protobuf_struct]);
 
 /**
  * @generated from message app.studio.v1.Language
@@ -173,6 +173,32 @@ export const SocialCopySchema: GenMessage<SocialCopy> = /*@__PURE__*/
   messageDesc(file_app_studio_v1_script, 5);
 
 /**
+ * @generated from message app.studio.v1.Soundtrack
+ */
+export type Soundtrack = Message<"app.studio.v1.Soundtrack"> & {
+  /**
+   * File name inside assets/music/ (repo), e.g. "calm-loop.mp3".
+   *
+   * @generated from field: string track = 1;
+   */
+  track: string;
+
+  /**
+   * Background volume under narration; runner clamps to [0.05, 0.5].
+   *
+   * @generated from field: double volume = 2;
+   */
+  volume: number;
+};
+
+/**
+ * Describes the message app.studio.v1.Soundtrack.
+ * Use `create(SoundtrackSchema)` to create a new message.
+ */
+export const SoundtrackSchema: GenMessage<Soundtrack> = /*@__PURE__*/
+  messageDesc(file_app_studio_v1_script, 6);
+
+/**
  * @generated from message app.studio.v1.StudioScript
  */
 export type StudioScript = Message<"app.studio.v1.StudioScript"> & {
@@ -205,6 +231,13 @@ export type StudioScript = Message<"app.studio.v1.StudioScript"> & {
    * @generated from field: app.studio.v1.SocialCopy social = 6;
    */
   social?: SocialCopy | undefined;
+
+  /**
+   * Optional background track with ducking (S5-08). Absent = no soundtrack.
+   *
+   * @generated from field: app.studio.v1.Soundtrack soundtrack = 7;
+   */
+  soundtrack?: Soundtrack | undefined;
 };
 
 /**
@@ -212,7 +245,7 @@ export type StudioScript = Message<"app.studio.v1.StudioScript"> & {
  * Use `create(StudioScriptSchema)` to create a new message.
  */
 export const StudioScriptSchema: GenMessage<StudioScript> = /*@__PURE__*/
-  messageDesc(file_app_studio_v1_script, 6);
+  messageDesc(file_app_studio_v1_script, 7);
 
 /**
  * @generated from enum app.studio.v1.Beat

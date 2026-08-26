@@ -492,21 +492,77 @@ func (x *SocialCopy) GetInstagramCaption() string {
 	return ""
 }
 
+type Soundtrack struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// File name inside assets/music/ (repo), e.g. "calm-loop.mp3".
+	Track string `protobuf:"bytes,1,opt,name=track,proto3" json:"track,omitempty"`
+	// Background volume under narration; runner clamps to [0.05, 0.5].
+	Volume        float64 `protobuf:"fixed64,2,opt,name=volume,proto3" json:"volume,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Soundtrack) Reset() {
+	*x = Soundtrack{}
+	mi := &file_app_studio_v1_script_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Soundtrack) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Soundtrack) ProtoMessage() {}
+
+func (x *Soundtrack) ProtoReflect() protoreflect.Message {
+	mi := &file_app_studio_v1_script_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Soundtrack.ProtoReflect.Descriptor instead.
+func (*Soundtrack) Descriptor() ([]byte, []int) {
+	return file_app_studio_v1_script_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *Soundtrack) GetTrack() string {
+	if x != nil {
+		return x.Track
+	}
+	return ""
+}
+
+func (x *Soundtrack) GetVolume() float64 {
+	if x != nil {
+		return x.Volume
+	}
+	return 0
+}
+
 type StudioScript struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Post          string                 `protobuf:"bytes,1,opt,name=post,proto3" json:"post,omitempty"`
-	Language      *Language              `protobuf:"bytes,2,opt,name=language,proto3" json:"language,omitempty"`
-	Target        *Target                `protobuf:"bytes,3,opt,name=target,proto3" json:"target,omitempty"`
-	Related       []string               `protobuf:"bytes,4,rep,name=related,proto3" json:"related,omitempty"`
-	Segments      []*Segment             `protobuf:"bytes,5,rep,name=segments,proto3" json:"segments,omitempty"`
-	Social        *SocialCopy            `protobuf:"bytes,6,opt,name=social,proto3" json:"social,omitempty"`
+	state    protoimpl.MessageState `protogen:"open.v1"`
+	Post     string                 `protobuf:"bytes,1,opt,name=post,proto3" json:"post,omitempty"`
+	Language *Language              `protobuf:"bytes,2,opt,name=language,proto3" json:"language,omitempty"`
+	Target   *Target                `protobuf:"bytes,3,opt,name=target,proto3" json:"target,omitempty"`
+	Related  []string               `protobuf:"bytes,4,rep,name=related,proto3" json:"related,omitempty"`
+	Segments []*Segment             `protobuf:"bytes,5,rep,name=segments,proto3" json:"segments,omitempty"`
+	Social   *SocialCopy            `protobuf:"bytes,6,opt,name=social,proto3" json:"social,omitempty"`
+	// Optional background track with ducking (S5-08). Absent = no soundtrack.
+	Soundtrack    *Soundtrack `protobuf:"bytes,7,opt,name=soundtrack,proto3" json:"soundtrack,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *StudioScript) Reset() {
 	*x = StudioScript{}
-	mi := &file_app_studio_v1_script_proto_msgTypes[6]
+	mi := &file_app_studio_v1_script_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -518,7 +574,7 @@ func (x *StudioScript) String() string {
 func (*StudioScript) ProtoMessage() {}
 
 func (x *StudioScript) ProtoReflect() protoreflect.Message {
-	mi := &file_app_studio_v1_script_proto_msgTypes[6]
+	mi := &file_app_studio_v1_script_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -531,7 +587,7 @@ func (x *StudioScript) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StudioScript.ProtoReflect.Descriptor instead.
 func (*StudioScript) Descriptor() ([]byte, []int) {
-	return file_app_studio_v1_script_proto_rawDescGZIP(), []int{6}
+	return file_app_studio_v1_script_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *StudioScript) GetPost() string {
@@ -576,6 +632,13 @@ func (x *StudioScript) GetSocial() *SocialCopy {
 	return nil
 }
 
+func (x *StudioScript) GetSoundtrack() *Soundtrack {
+	if x != nil {
+		return x.Soundtrack
+	}
+	return nil
+}
+
 var File_app_studio_v1_script_proto protoreflect.FileDescriptor
 
 const file_app_studio_v1_script_proto_rawDesc = "" +
@@ -604,14 +667,21 @@ const file_app_studio_v1_script_proto_rawDesc = "" +
 	"SocialCopy\x12\x1a\n" +
 	"\bx_thread\x18\x01 \x03(\tR\bx_thread\x12\x1a\n" +
 	"\blinkedin\x18\x02 \x01(\tR\blinkedin\x12,\n" +
-	"\x11instagram_caption\x18\x03 \x01(\tR\x11instagram_caption\"\x87\x02\n" +
+	"\x11instagram_caption\x18\x03 \x01(\tR\x11instagram_caption\":\n" +
+	"\n" +
+	"Soundtrack\x12\x14\n" +
+	"\x05track\x18\x01 \x01(\tR\x05track\x12\x16\n" +
+	"\x06volume\x18\x02 \x01(\x01R\x06volume\"\xc2\x02\n" +
 	"\fStudioScript\x12\x12\n" +
 	"\x04post\x18\x01 \x01(\tR\x04post\x123\n" +
 	"\blanguage\x18\x02 \x01(\v2\x17.app.studio.v1.LanguageR\blanguage\x12-\n" +
 	"\x06target\x18\x03 \x01(\v2\x15.app.studio.v1.TargetR\x06target\x12\x18\n" +
 	"\arelated\x18\x04 \x03(\tR\arelated\x122\n" +
 	"\bsegments\x18\x05 \x03(\v2\x16.app.studio.v1.SegmentR\bsegments\x121\n" +
-	"\x06social\x18\x06 \x01(\v2\x19.app.studio.v1.SocialCopyR\x06social*l\n" +
+	"\x06social\x18\x06 \x01(\v2\x19.app.studio.v1.SocialCopyR\x06social\x129\n" +
+	"\n" +
+	"soundtrack\x18\a \x01(\v2\x19.app.studio.v1.SoundtrackR\n" +
+	"soundtrack*l\n" +
 	"\x04Beat\x12\x14\n" +
 	"\x10BEAT_UNSPECIFIED\x10\x00\x12\r\n" +
 	"\tBEAT_HOOK\x10\x01\x12\x0e\n" +
@@ -641,7 +711,7 @@ func file_app_studio_v1_script_proto_rawDescGZIP() []byte {
 }
 
 var file_app_studio_v1_script_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_app_studio_v1_script_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_app_studio_v1_script_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_app_studio_v1_script_proto_goTypes = []any{
 	(Beat)(0),               // 0: app.studio.v1.Beat
 	(Emotion)(0),            // 1: app.studio.v1.Emotion
@@ -651,24 +721,26 @@ var file_app_studio_v1_script_proto_goTypes = []any{
 	(*ShortMarker)(nil),     // 5: app.studio.v1.ShortMarker
 	(*Segment)(nil),         // 6: app.studio.v1.Segment
 	(*SocialCopy)(nil),      // 7: app.studio.v1.SocialCopy
-	(*StudioScript)(nil),    // 8: app.studio.v1.StudioScript
-	(*structpb.Struct)(nil), // 9: google.protobuf.Struct
+	(*Soundtrack)(nil),      // 8: app.studio.v1.Soundtrack
+	(*StudioScript)(nil),    // 9: app.studio.v1.StudioScript
+	(*structpb.Struct)(nil), // 10: google.protobuf.Struct
 }
 var file_app_studio_v1_script_proto_depIdxs = []int32{
-	9, // 0: app.studio.v1.SceneRef.props:type_name -> google.protobuf.Struct
-	0, // 1: app.studio.v1.Segment.beat:type_name -> app.studio.v1.Beat
-	1, // 2: app.studio.v1.Segment.emotion:type_name -> app.studio.v1.Emotion
-	4, // 3: app.studio.v1.Segment.scene:type_name -> app.studio.v1.SceneRef
-	5, // 4: app.studio.v1.Segment.short:type_name -> app.studio.v1.ShortMarker
-	2, // 5: app.studio.v1.StudioScript.language:type_name -> app.studio.v1.Language
-	3, // 6: app.studio.v1.StudioScript.target:type_name -> app.studio.v1.Target
-	6, // 7: app.studio.v1.StudioScript.segments:type_name -> app.studio.v1.Segment
-	7, // 8: app.studio.v1.StudioScript.social:type_name -> app.studio.v1.SocialCopy
-	9, // [9:9] is the sub-list for method output_type
-	9, // [9:9] is the sub-list for method input_type
-	9, // [9:9] is the sub-list for extension type_name
-	9, // [9:9] is the sub-list for extension extendee
-	0, // [0:9] is the sub-list for field type_name
+	10, // 0: app.studio.v1.SceneRef.props:type_name -> google.protobuf.Struct
+	0,  // 1: app.studio.v1.Segment.beat:type_name -> app.studio.v1.Beat
+	1,  // 2: app.studio.v1.Segment.emotion:type_name -> app.studio.v1.Emotion
+	4,  // 3: app.studio.v1.Segment.scene:type_name -> app.studio.v1.SceneRef
+	5,  // 4: app.studio.v1.Segment.short:type_name -> app.studio.v1.ShortMarker
+	2,  // 5: app.studio.v1.StudioScript.language:type_name -> app.studio.v1.Language
+	3,  // 6: app.studio.v1.StudioScript.target:type_name -> app.studio.v1.Target
+	6,  // 7: app.studio.v1.StudioScript.segments:type_name -> app.studio.v1.Segment
+	7,  // 8: app.studio.v1.StudioScript.social:type_name -> app.studio.v1.SocialCopy
+	8,  // 9: app.studio.v1.StudioScript.soundtrack:type_name -> app.studio.v1.Soundtrack
+	10, // [10:10] is the sub-list for method output_type
+	10, // [10:10] is the sub-list for method input_type
+	10, // [10:10] is the sub-list for extension type_name
+	10, // [10:10] is the sub-list for extension extendee
+	0,  // [0:10] is the sub-list for field type_name
 }
 
 func init() { file_app_studio_v1_script_proto_init() }
@@ -682,7 +754,7 @@ func file_app_studio_v1_script_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_app_studio_v1_script_proto_rawDesc), len(file_app_studio_v1_script_proto_rawDesc)),
 			NumEnums:      2,
-			NumMessages:   7,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

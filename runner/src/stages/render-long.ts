@@ -25,6 +25,7 @@ export interface BuiltInputProps {
   spriteMeta: Record<string, unknown>;
   showSubtitles: boolean;
   subtitleWordsBySeg: Record<string, never>;
+  singleAudioRef?: string;
 }
 
 /**
@@ -76,6 +77,10 @@ export function buildInputProps(root: string): BuiltInputProps {
     throw new NonRetryableError("script.json has no segments");
   }
 
+  // S5-08: pre-mixed soundtrack replaces per-segment audio for the LONG only.
+  const mixedRel = "out/mixed.wav";
+  const hasMixed = fs.existsSync(path.join(root, mixedRel));
+
   return {
     title: script.post ?? "Guigas Studio",
     segments,
@@ -85,6 +90,7 @@ export function buildInputProps(root: string): BuiltInputProps {
     spriteMeta: {},
     showSubtitles: false,
     subtitleWordsBySeg: {},
+    ...(hasMixed ? { singleAudioRef: mixedRel } : {}),
   };
 }
 

@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"connectrpc.com/connect"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -401,6 +402,10 @@ func (s *VideoService) ApproveScenes(
 		return nil, connect.NewError(connect.CodeFailedPrecondition,
 			errors.New("script.json missing from workspace — cannot arm render"))
 	}
+	if sErr := s.stageSoundtrack(video.Slug, rawScript); sErr != nil {
+		return nil, connect.NewError(connect.CodeFailedPrecondition,
+			fmt.Errorf("soundtrack: %v", sErr))
+	}
 	payload := JobPayload{
 		Slug:           video.Slug,
 		ExpectedShorts: CountShortMarkers(rawScript),
@@ -459,6 +464,35 @@ func (s *VideoService) ApproveScenes(
 		return nil, connect.NewError(connect.CodeInternal, errors.New("failed to reload video"))
 	}
 	return connect.NewResponse(&studiov1.ApproveScenesResponse{Video: videoToProto(&updated)}), nil
+}
+
+// stageSoundtrack copies the chosen repo track into the workspace assets/
+// so it flows through the normal manifest+download path (S5-08). Absent
+// soundtrack field → no-op.
+func (s *VideoService) stageSoundtrack(slug string, rawScript []byte) error {
+	var parsed struct {
+		Soundtrack *struct {
+			Track  string  `json:"track"`
+			Volume float64 `json:"volume"`
+		} `json:"soundtrack"`
+	}
+	if err := json.Unmarshal(rawScript, &parsed); err != nil {
+		return nil // schema validation already rejected malformed scripts
+	}
+	if parsed.Soundtrack == nil || parsed.Soundtrack.Track == "" {
+		return nil
+	}
+	track := filepath.Base(parsed.Soundtrack.Track) // no traversal
+	repoTrack := filepath.Join("assets", "music", track)
+	data, err := os.ReadFile(repoTrack)
+	if err != nil {
+		return fmt.Errorf("track %q not found in assets/music (see LICENSE.md)", track)
+	}
+	dest := filepath.Join(s.workspaceRoot(slug), "assets")
+	if err := os.MkdirAll(dest, 0o755); err != nil {
+		return err
+	}
+	return os.WriteFile(filepath.Join(dest, "soundtrack"+strings.ToLower(filepath.Ext(track))), data, 0o644)
 }
 
 func mustJSON(v any) []byte {

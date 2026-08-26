@@ -6,6 +6,8 @@ import type { StageHandler } from "./types.js";
 import { makeBundle } from "./bundle.js";
 import { makeRenderLongStage } from "./render-long.js";
 import { makeShortsStage } from "./shorts.js";
+import { mixSoundtrack } from "./soundtrack.js";
+import { makeUploadStage } from "./upload-stage.js";
 
 export interface StageEnv {
   baseUrl: string;
@@ -32,7 +34,14 @@ export function defaultStages(
     bytes: Number(f.bytes),
   }));
 
-  const names = ["sync", "bundle", "render_long", "shorts", "upload"] as const;
+  const names = [
+    "sync",
+    "soundtrack",
+    "bundle",
+    "render_long",
+    "shorts",
+    "upload",
+  ] as const;
 
   const syncStage: StageHandler = async (ctx) => {
     await ctx.checkCancelled();
@@ -61,21 +70,27 @@ export function defaultStages(
 
   const renderLongStage = makeRenderLongStage();
   const shortsStage = makeShortsStage();
+  const uploadStage = makeUploadStage({ baseUrl: env.baseUrl, bearerToken: env.bearerToken });
+  const soundtrackStage: StageHandler = mixSoundtrack;
 
   return names.map((name) => [
     name,
     name === "sync"
       ? syncStage
-      : name === "bundle"
-        ? bundleStage
-        : name === "render_long"
-          ? renderLongStage
-          : name === "shorts"
-            ? shortsStage
-            : async (ctx) => {
-              await ctx.checkCancelled();
-                ctx.log.info({ stage: name }, "stage placeholder");
-                await ctx.report(name, Math.round((names.indexOf(name) + 1) * (100 / names.length)));
-              },
+      : name === "soundtrack"
+        ? soundtrackStage
+        : name === "bundle"
+          ? bundleStage
+          : name === "render_long"
+            ? renderLongStage
+            : name === "shorts"
+              ? shortsStage
+              : name === "upload"
+                ? uploadStage
+                : async (ctx) => {
+                    await ctx.checkCancelled();
+                    ctx.log.info({ stage: name }, "stage placeholder");
+                    await ctx.report(name, Math.round((names.indexOf(name) + 1) * (100 / names.length)));
+                  },
   ]);
 }
