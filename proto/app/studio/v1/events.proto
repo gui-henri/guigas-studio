@@ -32,6 +32,14 @@ message ScenesValidated {
   bool valid = 3;
 }
 
+// JobProgress mirrors render progress to the dashboard in real time.
+message JobProgress {
+  string job_id = 1;
+  string video_id = 2;
+  int32 percent = 3;
+  string stage = 4;
+}
+
 // StudioEvent is the typed envelope shared Go↔TS over SSE (protojson).
 message StudioEvent {
   oneof event {
@@ -39,5 +47,6 @@ message StudioEvent {
     ScriptValidated script_validated = 2;
     WatcherPostFound watcher_post_found = 3;
     ScenesValidated scenes_validated = 4;
+    JobProgress job_progress = 5;
   }
 }

@@ -24,6 +24,8 @@ type Querier interface {
 	// FailJob increments attempts; below max_attempts the job returns to pending
 	// with exponential backoff (2^attempts × 30 s), otherwise it settles failed.
 	FailJob(ctx context.Context, arg FailJobParams) (Job, error)
+	// Non-retryable failure settles the job as failed immediately.
+	FailJobTerminal(ctx context.Context, arg FailJobTerminalParams) (Job, error)
 	GetJob(ctx context.Context, id uuid.UUID) (Job, error)
 	GetOriginalScript(ctx context.Context, id uuid.UUID) ([]byte, error)
 	GetUserByUsername(ctx context.Context, username string) (User, error)
@@ -41,8 +43,12 @@ type Querier interface {
 	// Cancel is cooperative: a pending job with cancel_requested is skipped by
 	// the claim scan; a claimed job sees the flag via GetJob/Heartbeat.
 	MarkCancelRequested(ctx context.Context, id uuid.UUID) (Job, error)
+	// Release a claim when the follow-up transition fails (S5-02 note: never
+	// leave a claimed job without an owner).
+	ResetJobToPending(ctx context.Context, id uuid.UUID) error
 	SetOriginalScript(ctx context.Context, arg SetOriginalScriptParams) (int64, error)
 	SetRssItemVideo(ctx context.Context, arg SetRssItemVideoParams) error
+	UpdateJobProgress(ctx context.Context, arg UpdateJobProgressParams) (Job, error)
 	UpdateVideoStatus(ctx context.Context, arg UpdateVideoStatusParams) error
 	UpsertTake(ctx context.Context, arg UpsertTakeParams) (Take, error)
 }

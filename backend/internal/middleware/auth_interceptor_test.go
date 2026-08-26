@@ -20,6 +20,9 @@ const (
 	privateProc   = "/test.v1.Private/Do"
 	publicLogin   = "/app.studio.v1.AuthService/Login"
 	publicHealth  = "/app.studio.v1.HealthService/Check"
+
+	// JobService procedure: the ONLY prefix that accepts the runner PAT.
+	jobProc = "/app.studio.v1.JobService/GetJob"
 )
 
 // newProtectedServer mounts one private procedure behind the interceptor.
@@ -35,8 +38,15 @@ func newProtectedServer(t *testing.T, runnerToken string) *httptest.Server {
 		},
 		connect.WithInterceptors(interceptor))
 
+	jobHandler := connect.NewUnaryHandler(jobProc,
+		func(ctx context.Context, req *connect.Request[studiov1.GetJobRequest]) (*connect.Response[studiov1.GetJobResponse], error) {
+			return connect.NewResponse(&studiov1.GetJobResponse{}), nil
+		},
+		connect.WithInterceptors(interceptor))
+
 	mux := http.NewServeMux()
 	mux.Handle(privateProc, handler)
+	mux.Handle(jobProc, jobHandler)
 	srv := httptest.NewServer(mux)
 	t.Cleanup(srv.Close)
 	return srv
@@ -44,7 +54,12 @@ func newProtectedServer(t *testing.T, runnerToken string) *httptest.Server {
 
 func callPrivate(t *testing.T, srv *httptest.Server, authorization string) int {
 	t.Helper()
-	req, _ := http.NewRequest("POST", srv.URL+privateProc, strings.NewReader("{}"))
+	return callProcedure(t, srv, privateProc, authorization)
+}
+
+func callProcedure(t *testing.T, srv *httptest.Server, procedure, authorization string) int {
+	t.Helper()
+	req, _ := http.NewRequest("POST", srv.URL+procedure, strings.NewReader("{}"))
 	req.Header.Set("Content-Type", "application/json")
 	if authorization != "" {
 		req.Header.Set("Authorization", authorization)
@@ -78,14 +93,24 @@ func TestAuthInterceptorMatrix(t *testing.T) {
 		{"valid jwt accepted", "Bearer " + validJWT(t), http.StatusOK},
 		{"expired jwt rejected", "Bearer " + mustExpiredJWT(t), http.StatusUnauthorized},
 		{"tampered jwt rejected", "Bearer " + tamper(validJWT(t)), http.StatusUnauthorized},
-		{"correct pat accepted", "Bearer " + testRunnerPAT, http.StatusOK},
+		{"pat rejected outside JobService", "Bearer " + testRunnerPAT, http.StatusUnauthorized},
 		{"wrong pat rejected", "Bearer wrong-pat", http.StatusUnauthorized},
 		{"non-bearer scheme rejected", "Basic dXNlcjpwYXNz", http.StatusUnauthorized},
 		{"empty bearer rejected", "Bearer ", http.StatusUnauthorized},
+
+		// Runner PAT scoping (S5-02): valid ONLY inside JobService.
+		{"pat accepted on JobService", "Bearer " + testRunnerPAT + "|JOB", http.StatusOK},
+		{"pat rejected on VideoService", "Bearer " + testRunnerPAT + "|PRIVATE", http.StatusUnauthorized},
+		{"jwt accepted on JobService", "Bearer " + validJWT(t) + "|JOB", http.StatusOK},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			got := callPrivate(t, srv, tc.authorization)
+			authorization, procedure := tc.authorization, privateProc
+			if suffix, ok := strings.CutSuffix(authorization, "|JOB"); ok {
+				authorization, procedure = suffix, jobProc
+			}
+			authorization = strings.TrimSuffix(authorization, "|PRIVATE")
+			got := callProcedure(t, srv, procedure, authorization)
 			if got != tc.wantStatus {
 				t.Errorf("status = %d, want %d (authorization=%q)", got, tc.wantStatus, tc.authorization)
 			}

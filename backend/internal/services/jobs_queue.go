@@ -118,6 +118,25 @@ func (q *JobsQueue) Get(ctx context.Context, jobID uuid.UUID) (sqlc.Job, error) 
 	return q.queries.GetJob(ctx, jobID)
 }
 
+// ResetToPending releases a claim when the follow-up transition fails.
+func (q *JobsQueue) ResetToPending(ctx context.Context, jobID uuid.UUID) error {
+	return q.queries.ResetJobToPending(ctx, jobID)
+}
+
+// FailTerminal settles a non-retryable failure immediately.
+func (q *JobsQueue) FailTerminal(ctx context.Context, jobID uuid.UUID, owner, reason string) (sqlc.Job, error) {
+	return q.queries.FailJobTerminal(ctx, sqlc.FailJobTerminalParams{
+		ID: jobID, ClaimedBy: textParam(owner), LastError: textParam(reason),
+	})
+}
+
+// UpdateProgress persists percent/stage on a claimed job.
+func (q *JobsQueue) UpdateProgress(ctx context.Context, jobID uuid.UUID, percent int32, stage string) (sqlc.Job, error) {
+	return q.queries.UpdateJobProgress(ctx, sqlc.UpdateJobProgressParams{
+		ID: jobID, ProgressPercent: percent, ProgressStage: stage,
+	})
+}
+
 // DecodePayload parses the jsonb payload of a job row.
 func DecodePayload(job sqlc.Job) (JobPayload, error) {
 	var p JobPayload

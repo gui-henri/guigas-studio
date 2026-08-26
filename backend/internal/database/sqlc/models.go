@@ -27,6 +27,8 @@ type Job struct {
 	CancelRequested bool               `json:"cancel_requested"`
 	CreatedAt       time.Time          `json:"created_at"`
 	UpdatedAt       time.Time          `json:"updated_at"`
+	ProgressPercent int32              `json:"progress_percent"`
+	ProgressStage   string             `json:"progress_stage"`
 }
 
 type RssItem struct {

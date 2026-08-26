@@ -26,7 +26,7 @@ WHERE id = (
   LIMIT 1
   FOR UPDATE SKIP LOCKED
 )
-RETURNING id, video_id, type, status, attempts, max_attempts, run_after, claimed_by, claimed_at, heartbeat_at, payload, last_error, cancel_requested, created_at, updated_at
+RETURNING id, video_id, type, status, attempts, max_attempts, run_after, claimed_by, claimed_at, heartbeat_at, payload, last_error, cancel_requested, created_at, updated_at, progress_percent, progress_stage
 `
 
 // ClaimJob must stay a SINGLE statement: SELECT … FOR UPDATE SKIP LOCKED
@@ -50,6 +50,8 @@ func (q *Queries) ClaimJob(ctx context.Context, claimedBy pgtype.Text) (Job, err
 		&i.CancelRequested,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.ProgressPercent,
+		&i.ProgressStage,
 	)
 	return i, err
 }
@@ -57,7 +59,7 @@ func (q *Queries) ClaimJob(ctx context.Context, claimedBy pgtype.Text) (Job, err
 const completeJob = `-- name: CompleteJob :one
 UPDATE jobs SET status = 'completed', updated_at = now()
 WHERE id = $1 AND status = 'claimed' AND claimed_by = $2
-RETURNING id, video_id, type, status, attempts, max_attempts, run_after, claimed_by, claimed_at, heartbeat_at, payload, last_error, cancel_requested, created_at, updated_at
+RETURNING id, video_id, type, status, attempts, max_attempts, run_after, claimed_by, claimed_at, heartbeat_at, payload, last_error, cancel_requested, created_at, updated_at, progress_percent, progress_stage
 `
 
 type CompleteJobParams struct {
@@ -84,6 +86,8 @@ func (q *Queries) CompleteJob(ctx context.Context, arg CompleteJobParams) (Job, 
 		&i.CancelRequested,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.ProgressPercent,
+		&i.ProgressStage,
 	)
 	return i, err
 }
@@ -91,7 +95,7 @@ func (q *Queries) CompleteJob(ctx context.Context, arg CompleteJobParams) (Job, 
 const enqueueJob = `-- name: EnqueueJob :one
 INSERT INTO jobs (video_id, type, payload)
 VALUES ($1, $2, $3)
-RETURNING id, video_id, type, status, attempts, max_attempts, run_after, claimed_by, claimed_at, heartbeat_at, payload, last_error, cancel_requested, created_at, updated_at
+RETURNING id, video_id, type, status, attempts, max_attempts, run_after, claimed_by, claimed_at, heartbeat_at, payload, last_error, cancel_requested, created_at, updated_at, progress_percent, progress_stage
 `
 
 type EnqueueJobParams struct {
@@ -119,6 +123,8 @@ func (q *Queries) EnqueueJob(ctx context.Context, arg EnqueueJobParams) (Job, er
 		&i.CancelRequested,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.ProgressPercent,
+		&i.ProgressStage,
 	)
 	return i, err
 }
@@ -137,7 +143,7 @@ UPDATE jobs SET
   heartbeat_at = NULL,
   updated_at = now()
 WHERE id = $1 AND status = 'claimed' AND claimed_by = $2
-RETURNING id, video_id, type, status, attempts, max_attempts, run_after, claimed_by, claimed_at, heartbeat_at, payload, last_error, cancel_requested, created_at, updated_at
+RETURNING id, video_id, type, status, attempts, max_attempts, run_after, claimed_by, claimed_at, heartbeat_at, payload, last_error, cancel_requested, created_at, updated_at, progress_percent, progress_stage
 `
 
 type FailJobParams struct {
@@ -167,12 +173,59 @@ func (q *Queries) FailJob(ctx context.Context, arg FailJobParams) (Job, error) {
 		&i.CancelRequested,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.ProgressPercent,
+		&i.ProgressStage,
+	)
+	return i, err
+}
+
+const failJobTerminal = `-- name: FailJobTerminal :one
+UPDATE jobs SET
+  attempts = attempts + 1,
+  status = 'failed',
+  last_error = $3,
+  claimed_by = NULL,
+  claimed_at = NULL,
+  heartbeat_at = NULL,
+  updated_at = now()
+WHERE id = $1 AND status = 'claimed' AND claimed_by = $2
+RETURNING id, video_id, type, status, attempts, max_attempts, run_after, claimed_by, claimed_at, heartbeat_at, payload, last_error, cancel_requested, created_at, updated_at, progress_percent, progress_stage
+`
+
+type FailJobTerminalParams struct {
+	ID        uuid.UUID   `json:"id"`
+	ClaimedBy pgtype.Text `json:"claimed_by"`
+	LastError pgtype.Text `json:"last_error"`
+}
+
+// Non-retryable failure settles the job as failed immediately.
+func (q *Queries) FailJobTerminal(ctx context.Context, arg FailJobTerminalParams) (Job, error) {
+	row := q.db.QueryRow(ctx, failJobTerminal, arg.ID, arg.ClaimedBy, arg.LastError)
+	var i Job
+	err := row.Scan(
+		&i.ID,
+		&i.VideoID,
+		&i.Type,
+		&i.Status,
+		&i.Attempts,
+		&i.MaxAttempts,
+		&i.RunAfter,
+		&i.ClaimedBy,
+		&i.ClaimedAt,
+		&i.HeartbeatAt,
+		&i.Payload,
+		&i.LastError,
+		&i.CancelRequested,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.ProgressPercent,
+		&i.ProgressStage,
 	)
 	return i, err
 }
 
 const getJob = `-- name: GetJob :one
-SELECT id, video_id, type, status, attempts, max_attempts, run_after, claimed_by, claimed_at, heartbeat_at, payload, last_error, cancel_requested, created_at, updated_at FROM jobs WHERE id = $1
+SELECT id, video_id, type, status, attempts, max_attempts, run_after, claimed_by, claimed_at, heartbeat_at, payload, last_error, cancel_requested, created_at, updated_at, progress_percent, progress_stage FROM jobs WHERE id = $1
 `
 
 func (q *Queries) GetJob(ctx context.Context, id uuid.UUID) (Job, error) {
@@ -194,6 +247,8 @@ func (q *Queries) GetJob(ctx context.Context, id uuid.UUID) (Job, error) {
 		&i.CancelRequested,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.ProgressPercent,
+		&i.ProgressStage,
 	)
 	return i, err
 }
@@ -201,7 +256,7 @@ func (q *Queries) GetJob(ctx context.Context, id uuid.UUID) (Job, error) {
 const heartbeatJob = `-- name: HeartbeatJob :one
 UPDATE jobs SET heartbeat_at = now(), updated_at = now()
 WHERE id = $1 AND status = 'claimed' AND claimed_by = $2
-RETURNING id, video_id, type, status, attempts, max_attempts, run_after, claimed_by, claimed_at, heartbeat_at, payload, last_error, cancel_requested, created_at, updated_at
+RETURNING id, video_id, type, status, attempts, max_attempts, run_after, claimed_by, claimed_at, heartbeat_at, payload, last_error, cancel_requested, created_at, updated_at, progress_percent, progress_stage
 `
 
 type HeartbeatJobParams struct {
@@ -228,12 +283,14 @@ func (q *Queries) HeartbeatJob(ctx context.Context, arg HeartbeatJobParams) (Job
 		&i.CancelRequested,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.ProgressPercent,
+		&i.ProgressStage,
 	)
 	return i, err
 }
 
 const listJobsByVideo = `-- name: ListJobsByVideo :many
-SELECT id, video_id, type, status, attempts, max_attempts, run_after, claimed_by, claimed_at, heartbeat_at, payload, last_error, cancel_requested, created_at, updated_at FROM jobs WHERE video_id = $1 ORDER BY created_at DESC
+SELECT id, video_id, type, status, attempts, max_attempts, run_after, claimed_by, claimed_at, heartbeat_at, payload, last_error, cancel_requested, created_at, updated_at, progress_percent, progress_stage FROM jobs WHERE video_id = $1 ORDER BY created_at DESC
 `
 
 func (q *Queries) ListJobsByVideo(ctx context.Context, videoID uuid.UUID) ([]Job, error) {
@@ -261,6 +318,8 @@ func (q *Queries) ListJobsByVideo(ctx context.Context, videoID uuid.UUID) ([]Job
 			&i.CancelRequested,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.ProgressPercent,
+			&i.ProgressStage,
 		); err != nil {
 			return nil, err
 		}
@@ -275,7 +334,7 @@ func (q *Queries) ListJobsByVideo(ctx context.Context, videoID uuid.UUID) ([]Job
 const markCancelRequested = `-- name: MarkCancelRequested :one
 UPDATE jobs SET cancel_requested = true, updated_at = now()
 WHERE id = $1 AND status IN ('pending', 'claimed')
-RETURNING id, video_id, type, status, attempts, max_attempts, run_after, claimed_by, claimed_at, heartbeat_at, payload, last_error, cancel_requested, created_at, updated_at
+RETURNING id, video_id, type, status, attempts, max_attempts, run_after, claimed_by, claimed_at, heartbeat_at, payload, last_error, cancel_requested, created_at, updated_at, progress_percent, progress_stage
 `
 
 // Cancel is cooperative: a pending job with cancel_requested is skipped by
@@ -299,6 +358,62 @@ func (q *Queries) MarkCancelRequested(ctx context.Context, id uuid.UUID) (Job, e
 		&i.CancelRequested,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.ProgressPercent,
+		&i.ProgressStage,
+	)
+	return i, err
+}
+
+const resetJobToPending = `-- name: ResetJobToPending :exec
+UPDATE jobs SET
+  status = 'pending',
+  claimed_by = NULL,
+  claimed_at = NULL,
+  heartbeat_at = NULL,
+  updated_at = now()
+WHERE id = $1
+`
+
+// Release a claim when the follow-up transition fails (S5-02 note: never
+// leave a claimed job without an owner).
+func (q *Queries) ResetJobToPending(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, resetJobToPending, id)
+	return err
+}
+
+const updateJobProgress = `-- name: UpdateJobProgress :one
+UPDATE jobs SET progress_percent = $2, progress_stage = $3, updated_at = now()
+WHERE id = $1 AND status = 'claimed'
+RETURNING id, video_id, type, status, attempts, max_attempts, run_after, claimed_by, claimed_at, heartbeat_at, payload, last_error, cancel_requested, created_at, updated_at, progress_percent, progress_stage
+`
+
+type UpdateJobProgressParams struct {
+	ID              uuid.UUID `json:"id"`
+	ProgressPercent int32     `json:"progress_percent"`
+	ProgressStage   string    `json:"progress_stage"`
+}
+
+func (q *Queries) UpdateJobProgress(ctx context.Context, arg UpdateJobProgressParams) (Job, error) {
+	row := q.db.QueryRow(ctx, updateJobProgress, arg.ID, arg.ProgressPercent, arg.ProgressStage)
+	var i Job
+	err := row.Scan(
+		&i.ID,
+		&i.VideoID,
+		&i.Type,
+		&i.Status,
+		&i.Attempts,
+		&i.MaxAttempts,
+		&i.RunAfter,
+		&i.ClaimedBy,
+		&i.ClaimedAt,
+		&i.HeartbeatAt,
+		&i.Payload,
+		&i.LastError,
+		&i.CancelRequested,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.ProgressPercent,
+		&i.ProgressStage,
 	)
 	return i, err
 }

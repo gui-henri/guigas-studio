@@ -18,6 +18,7 @@ import (
 	"strings"
 	"sync"
 	"testing"
+	"time"
 
 	"connectrpc.com/connect"
 	studiov1 "github.com/gui-henri/guigas-studio/backend/gen/app/studio/v1"
@@ -25,6 +26,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/gui-henri/guigas-studio/backend/internal/database"
+	"github.com/gui-henri/guigas-studio/backend/internal/events"
 	"github.com/gui-henri/guigas-studio/backend/internal/domain/videostate"
 	sqlc "github.com/gui-henri/guigas-studio/backend/internal/database/sqlc"
 	"github.com/gui-henri/guigas-studio/backend/internal/services"
@@ -394,4 +396,126 @@ func TestJobsFailBeyondMaxAttemptsBlocksVideo(t *testing.T) {
 	history, err := queries.ListStatusHistoryByVideo(ctx, videoID)
 	_ = history
 	_ = err
+}
+
+func TestJobServiceClaimTransitionsAndSSE(t *testing.T) {
+	ctx := context.Background()
+	pool, queries := setupJobsDB(t, ctx)
+	videoID := insertJobVideo(t, ctx, queries, "jobsvc-claim")
+	walkToScenesReview(t, ctx, queries, videoID)
+
+	// Walk one step further: queued (ApproveScenes equivalent).
+	if err := queries.UpdateVideoStatus(ctx, sqlc.UpdateVideoStatusParams{ID: videoID, Status: "queued"}); err != nil {
+		t.Fatal(err)
+	}
+	enqueued, err := queries.EnqueueJob(ctx, sqlc.EnqueueJobParams{
+		VideoID: videoID,
+		Type:    services.JobTypeRenderLongShorts,
+		Payload: []byte(`{"slug":"jobsvc-claim","expected_shorts":0}`),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	hub := events.NewHub()
+	svc := services.NewJobService(queries, pool, hub)
+	sub, cancel := hub.Subscribe(events.TopicForVideo(videoID.String()))
+	defer cancel()
+
+	// Claim → video rendering + history row.
+	resp, err := svc.ClaimJob(ctx, connectReq(&studiov1.ClaimJobRequest{RunnerId: "runner-x"}))
+	if err != nil {
+		t.Fatalf("ClaimJob: %v", err)
+	}
+	if resp.Msg.GetJob() == nil || resp.Msg.GetJob().GetId() != enqueued.ID.String() {
+		t.Fatalf("claim returned wrong job: %+v", resp.Msg.GetJob())
+	}
+	v, _ := queries.GetVideo(ctx, videoID)
+	if v.Status != "rendering" {
+		t.Fatalf("video status=%s want rendering", v.Status)
+	}
+
+	// Progress persists and emits SSE.
+	if _, err := svc.UpdateProgress(ctx, connectReq(&studiov1.UpdateProgressRequest{
+		JobId: enqueued.ID.String(), Percent: 40, Stage: "render-long",
+	})); err != nil {
+		t.Fatalf("UpdateProgress: %v", err)
+	}
+	var sawProgress bool
+	deadline := time.After(2 * time.Second)
+	for !sawProgress {
+		select {
+		case evt := <-sub:
+			if p := evt.GetJobProgress(); p != nil && p.GetPercent() == 40 && p.GetStage() == "render-long" {
+				sawProgress = true
+			}
+		case <-deadline:
+			t.Fatal("no SSE progress event within timeout")
+		}
+	}
+	stored, _ := queries.GetJob(ctx, enqueued.ID)
+	if stored.ProgressPercent != 40 || stored.ProgressStage != "render-long" {
+		t.Fatalf("progress not persisted: %d/%s", stored.ProgressPercent, stored.ProgressStage)
+	}
+
+	// GetJob exposes cancel_requested for the cooperative cancel-check.
+	if _, err := queries.MarkCancelRequested(ctx, enqueued.ID); err != nil {
+		t.Fatal(err)
+	}
+	view, err := svc.GetJob(ctx, connectReq(&studiov1.GetJobRequest{JobId: enqueued.ID.String()}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !view.Msg.GetJob().GetCancelRequested() {
+		t.Fatal("cancel_requested not exposed in JobView")
+	}
+
+	// Non-retryable failure settles failed immediately.
+	if _, err := svc.FailJob(ctx, connectReq(&studiov1.FailJobRequest{
+		JobId: enqueued.ID.String(), Reason: "disk full", Retryable: false,
+	})); err != nil {
+		t.Fatal(err)
+	}
+	final, _ := queries.GetJob(ctx, enqueued.ID)
+	if final.Status != "failed" {
+		t.Fatalf("non-retryable failure status=%s", final.Status)
+	}
+}
+
+func TestJobServiceEmptyQueueAndBadTransition(t *testing.T) {
+	ctx := context.Background()
+	pool, queries := setupJobsDB(t, ctx)
+	hub := events.NewHub()
+	svc := services.NewJobService(queries, pool, hub)
+
+	// Empty queue → response without job, NO error.
+	empty, err := svc.ClaimJob(ctx, connectReq(&studiov1.ClaimJobRequest{RunnerId: "runner-y"}))
+	if err != nil {
+		t.Fatalf("empty queue claim errored: %v", err)
+	}
+	if empty.Msg.GetJob() != nil {
+		t.Fatal("empty queue must not return a job")
+	}
+
+	// A job whose video is NOT queued: claim succeeds but transition fails →
+	// the job is released back to pending and an error surfaces.
+	videoID := insertJobVideo(t, ctx, queries, "jobsvc-badstate")
+	if _, err := queries.EnqueueJob(ctx, sqlc.EnqueueJobParams{
+		VideoID: videoID,
+		Type:    services.JobTypeRenderLongShorts,
+		Payload: []byte(`{"slug":"jobsvc-badstate","expected_shorts":0}`),
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := svc.ClaimJob(ctx, connectReq(&studiov1.ClaimJobRequest{RunnerId: "runner-z"})); err == nil {
+		t.Fatal("claim of non-queued video should fail")
+	}
+	jobs, _ := queries.ListJobsByVideo(ctx, videoID)
+	if len(jobs) != 1 || jobs[0].Status != "pending" {
+		t.Fatalf("job must be back to pending, got %+v", jobs[0].Status)
+	}
+	v, _ := queries.GetVideo(ctx, videoID)
+	if v.Status != "new" {
+		t.Fatalf("video status changed unexpectedly: %s", v.Status)
+	}
 }

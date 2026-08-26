@@ -62,3 +62,32 @@ RETURNING *;
 UPDATE jobs SET cancel_requested = true, updated_at = now()
 WHERE id = $1 AND status IN ('pending', 'claimed')
 RETURNING *;
+
+-- name: UpdateJobProgress :one
+UPDATE jobs SET progress_percent = $2, progress_stage = $3, updated_at = now()
+WHERE id = $1 AND status = 'claimed'
+RETURNING *;
+
+-- Non-retryable failure settles the job as failed immediately.
+-- name: FailJobTerminal :one
+UPDATE jobs SET
+  attempts = attempts + 1,
+  status = 'failed',
+  last_error = $3,
+  claimed_by = NULL,
+  claimed_at = NULL,
+  heartbeat_at = NULL,
+  updated_at = now()
+WHERE id = $1 AND status = 'claimed' AND claimed_by = $2
+RETURNING *;
+
+-- Release a claim when the follow-up transition fails (S5-02 note: never
+-- leave a claimed job without an owner).
+-- name: ResetJobToPending :exec
+UPDATE jobs SET
+  status = 'pending',
+  claimed_by = NULL,
+  claimed_at = NULL,
+  heartbeat_at = NULL,
+  updated_at = now()
+WHERE id = $1;

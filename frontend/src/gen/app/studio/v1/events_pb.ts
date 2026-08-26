@@ -10,7 +10,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file app/studio/v1/events.proto.
  */
 export const file_app_studio_v1_events: GenFile = /*@__PURE__*/
-  fileDesc("ChphcHAvc3R1ZGlvL3YxL2V2ZW50cy5wcm90bxINYXBwLnN0dWRpby52MSJcChJWaWRlb1N0YXR1c0NoYW5nZWQSEAoIdmlkZW9faWQYASABKAkSDAoEc2x1ZxgCIAEoCRITCgtmcm9tX3N0YXR1cxgDIAEoCRIRCgl0b19zdGF0dXMYBCABKAkiQAoPU2NyaXB0VmFsaWRhdGVkEhAKCHZpZGVvX2lkGAEgASgJEgwKBHNsdWcYAiABKAkSDQoFdmFsaWQYAyABKAgiIAoQV2F0Y2hlclBvc3RGb3VuZBIMCgRzbHVnGAEgASgJIkAKD1NjZW5lc1ZhbGlkYXRlZBIQCgh2aWRlb19pZBgBIAEoCRIMCgRzbHVnGAIgASgJEg0KBXZhbGlkGAMgASgIIpACCgtTdHVkaW9FdmVudBJBChR2aWRlb19zdGF0dXNfY2hhbmdlZBgBIAEoCzIhLmFwcC5zdHVkaW8udjEuVmlkZW9TdGF0dXNDaGFuZ2VkSAASOgoQc2NyaXB0X3ZhbGlkYXRlZBgCIAEoCzIeLmFwcC5zdHVkaW8udjEuU2NyaXB0VmFsaWRhdGVkSAASPQoSd2F0Y2hlcl9wb3N0X2ZvdW5kGAMgASgLMh8uYXBwLnN0dWRpby52MS5XYXRjaGVyUG9zdEZvdW5kSAASOgoQc2NlbmVzX3ZhbGlkYXRlZBgEIAEoCzIeLmFwcC5zdHVkaW8udjEuU2NlbmVzVmFsaWRhdGVkSABCBwoFZXZlbnRCR1pFZ2l0aHViLmNvbS9ndWktaGVucmkvZ3VpZ2FzLXN0dWRpby9iYWNrZW5kL2dlbi9hcHAvc3R1ZGlvL3YxO3N0dWRpb3YxYgZwcm90bzM");
+  fileDesc("ChphcHAvc3R1ZGlvL3YxL2V2ZW50cy5wcm90bxINYXBwLnN0dWRpby52MSJcChJWaWRlb1N0YXR1c0NoYW5nZWQSEAoIdmlkZW9faWQYASABKAkSDAoEc2x1ZxgCIAEoCRITCgtmcm9tX3N0YXR1cxgDIAEoCRIRCgl0b19zdGF0dXMYBCABKAkiQAoPU2NyaXB0VmFsaWRhdGVkEhAKCHZpZGVvX2lkGAEgASgJEgwKBHNsdWcYAiABKAkSDQoFdmFsaWQYAyABKAgiIAoQV2F0Y2hlclBvc3RGb3VuZBIMCgRzbHVnGAEgASgJIkAKD1NjZW5lc1ZhbGlkYXRlZBIQCgh2aWRlb19pZBgBIAEoCRIMCgRzbHVnGAIgASgJEg0KBXZhbGlkGAMgASgIIk8KC0pvYlByb2dyZXNzEg4KBmpvYl9pZBgBIAEoCRIQCgh2aWRlb19pZBgCIAEoCRIPCgdwZXJjZW50GAMgASgFEg0KBXN0YWdlGAQgASgJIsQCCgtTdHVkaW9FdmVudBJBChR2aWRlb19zdGF0dXNfY2hhbmdlZBgBIAEoCzIhLmFwcC5zdHVkaW8udjEuVmlkZW9TdGF0dXNDaGFuZ2VkSAASOgoQc2NyaXB0X3ZhbGlkYXRlZBgCIAEoCzIeLmFwcC5zdHVkaW8udjEuU2NyaXB0VmFsaWRhdGVkSAASPQoSd2F0Y2hlcl9wb3N0X2ZvdW5kGAMgASgLMh8uYXBwLnN0dWRpby52MS5XYXRjaGVyUG9zdEZvdW5kSAASOgoQc2NlbmVzX3ZhbGlkYXRlZBgEIAEoCzIeLmFwcC5zdHVkaW8udjEuU2NlbmVzVmFsaWRhdGVkSAASMgoMam9iX3Byb2dyZXNzGAUgASgLMhouYXBwLnN0dWRpby52MS5Kb2JQcm9ncmVzc0gAQgcKBWV2ZW50QkdaRWdpdGh1Yi5jb20vZ3VpLWhlbnJpL2d1aWdhcy1zdHVkaW8vYmFja2VuZC9nZW4vYXBwL3N0dWRpby92MTtzdHVkaW92MWIGcHJvdG8z");
 
 /**
  * VideoStatusChanged is emitted whenever a video moves through the machine.
@@ -125,6 +125,40 @@ export const ScenesValidatedSchema: GenMessage<ScenesValidated> = /*@__PURE__*/
   messageDesc(file_app_studio_v1_events, 3);
 
 /**
+ * JobProgress mirrors render progress to the dashboard in real time.
+ *
+ * @generated from message app.studio.v1.JobProgress
+ */
+export type JobProgress = Message<"app.studio.v1.JobProgress"> & {
+  /**
+   * @generated from field: string job_id = 1;
+   */
+  jobId: string;
+
+  /**
+   * @generated from field: string video_id = 2;
+   */
+  videoId: string;
+
+  /**
+   * @generated from field: int32 percent = 3;
+   */
+  percent: number;
+
+  /**
+   * @generated from field: string stage = 4;
+   */
+  stage: string;
+};
+
+/**
+ * Describes the message app.studio.v1.JobProgress.
+ * Use `create(JobProgressSchema)` to create a new message.
+ */
+export const JobProgressSchema: GenMessage<JobProgress> = /*@__PURE__*/
+  messageDesc(file_app_studio_v1_events, 4);
+
+/**
  * StudioEvent is the typed envelope shared Go↔TS over SSE (protojson).
  *
  * @generated from message app.studio.v1.StudioEvent
@@ -157,6 +191,12 @@ export type StudioEvent = Message<"app.studio.v1.StudioEvent"> & {
      */
     value: ScenesValidated;
     case: "scenesValidated";
+  } | {
+    /**
+     * @generated from field: app.studio.v1.JobProgress job_progress = 5;
+     */
+    value: JobProgress;
+    case: "jobProgress";
   } | { case: undefined; value?: undefined };
 };
 
@@ -165,5 +205,5 @@ export type StudioEvent = Message<"app.studio.v1.StudioEvent"> & {
  * Use `create(StudioEventSchema)` to create a new message.
  */
 export const StudioEventSchema: GenMessage<StudioEvent> = /*@__PURE__*/
-  messageDesc(file_app_studio_v1_events, 4);
+  messageDesc(file_app_studio_v1_events, 5);
 

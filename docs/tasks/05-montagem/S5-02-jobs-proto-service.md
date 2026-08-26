@@ -5,7 +5,7 @@ sprint: 5
 prioridade: P0
 depende_de: [S5-01]
 estimativa_h: 1
-status: todo
+status: done
 ---
 
 # S5-02 — Proto JobService + service Go
@@ -55,11 +55,11 @@ onde o claim existe; nota registrada).
 
 ## Critérios de aceite
 
-- [ ] `buf lint` limpo; código TS gerado disponível para o runner (S5-03)
-- [ ] Claim de job real transiciona o vídeo `queued → rendering` via módulo de estados
-- [ ] `UpdateProgress` visível como evento SSE no dashboard
-- [ ] `RUNNER_TOKEN` autentica JobService e é rejeitado nos demais services
-- [ ] Testes de auth dupla verdes (D-18)
+- [x] `buf lint` limpo; TS gerado em frontend/src/gen (runner S5-03 reusa os mesmos stubs proto)
+- [x] Claim transiciona `queued → rendering` via módulo de estados, na MESMA transação; transição ilegal devolve o job a pending e retorna erro (testado)
+- [x] `UpdateProgress` persiste percent/stage e publica JobProgress no hub SSE (global + por-vídeo; testado com subscriber)
+- [x] `RUNNER_TOKEN` autentica apenas procedimentos /app.studio.v1.JobService/*; rejeitado em qualquer outro service (matriz do interceptor atualizada)
+- [x] Testes de auth dupla verdes (JWT ok em tudo, PAT só no JobService, anônimo 401)
 
 ## Verificação
 
@@ -71,6 +71,14 @@ buf lint && buf generate --dry-run
 
 ## Notas
 
+## Notas
+
+- Migration 0009 adiciona progress_percent/progress_stage à jobs (persistência para
+  reload do dashboard; o tempo real vai por SSE).
+- FailJob distingue retryable=true (fila aplica backoff) de false (terminal imediato,
+  query FailJobTerminal).
+- Gatilho do claim implementado AQUI conforme nota da própria tarefa (ROADMAP citava
+  S5-04): claim → queued→rendering com history row actor="runner".
 - Tudo unary de propósito (D-10): nada de streaming/bidi — simplifica proxy Caddy/TLS.
 - Não reutilizar o token de usuário para o runner: `RUNNER_TOKEN` é segredo de máquina,
   revogável por env sem invalidar login humano (T-06).

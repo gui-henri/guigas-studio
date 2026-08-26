@@ -258,6 +258,75 @@ func (x *ScenesValidated) GetValid() bool {
 	return false
 }
 
+// JobProgress mirrors render progress to the dashboard in real time.
+type JobProgress struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	JobId         string                 `protobuf:"bytes,1,opt,name=job_id,json=jobId,proto3" json:"job_id,omitempty"`
+	VideoId       string                 `protobuf:"bytes,2,opt,name=video_id,json=videoId,proto3" json:"video_id,omitempty"`
+	Percent       int32                  `protobuf:"varint,3,opt,name=percent,proto3" json:"percent,omitempty"`
+	Stage         string                 `protobuf:"bytes,4,opt,name=stage,proto3" json:"stage,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *JobProgress) Reset() {
+	*x = JobProgress{}
+	mi := &file_app_studio_v1_events_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *JobProgress) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*JobProgress) ProtoMessage() {}
+
+func (x *JobProgress) ProtoReflect() protoreflect.Message {
+	mi := &file_app_studio_v1_events_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use JobProgress.ProtoReflect.Descriptor instead.
+func (*JobProgress) Descriptor() ([]byte, []int) {
+	return file_app_studio_v1_events_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *JobProgress) GetJobId() string {
+	if x != nil {
+		return x.JobId
+	}
+	return ""
+}
+
+func (x *JobProgress) GetVideoId() string {
+	if x != nil {
+		return x.VideoId
+	}
+	return ""
+}
+
+func (x *JobProgress) GetPercent() int32 {
+	if x != nil {
+		return x.Percent
+	}
+	return 0
+}
+
+func (x *JobProgress) GetStage() string {
+	if x != nil {
+		return x.Stage
+	}
+	return ""
+}
+
 // StudioEvent is the typed envelope shared Go↔TS over SSE (protojson).
 type StudioEvent struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
@@ -267,6 +336,7 @@ type StudioEvent struct {
 	//	*StudioEvent_ScriptValidated
 	//	*StudioEvent_WatcherPostFound
 	//	*StudioEvent_ScenesValidated
+	//	*StudioEvent_JobProgress
 	Event         isStudioEvent_Event `protobuf_oneof:"event"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -274,7 +344,7 @@ type StudioEvent struct {
 
 func (x *StudioEvent) Reset() {
 	*x = StudioEvent{}
-	mi := &file_app_studio_v1_events_proto_msgTypes[4]
+	mi := &file_app_studio_v1_events_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -286,7 +356,7 @@ func (x *StudioEvent) String() string {
 func (*StudioEvent) ProtoMessage() {}
 
 func (x *StudioEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_app_studio_v1_events_proto_msgTypes[4]
+	mi := &file_app_studio_v1_events_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -299,7 +369,7 @@ func (x *StudioEvent) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StudioEvent.ProtoReflect.Descriptor instead.
 func (*StudioEvent) Descriptor() ([]byte, []int) {
-	return file_app_studio_v1_events_proto_rawDescGZIP(), []int{4}
+	return file_app_studio_v1_events_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *StudioEvent) GetEvent() isStudioEvent_Event {
@@ -345,6 +415,15 @@ func (x *StudioEvent) GetScenesValidated() *ScenesValidated {
 	return nil
 }
 
+func (x *StudioEvent) GetJobProgress() *JobProgress {
+	if x != nil {
+		if x, ok := x.Event.(*StudioEvent_JobProgress); ok {
+			return x.JobProgress
+		}
+	}
+	return nil
+}
+
 type isStudioEvent_Event interface {
 	isStudioEvent_Event()
 }
@@ -365,6 +444,10 @@ type StudioEvent_ScenesValidated struct {
 	ScenesValidated *ScenesValidated `protobuf:"bytes,4,opt,name=scenes_validated,json=scenesValidated,proto3,oneof"`
 }
 
+type StudioEvent_JobProgress struct {
+	JobProgress *JobProgress `protobuf:"bytes,5,opt,name=job_progress,json=jobProgress,proto3,oneof"`
+}
+
 func (*StudioEvent_VideoStatusChanged) isStudioEvent_Event() {}
 
 func (*StudioEvent_ScriptValidated) isStudioEvent_Event() {}
@@ -372,6 +455,8 @@ func (*StudioEvent_ScriptValidated) isStudioEvent_Event() {}
 func (*StudioEvent_WatcherPostFound) isStudioEvent_Event() {}
 
 func (*StudioEvent_ScenesValidated) isStudioEvent_Event() {}
+
+func (*StudioEvent_JobProgress) isStudioEvent_Event() {}
 
 var File_app_studio_v1_events_proto protoreflect.FileDescriptor
 
@@ -393,12 +478,18 @@ const file_app_studio_v1_events_proto_rawDesc = "" +
 	"\x0fScenesValidated\x12\x19\n" +
 	"\bvideo_id\x18\x01 \x01(\tR\avideoId\x12\x12\n" +
 	"\x04slug\x18\x02 \x01(\tR\x04slug\x12\x14\n" +
-	"\x05valid\x18\x03 \x01(\bR\x05valid\"\xd8\x02\n" +
+	"\x05valid\x18\x03 \x01(\bR\x05valid\"o\n" +
+	"\vJobProgress\x12\x15\n" +
+	"\x06job_id\x18\x01 \x01(\tR\x05jobId\x12\x19\n" +
+	"\bvideo_id\x18\x02 \x01(\tR\avideoId\x12\x18\n" +
+	"\apercent\x18\x03 \x01(\x05R\apercent\x12\x14\n" +
+	"\x05stage\x18\x04 \x01(\tR\x05stage\"\x99\x03\n" +
 	"\vStudioEvent\x12U\n" +
 	"\x14video_status_changed\x18\x01 \x01(\v2!.app.studio.v1.VideoStatusChangedH\x00R\x12videoStatusChanged\x12K\n" +
 	"\x10script_validated\x18\x02 \x01(\v2\x1e.app.studio.v1.ScriptValidatedH\x00R\x0fscriptValidated\x12O\n" +
 	"\x12watcher_post_found\x18\x03 \x01(\v2\x1f.app.studio.v1.WatcherPostFoundH\x00R\x10watcherPostFound\x12K\n" +
-	"\x10scenes_validated\x18\x04 \x01(\v2\x1e.app.studio.v1.ScenesValidatedH\x00R\x0fscenesValidatedB\a\n" +
+	"\x10scenes_validated\x18\x04 \x01(\v2\x1e.app.studio.v1.ScenesValidatedH\x00R\x0fscenesValidated\x12?\n" +
+	"\fjob_progress\x18\x05 \x01(\v2\x1a.app.studio.v1.JobProgressH\x00R\vjobProgressB\a\n" +
 	"\x05eventBGZEgithub.com/gui-henri/guigas-studio/backend/gen/app/studio/v1;studiov1b\x06proto3"
 
 var (
@@ -413,24 +504,26 @@ func file_app_studio_v1_events_proto_rawDescGZIP() []byte {
 	return file_app_studio_v1_events_proto_rawDescData
 }
 
-var file_app_studio_v1_events_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_app_studio_v1_events_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_app_studio_v1_events_proto_goTypes = []any{
 	(*VideoStatusChanged)(nil), // 0: app.studio.v1.VideoStatusChanged
 	(*ScriptValidated)(nil),    // 1: app.studio.v1.ScriptValidated
 	(*WatcherPostFound)(nil),   // 2: app.studio.v1.WatcherPostFound
 	(*ScenesValidated)(nil),    // 3: app.studio.v1.ScenesValidated
-	(*StudioEvent)(nil),        // 4: app.studio.v1.StudioEvent
+	(*JobProgress)(nil),        // 4: app.studio.v1.JobProgress
+	(*StudioEvent)(nil),        // 5: app.studio.v1.StudioEvent
 }
 var file_app_studio_v1_events_proto_depIdxs = []int32{
 	0, // 0: app.studio.v1.StudioEvent.video_status_changed:type_name -> app.studio.v1.VideoStatusChanged
 	1, // 1: app.studio.v1.StudioEvent.script_validated:type_name -> app.studio.v1.ScriptValidated
 	2, // 2: app.studio.v1.StudioEvent.watcher_post_found:type_name -> app.studio.v1.WatcherPostFound
 	3, // 3: app.studio.v1.StudioEvent.scenes_validated:type_name -> app.studio.v1.ScenesValidated
-	4, // [4:4] is the sub-list for method output_type
-	4, // [4:4] is the sub-list for method input_type
-	4, // [4:4] is the sub-list for extension type_name
-	4, // [4:4] is the sub-list for extension extendee
-	0, // [0:4] is the sub-list for field type_name
+	4, // 4: app.studio.v1.StudioEvent.job_progress:type_name -> app.studio.v1.JobProgress
+	5, // [5:5] is the sub-list for method output_type
+	5, // [5:5] is the sub-list for method input_type
+	5, // [5:5] is the sub-list for extension type_name
+	5, // [5:5] is the sub-list for extension extendee
+	0, // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_app_studio_v1_events_proto_init() }
@@ -438,11 +531,12 @@ func file_app_studio_v1_events_proto_init() {
 	if File_app_studio_v1_events_proto != nil {
 		return
 	}
-	file_app_studio_v1_events_proto_msgTypes[4].OneofWrappers = []any{
+	file_app_studio_v1_events_proto_msgTypes[5].OneofWrappers = []any{
 		(*StudioEvent_VideoStatusChanged)(nil),
 		(*StudioEvent_ScriptValidated)(nil),
 		(*StudioEvent_WatcherPostFound)(nil),
 		(*StudioEvent_ScenesValidated)(nil),
+		(*StudioEvent_JobProgress)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -450,7 +544,7 @@ func file_app_studio_v1_events_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_app_studio_v1_events_proto_rawDesc), len(file_app_studio_v1_events_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

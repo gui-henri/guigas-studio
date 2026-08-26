@@ -1,0 +1,81 @@
+syntax = "proto3";
+
+package app.studio.v1;
+
+option go_package = "github.com/gui-henri/guigas-studio/backend/gen/app/studio/v1;studiov1";
+
+// JobView is the runner-facing projection of a queued job row (S5-02).
+message JobView {
+  string id = 1;
+  string video_id = 2;
+  string type = 3;
+  string status = 4;
+  int32 attempts = 5;
+  int32 max_attempts = 6;
+  // Opaque JSON payload ({slug, expected_shorts}); the runner decodes it.
+  string payload_json = 7;
+  bool cancel_requested = 8;
+  int32 progress_percent = 9;
+  string progress_stage = 10;
+}
+
+// Artifact describes one rendered output file (S5-09 consumes duration_s).
+message Artifact {
+  string path = 1;
+  string sha256 = 2;
+  uint64 bytes = 3;
+  double duration_s = 4;
+}
+
+message ClaimJobRequest {
+  // Stable identity of the claiming runner (becomes claimed_by).
+  string runner_id = 1;
+}
+
+message ClaimJobResponse {
+  // Absent when the queue has nothing runnable right now.
+  JobView job = 1;
+}
+
+message UpdateProgressRequest {
+  string job_id = 1;
+  int32 percent = 2; // 0..100
+  string stage = 3;  // e.g. "bundle", "render-long", "render-short-2"
+}
+
+message UpdateProgressResponse {}
+
+message CompleteJobRequest {
+  string job_id = 1;
+  repeated Artifact artifacts = 2;
+  repeated string warnings = 3;
+}
+
+message CompleteJobResponse {}
+
+message FailJobRequest {
+  string job_id = 1;
+  string reason = 2;
+  // false → terminal failure (no requeue), true → queue backoff applies.
+  bool retryable = 3;
+}
+
+message FailJobResponse {}
+
+message GetJobRequest {
+  string job_id = 1;
+}
+
+message GetJobResponse {
+  JobView job = 1;
+}
+
+// Unary-only API consumed by the local runner (D-10): claim, report progress,
+// finish or fail. Auth: user JWT OR RUNNER_TOKEN (JobService only — T-06).
+service JobService {
+  rpc ClaimJob(ClaimJobRequest) returns (ClaimJobResponse);
+  rpc UpdateProgress(UpdateProgressRequest) returns (UpdateProgressResponse);
+  rpc CompleteJob(CompleteJobRequest) returns (CompleteJobResponse);
+  rpc FailJob(FailJobRequest) returns (FailJobResponse);
+  rpc GetJob(GetJobRequest) returns (GetJobResponse);
+}
