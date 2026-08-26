@@ -16,6 +16,7 @@ import PlayerDevPage from "./pages/PlayerDevPage";
 import StudioRecordingPage from "./pages/StudioRecordingPage";
 import VoicePreviewPage from "./pages/VoicePreviewPage";
 import ScenesReviewPage from "./pages/ScenesReviewPage";
+import FinalReviewPage from "./pages/FinalReviewPage";
 
 export default function App() {
   useStudioEvents();
@@ -65,6 +66,16 @@ export default function App() {
           <RequireAuth>
             <AppShell>
               <VoicePreviewPage />
+            </AppShell>
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/videos/:id/final"
+        element={
+          <RequireAuth>
+            <AppShell>
+              <FinalReviewPage />
             </AppShell>
           </RequireAuth>
         }

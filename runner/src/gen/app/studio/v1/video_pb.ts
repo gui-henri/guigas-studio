@@ -12,7 +12,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file app/studio/v1/video.proto.
  */
 export const file_app_studio_v1_video: GenFile = /*@__PURE__*/
-  fileDesc("ChlhcHAvc3R1ZGlvL3YxL3ZpZGVvLnByb3RvEg1hcHAuc3R1ZGlvLnYxIpgBCgVWaWRlbxIKCgJpZBgBIAEoCRIMCgRzbHVnGAIgASgJEg0KBXRpdGxlGAMgASgJEhIKCnNvdXJjZV91cmwYBCABKAkSKgoGc3RhdHVzGAUgASgOMhouYXBwLnN0dWRpby52MS5WaWRlb1N0YXR1cxISCgpjcmVhdGVkX2F0GAYgASgJEhIKCnVwZGF0ZWRfYXQYByABKAkiUwoOVmlkZW9BcnRpZmFjdHMSDgoGc2NyaXB0GAEgASgIEg0KBWF1ZGlvGAIgASgIEhEKCXRpbWVsaW5lcxgDIAEoCBIPCgdyZW5kZXJzGAQgASgIIlEKDFN0YXR1c0NoYW5nZRIOCgZzdGF0dXMYASABKAkSDgoGcmVhc29uGAIgASgJEg0KBWFjdG9yGAMgASgJEhIKCmNoYW5nZWRfYXQYBCABKAkiEwoRTGlzdFZpZGVvc1JlcXVlc3QiOgoSTGlzdFZpZGVvc1Jlc3BvbnNlEiQKBnZpZGVvcxgBIAMoCzIULmFwcC5zdHVkaW8udjEuVmlkZW8iHQoPR2V0VmlkZW9SZXF1ZXN0EgoKAmlkGAEgASgJIoECChBHZXRWaWRlb1Jlc3BvbnNlEiMKBXZpZGVvGAEgASgLMhQuYXBwLnN0dWRpby52MS5WaWRlbxIrCgZzY3JpcHQYAiABKAsyGy5hcHAuc3R1ZGlvLnYxLlN0dWRpb1NjcmlwdBI0Cg9vcmlnaW5hbF9zY3JpcHQYAyABKAsyGy5hcHAuc3R1ZGlvLnYxLlN0dWRpb1NjcmlwdBIwCglhcnRpZmFjdHMYBCABKAsyHS5hcHAuc3R1ZGlvLnYxLlZpZGVvQXJ0aWZhY3RzEjMKDnN0YXR1c19oaXN0b3J5GAUgAygLMhsuYXBwLnN0dWRpby52MS5TdGF0dXNDaGFuZ2UiRQoSQ3JlYXRlVmlkZW9SZXF1ZXN0EgwKBHNsdWcYASABKAkSDQoFdGl0bGUYAiABKAkSEgoKc291cmNlX3VybBgDIAEoCSI6ChNDcmVhdGVWaWRlb1Jlc3BvbnNlEiMKBXZpZGVvGAEgASgLMhQuYXBwLnN0dWRpby52MS5WaWRlbyJUChNVcGRhdGVTY3JpcHRSZXF1ZXN0EhAKCHZpZGVvX2lkGAEgASgJEisKBnNjcmlwdBgCIAEoCzIbLmFwcC5zdHVkaW8udjEuU3R1ZGlvU2NyaXB0IlMKFFVwZGF0ZVNjcmlwdFJlc3BvbnNlEg4KBmVycm9ycxgBIAMoCRIrCgZzY3JpcHQYAiABKAsyGy5hcHAuc3R1ZGlvLnYxLlN0dWRpb1NjcmlwdCIoChRBcHByb3ZlU2NyaXB0UmVxdWVzdBIQCgh2aWRlb19pZBgBIAEoCSI8ChVBcHByb3ZlU2NyaXB0UmVzcG9uc2USIwoFdmlkZW8YASABKAsyFC5hcHAuc3R1ZGlvLnYxLlZpZGVvIjgKE1JlamVjdFNjcmlwdFJlcXVlc3QSEAoIdmlkZW9faWQYASABKAkSDwoHY29tbWVudBgCIAEoCSI7ChRSZWplY3RTY3JpcHRSZXNwb25zZRIjCgV2aWRlbxgBIAEoCzIULmFwcC5zdHVkaW8udjEuVmlkZW8iZwoLVGFrZVN1bW1hcnkSEgoKc2VnbWVudF9pZBgBIAEoCRIMCgRraW5kGAIgASgJEg4KBnNoYTI1NhgDIAEoCRISCgpzaXplX2J5dGVzGAQgASgDEhIKCmNyZWF0ZWRfYXQYBSABKAkiJgoQTGlzdFRha2VzUmVxdWVzdBISCgp2aWRlb19zbHVnGAEgASgJIj4KEUxpc3RUYWtlc1Jlc3BvbnNlEikKBXRha2VzGAEgAygLMhouYXBwLnN0dWRpby52MS5UYWtlU3VtbWFyeSIqChZSZXF1ZXN0UmVyZW5kZXJSZXF1ZXN0EhAKCHZpZGVvX2lkGAEgASgJIj4KF1JlcXVlc3RSZXJlbmRlclJlc3BvbnNlEiMKBXZpZGVvGAEgASgLMhQuYXBwLnN0dWRpby52MS5WaWRlbyIqChZBcHByb3ZlRmluYWxDdXRSZXF1ZXN0EhAKCHZpZGVvX2lkGAEgASgJIlcKF0FwcHJvdmVGaW5hbEN1dFJlc3BvbnNlEiMKBXZpZGVvGAEgASgLMhQuYXBwLnN0dWRpby52MS5WaWRlbxIXCg9nZW5lcmF0ZWRfcGF0aHMYAiADKAkiKAoUQXBwcm92ZVNjZW5lc1JlcXVlc3QSEAoIdmlkZW9faWQYASABKAkiPAoVQXBwcm92ZVNjZW5lc1Jlc3BvbnNlEiMKBXZpZGVvGAEgASgLMhQuYXBwLnN0dWRpby52MS5WaWRlbyqtAwoLVmlkZW9TdGF0dXMSHAoYVklERU9fU1RBVFVTX1VOU1BFQ0lGSUVEEAASFAoQVklERU9fU1RBVFVTX05FVxABEh8KG1ZJREVPX1NUQVRVU19TQ1JJUFRfUEVORElORxACEh4KGlZJREVPX1NUQVRVU19TQ1JJUFRfUkVWSUVXEAMSIAocVklERU9fU1RBVFVTX1NDUklQVF9BUFBST1ZFRBAEEhoKFlZJREVPX1NUQVRVU19SRUNPUkRJTkcQBRIhCh1WSURFT19TVEFUVVNfVk9JQ0VfUFJPQ0VTU0lORxAGEh8KG1ZJREVPX1NUQVRVU19TQ0VORVNfUEVORElORxAHEh4KGlZJREVPX1NUQVRVU19TQ0VORVNfUkVWSUVXEAgSFwoTVklERU9fU1RBVFVTX1FVRVVFRBAJEhoKFlZJREVPX1NUQVRVU19SRU5ERVJJTkcQChIdChlWSURFT19TVEFUVVNfRklOQUxfUkVWSUVXEAsSGQoVVklERU9fU1RBVFVTX1JFTEVBU0VEEAwSGAoUVklERU9fU1RBVFVTX0JMT0NLRUQQDTKCBwoMVmlkZW9TZXJ2aWNlElEKCkxpc3RWaWRlb3MSIC5hcHAuc3R1ZGlvLnYxLkxpc3RWaWRlb3NSZXF1ZXN0GiEuYXBwLnN0dWRpby52MS5MaXN0VmlkZW9zUmVzcG9uc2USSwoIR2V0VmlkZW8SHi5hcHAuc3R1ZGlvLnYxLkdldFZpZGVvUmVxdWVzdBofLmFwcC5zdHVkaW8udjEuR2V0VmlkZW9SZXNwb25zZRJUCgtDcmVhdGVWaWRlbxIhLmFwcC5zdHVkaW8udjEuQ3JlYXRlVmlkZW9SZXF1ZXN0GiIuYXBwLnN0dWRpby52MS5DcmVhdGVWaWRlb1Jlc3BvbnNlElcKDFVwZGF0ZVNjcmlwdBIiLmFwcC5zdHVkaW8udjEuVXBkYXRlU2NyaXB0UmVxdWVzdBojLmFwcC5zdHVkaW8udjEuVXBkYXRlU2NyaXB0UmVzcG9uc2USWgoNQXBwcm92ZVNjcmlwdBIjLmFwcC5zdHVkaW8udjEuQXBwcm92ZVNjcmlwdFJlcXVlc3QaJC5hcHAuc3R1ZGlvLnYxLkFwcHJvdmVTY3JpcHRSZXNwb25zZRJXCgxSZWplY3RTY3JpcHQSIi5hcHAuc3R1ZGlvLnYxLlJlamVjdFNjcmlwdFJlcXVlc3QaIy5hcHAuc3R1ZGlvLnYxLlJlamVjdFNjcmlwdFJlc3BvbnNlEk4KCUxpc3RUYWtlcxIfLmFwcC5zdHVkaW8udjEuTGlzdFRha2VzUmVxdWVzdBogLmFwcC5zdHVkaW8udjEuTGlzdFRha2VzUmVzcG9uc2USWgoNQXBwcm92ZVNjZW5lcxIjLmFwcC5zdHVkaW8udjEuQXBwcm92ZVNjZW5lc1JlcXVlc3QaJC5hcHAuc3R1ZGlvLnYxLkFwcHJvdmVTY2VuZXNSZXNwb25zZRJgCg9SZXF1ZXN0UmVyZW5kZXISJS5hcHAuc3R1ZGlvLnYxLlJlcXVlc3RSZXJlbmRlclJlcXVlc3QaJi5hcHAuc3R1ZGlvLnYxLlJlcXVlc3RSZXJlbmRlclJlc3BvbnNlEmAKD0FwcHJvdmVGaW5hbEN1dBIlLmFwcC5zdHVkaW8udjEuQXBwcm92ZUZpbmFsQ3V0UmVxdWVzdBomLmFwcC5zdHVkaW8udjEuQXBwcm92ZUZpbmFsQ3V0UmVzcG9uc2VCR1pFZ2l0aHViLmNvbS9ndWktaGVucmkvZ3VpZ2FzLXN0dWRpby9iYWNrZW5kL2dlbi9hcHAvc3R1ZGlvL3YxO3N0dWRpb3YxYgZwcm90bzM", [file_app_studio_v1_script]);
+  fileDesc("ChlhcHAvc3R1ZGlvL3YxL3ZpZGVvLnByb3RvEg1hcHAuc3R1ZGlvLnYxIpgBCgVWaWRlbxIKCgJpZBgBIAEoCRIMCgRzbHVnGAIgASgJEg0KBXRpdGxlGAMgASgJEhIKCnNvdXJjZV91cmwYBCABKAkSKgoGc3RhdHVzGAUgASgOMhouYXBwLnN0dWRpby52MS5WaWRlb1N0YXR1cxISCgpjcmVhdGVkX2F0GAYgASgJEhIKCnVwZGF0ZWRfYXQYByABKAkiUwoOVmlkZW9BcnRpZmFjdHMSDgoGc2NyaXB0GAEgASgIEg0KBWF1ZGlvGAIgASgIEhEKCXRpbWVsaW5lcxgDIAEoCBIPCgdyZW5kZXJzGAQgASgIIlEKDFN0YXR1c0NoYW5nZRIOCgZzdGF0dXMYASABKAkSDgoGcmVhc29uGAIgASgJEg0KBWFjdG9yGAMgASgJEhIKCmNoYW5nZWRfYXQYBCABKAkiEwoRTGlzdFZpZGVvc1JlcXVlc3QiOgoSTGlzdFZpZGVvc1Jlc3BvbnNlEiQKBnZpZGVvcxgBIAMoCzIULmFwcC5zdHVkaW8udjEuVmlkZW8iHQoPR2V0VmlkZW9SZXF1ZXN0EgoKAmlkGAEgASgJIr4CChBHZXRWaWRlb1Jlc3BvbnNlEiMKBXZpZGVvGAEgASgLMhQuYXBwLnN0dWRpby52MS5WaWRlbxIrCgZzY3JpcHQYAiABKAsyGy5hcHAuc3R1ZGlvLnYxLlN0dWRpb1NjcmlwdBI0Cg9vcmlnaW5hbF9zY3JpcHQYAyABKAsyGy5hcHAuc3R1ZGlvLnYxLlN0dWRpb1NjcmlwdBIwCglhcnRpZmFjdHMYBCABKAsyHS5hcHAuc3R1ZGlvLnYxLlZpZGVvQXJ0aWZhY3RzEjMKDnN0YXR1c19oaXN0b3J5GAUgAygLMhsuYXBwLnN0dWRpby52MS5TdGF0dXNDaGFuZ2USOwoQcmVuZGVyX2FydGlmYWN0cxgGIAMoCzIhLmFwcC5zdHVkaW8udjEuUmVuZGVyQXJ0aWZhY3RWaWV3IkUKElJlbmRlckFydGlmYWN0VmlldxIMCgRwYXRoGAEgASgJEg0KBWJ5dGVzGAIgASgEEhIKCmR1cmF0aW9uX3MYAyABKAEiRQoSQ3JlYXRlVmlkZW9SZXF1ZXN0EgwKBHNsdWcYASABKAkSDQoFdGl0bGUYAiABKAkSEgoKc291cmNlX3VybBgDIAEoCSI6ChNDcmVhdGVWaWRlb1Jlc3BvbnNlEiMKBXZpZGVvGAEgASgLMhQuYXBwLnN0dWRpby52MS5WaWRlbyJUChNVcGRhdGVTY3JpcHRSZXF1ZXN0EhAKCHZpZGVvX2lkGAEgASgJEisKBnNjcmlwdBgCIAEoCzIbLmFwcC5zdHVkaW8udjEuU3R1ZGlvU2NyaXB0IlMKFFVwZGF0ZVNjcmlwdFJlc3BvbnNlEg4KBmVycm9ycxgBIAMoCRIrCgZzY3JpcHQYAiABKAsyGy5hcHAuc3R1ZGlvLnYxLlN0dWRpb1NjcmlwdCIoChRBcHByb3ZlU2NyaXB0UmVxdWVzdBIQCgh2aWRlb19pZBgBIAEoCSI8ChVBcHByb3ZlU2NyaXB0UmVzcG9uc2USIwoFdmlkZW8YASABKAsyFC5hcHAuc3R1ZGlvLnYxLlZpZGVvIjgKE1JlamVjdFNjcmlwdFJlcXVlc3QSEAoIdmlkZW9faWQYASABKAkSDwoHY29tbWVudBgCIAEoCSI7ChRSZWplY3RTY3JpcHRSZXNwb25zZRIjCgV2aWRlbxgBIAEoCzIULmFwcC5zdHVkaW8udjEuVmlkZW8iZwoLVGFrZVN1bW1hcnkSEgoKc2VnbWVudF9pZBgBIAEoCRIMCgRraW5kGAIgASgJEg4KBnNoYTI1NhgDIAEoCRISCgpzaXplX2J5dGVzGAQgASgDEhIKCmNyZWF0ZWRfYXQYBSABKAkiJgoQTGlzdFRha2VzUmVxdWVzdBISCgp2aWRlb19zbHVnGAEgASgJIj4KEUxpc3RUYWtlc1Jlc3BvbnNlEikKBXRha2VzGAEgAygLMhouYXBwLnN0dWRpby52MS5UYWtlU3VtbWFyeSIqChZSZXF1ZXN0UmVyZW5kZXJSZXF1ZXN0EhAKCHZpZGVvX2lkGAEgASgJIj4KF1JlcXVlc3RSZXJlbmRlclJlc3BvbnNlEiMKBXZpZGVvGAEgASgLMhQuYXBwLnN0dWRpby52MS5WaWRlbyIqChZBcHByb3ZlRmluYWxDdXRSZXF1ZXN0EhAKCHZpZGVvX2lkGAEgASgJIlcKF0FwcHJvdmVGaW5hbEN1dFJlc3BvbnNlEiMKBXZpZGVvGAEgASgLMhQuYXBwLnN0dWRpby52MS5WaWRlbxIXCg9nZW5lcmF0ZWRfcGF0aHMYAiADKAkiKAoUQXBwcm92ZVNjZW5lc1JlcXVlc3QSEAoIdmlkZW9faWQYASABKAkiPAoVQXBwcm92ZVNjZW5lc1Jlc3BvbnNlEiMKBXZpZGVvGAEgASgLMhQuYXBwLnN0dWRpby52MS5WaWRlbyqtAwoLVmlkZW9TdGF0dXMSHAoYVklERU9fU1RBVFVTX1VOU1BFQ0lGSUVEEAASFAoQVklERU9fU1RBVFVTX05FVxABEh8KG1ZJREVPX1NUQVRVU19TQ1JJUFRfUEVORElORxACEh4KGlZJREVPX1NUQVRVU19TQ1JJUFRfUkVWSUVXEAMSIAocVklERU9fU1RBVFVTX1NDUklQVF9BUFBST1ZFRBAEEhoKFlZJREVPX1NUQVRVU19SRUNPUkRJTkcQBRIhCh1WSURFT19TVEFUVVNfVk9JQ0VfUFJPQ0VTU0lORxAGEh8KG1ZJREVPX1NUQVRVU19TQ0VORVNfUEVORElORxAHEh4KGlZJREVPX1NUQVRVU19TQ0VORVNfUkVWSUVXEAgSFwoTVklERU9fU1RBVFVTX1FVRVVFRBAJEhoKFlZJREVPX1NUQVRVU19SRU5ERVJJTkcQChIdChlWSURFT19TVEFUVVNfRklOQUxfUkVWSUVXEAsSGQoVVklERU9fU1RBVFVTX1JFTEVBU0VEEAwSGAoUVklERU9fU1RBVFVTX0JMT0NLRUQQDTKCBwoMVmlkZW9TZXJ2aWNlElEKCkxpc3RWaWRlb3MSIC5hcHAuc3R1ZGlvLnYxLkxpc3RWaWRlb3NSZXF1ZXN0GiEuYXBwLnN0dWRpby52MS5MaXN0VmlkZW9zUmVzcG9uc2USSwoIR2V0VmlkZW8SHi5hcHAuc3R1ZGlvLnYxLkdldFZpZGVvUmVxdWVzdBofLmFwcC5zdHVkaW8udjEuR2V0VmlkZW9SZXNwb25zZRJUCgtDcmVhdGVWaWRlbxIhLmFwcC5zdHVkaW8udjEuQ3JlYXRlVmlkZW9SZXF1ZXN0GiIuYXBwLnN0dWRpby52MS5DcmVhdGVWaWRlb1Jlc3BvbnNlElcKDFVwZGF0ZVNjcmlwdBIiLmFwcC5zdHVkaW8udjEuVXBkYXRlU2NyaXB0UmVxdWVzdBojLmFwcC5zdHVkaW8udjEuVXBkYXRlU2NyaXB0UmVzcG9uc2USWgoNQXBwcm92ZVNjcmlwdBIjLmFwcC5zdHVkaW8udjEuQXBwcm92ZVNjcmlwdFJlcXVlc3QaJC5hcHAuc3R1ZGlvLnYxLkFwcHJvdmVTY3JpcHRSZXNwb25zZRJXCgxSZWplY3RTY3JpcHQSIi5hcHAuc3R1ZGlvLnYxLlJlamVjdFNjcmlwdFJlcXVlc3QaIy5hcHAuc3R1ZGlvLnYxLlJlamVjdFNjcmlwdFJlc3BvbnNlEk4KCUxpc3RUYWtlcxIfLmFwcC5zdHVkaW8udjEuTGlzdFRha2VzUmVxdWVzdBogLmFwcC5zdHVkaW8udjEuTGlzdFRha2VzUmVzcG9uc2USWgoNQXBwcm92ZVNjZW5lcxIjLmFwcC5zdHVkaW8udjEuQXBwcm92ZVNjZW5lc1JlcXVlc3QaJC5hcHAuc3R1ZGlvLnYxLkFwcHJvdmVTY2VuZXNSZXNwb25zZRJgCg9SZXF1ZXN0UmVyZW5kZXISJS5hcHAuc3R1ZGlvLnYxLlJlcXVlc3RSZXJlbmRlclJlcXVlc3QaJi5hcHAuc3R1ZGlvLnYxLlJlcXVlc3RSZXJlbmRlclJlc3BvbnNlEmAKD0FwcHJvdmVGaW5hbEN1dBIlLmFwcC5zdHVkaW8udjEuQXBwcm92ZUZpbmFsQ3V0UmVxdWVzdBomLmFwcC5zdHVkaW8udjEuQXBwcm92ZUZpbmFsQ3V0UmVzcG9uc2VCR1pFZ2l0aHViLmNvbS9ndWktaGVucmkvZ3VpZ2FzLXN0dWRpby9iYWNrZW5kL2dlbi9hcHAvc3R1ZGlvL3YxO3N0dWRpb3YxYgZwcm90bzM", [file_app_studio_v1_script]);
 
 /**
  * Video is the pipeline index entry kept in Postgres (D-02); heavy artifacts live on disk.
@@ -210,6 +210,13 @@ export type GetVideoResponse = Message<"app.studio.v1.GetVideoResponse"> & {
    * @generated from field: repeated app.studio.v1.StatusChange status_history = 5;
    */
   statusHistory: StatusChange[];
+
+  /**
+   * Verified render outputs (S5-07) — final review page consumes these.
+   *
+   * @generated from field: repeated app.studio.v1.RenderArtifactView render_artifacts = 6;
+   */
+  renderArtifacts: RenderArtifactView[];
 };
 
 /**
@@ -218,6 +225,35 @@ export type GetVideoResponse = Message<"app.studio.v1.GetVideoResponse"> & {
  */
 export const GetVideoResponseSchema: GenMessage<GetVideoResponse> = /*@__PURE__*/
   messageDesc(file_app_studio_v1_video, 6);
+
+/**
+ * @generated from message app.studio.v1.RenderArtifactView
+ */
+export type RenderArtifactView = Message<"app.studio.v1.RenderArtifactView"> & {
+  /**
+   * "renders/long.mp4"
+   *
+   * @generated from field: string path = 1;
+   */
+  path: string;
+
+  /**
+   * @generated from field: uint64 bytes = 2;
+   */
+  bytes: bigint;
+
+  /**
+   * @generated from field: double duration_s = 3;
+   */
+  durationS: number;
+};
+
+/**
+ * Describes the message app.studio.v1.RenderArtifactView.
+ * Use `create(RenderArtifactViewSchema)` to create a new message.
+ */
+export const RenderArtifactViewSchema: GenMessage<RenderArtifactView> = /*@__PURE__*/
+  messageDesc(file_app_studio_v1_video, 7);
 
 /**
  * @generated from message app.studio.v1.CreateVideoRequest
@@ -244,7 +280,7 @@ export type CreateVideoRequest = Message<"app.studio.v1.CreateVideoRequest"> & {
  * Use `create(CreateVideoRequestSchema)` to create a new message.
  */
 export const CreateVideoRequestSchema: GenMessage<CreateVideoRequest> = /*@__PURE__*/
-  messageDesc(file_app_studio_v1_video, 7);
+  messageDesc(file_app_studio_v1_video, 8);
 
 /**
  * @generated from message app.studio.v1.CreateVideoResponse
@@ -261,7 +297,7 @@ export type CreateVideoResponse = Message<"app.studio.v1.CreateVideoResponse"> &
  * Use `create(CreateVideoResponseSchema)` to create a new message.
  */
 export const CreateVideoResponseSchema: GenMessage<CreateVideoResponse> = /*@__PURE__*/
-  messageDesc(file_app_studio_v1_video, 8);
+  messageDesc(file_app_studio_v1_video, 9);
 
 /**
  * @generated from message app.studio.v1.UpdateScriptRequest
@@ -283,7 +319,7 @@ export type UpdateScriptRequest = Message<"app.studio.v1.UpdateScriptRequest"> &
  * Use `create(UpdateScriptRequestSchema)` to create a new message.
  */
 export const UpdateScriptRequestSchema: GenMessage<UpdateScriptRequest> = /*@__PURE__*/
-  messageDesc(file_app_studio_v1_video, 9);
+  messageDesc(file_app_studio_v1_video, 10);
 
 /**
  * @generated from message app.studio.v1.UpdateScriptResponse
@@ -307,7 +343,7 @@ export type UpdateScriptResponse = Message<"app.studio.v1.UpdateScriptResponse">
  * Use `create(UpdateScriptResponseSchema)` to create a new message.
  */
 export const UpdateScriptResponseSchema: GenMessage<UpdateScriptResponse> = /*@__PURE__*/
-  messageDesc(file_app_studio_v1_video, 10);
+  messageDesc(file_app_studio_v1_video, 11);
 
 /**
  * @generated from message app.studio.v1.ApproveScriptRequest
@@ -324,7 +360,7 @@ export type ApproveScriptRequest = Message<"app.studio.v1.ApproveScriptRequest">
  * Use `create(ApproveScriptRequestSchema)` to create a new message.
  */
 export const ApproveScriptRequestSchema: GenMessage<ApproveScriptRequest> = /*@__PURE__*/
-  messageDesc(file_app_studio_v1_video, 11);
+  messageDesc(file_app_studio_v1_video, 12);
 
 /**
  * @generated from message app.studio.v1.ApproveScriptResponse
@@ -341,7 +377,7 @@ export type ApproveScriptResponse = Message<"app.studio.v1.ApproveScriptResponse
  * Use `create(ApproveScriptResponseSchema)` to create a new message.
  */
 export const ApproveScriptResponseSchema: GenMessage<ApproveScriptResponse> = /*@__PURE__*/
-  messageDesc(file_app_studio_v1_video, 12);
+  messageDesc(file_app_studio_v1_video, 13);
 
 /**
  * @generated from message app.studio.v1.RejectScriptRequest
@@ -363,7 +399,7 @@ export type RejectScriptRequest = Message<"app.studio.v1.RejectScriptRequest"> &
  * Use `create(RejectScriptRequestSchema)` to create a new message.
  */
 export const RejectScriptRequestSchema: GenMessage<RejectScriptRequest> = /*@__PURE__*/
-  messageDesc(file_app_studio_v1_video, 13);
+  messageDesc(file_app_studio_v1_video, 14);
 
 /**
  * @generated from message app.studio.v1.RejectScriptResponse
@@ -380,7 +416,7 @@ export type RejectScriptResponse = Message<"app.studio.v1.RejectScriptResponse">
  * Use `create(RejectScriptResponseSchema)` to create a new message.
  */
 export const RejectScriptResponseSchema: GenMessage<RejectScriptResponse> = /*@__PURE__*/
-  messageDesc(file_app_studio_v1_video, 14);
+  messageDesc(file_app_studio_v1_video, 15);
 
 /**
  * TakeSummary is one recorded artifact pair entry for a video.
@@ -421,7 +457,7 @@ export type TakeSummary = Message<"app.studio.v1.TakeSummary"> & {
  * Use `create(TakeSummarySchema)` to create a new message.
  */
 export const TakeSummarySchema: GenMessage<TakeSummary> = /*@__PURE__*/
-  messageDesc(file_app_studio_v1_video, 15);
+  messageDesc(file_app_studio_v1_video, 16);
 
 /**
  * @generated from message app.studio.v1.ListTakesRequest
@@ -438,7 +474,7 @@ export type ListTakesRequest = Message<"app.studio.v1.ListTakesRequest"> & {
  * Use `create(ListTakesRequestSchema)` to create a new message.
  */
 export const ListTakesRequestSchema: GenMessage<ListTakesRequest> = /*@__PURE__*/
-  messageDesc(file_app_studio_v1_video, 16);
+  messageDesc(file_app_studio_v1_video, 17);
 
 /**
  * @generated from message app.studio.v1.ListTakesResponse
@@ -455,7 +491,7 @@ export type ListTakesResponse = Message<"app.studio.v1.ListTakesResponse"> & {
  * Use `create(ListTakesResponseSchema)` to create a new message.
  */
 export const ListTakesResponseSchema: GenMessage<ListTakesResponse> = /*@__PURE__*/
-  messageDesc(file_app_studio_v1_video, 17);
+  messageDesc(file_app_studio_v1_video, 18);
 
 /**
  * @generated from message app.studio.v1.RequestRerenderRequest
@@ -472,7 +508,7 @@ export type RequestRerenderRequest = Message<"app.studio.v1.RequestRerenderReque
  * Use `create(RequestRerenderRequestSchema)` to create a new message.
  */
 export const RequestRerenderRequestSchema: GenMessage<RequestRerenderRequest> = /*@__PURE__*/
-  messageDesc(file_app_studio_v1_video, 18);
+  messageDesc(file_app_studio_v1_video, 19);
 
 /**
  * @generated from message app.studio.v1.RequestRerenderResponse
@@ -489,7 +525,7 @@ export type RequestRerenderResponse = Message<"app.studio.v1.RequestRerenderResp
  * Use `create(RequestRerenderResponseSchema)` to create a new message.
  */
 export const RequestRerenderResponseSchema: GenMessage<RequestRerenderResponse> = /*@__PURE__*/
-  messageDesc(file_app_studio_v1_video, 19);
+  messageDesc(file_app_studio_v1_video, 20);
 
 /**
  * @generated from message app.studio.v1.ApproveFinalCutRequest
@@ -506,7 +542,7 @@ export type ApproveFinalCutRequest = Message<"app.studio.v1.ApproveFinalCutReque
  * Use `create(ApproveFinalCutRequestSchema)` to create a new message.
  */
 export const ApproveFinalCutRequestSchema: GenMessage<ApproveFinalCutRequest> = /*@__PURE__*/
-  messageDesc(file_app_studio_v1_video, 20);
+  messageDesc(file_app_studio_v1_video, 21);
 
 /**
  * @generated from message app.studio.v1.ApproveFinalCutResponse
@@ -530,7 +566,7 @@ export type ApproveFinalCutResponse = Message<"app.studio.v1.ApproveFinalCutResp
  * Use `create(ApproveFinalCutResponseSchema)` to create a new message.
  */
 export const ApproveFinalCutResponseSchema: GenMessage<ApproveFinalCutResponse> = /*@__PURE__*/
-  messageDesc(file_app_studio_v1_video, 21);
+  messageDesc(file_app_studio_v1_video, 22);
 
 /**
  * @generated from message app.studio.v1.ApproveScenesRequest
@@ -547,7 +583,7 @@ export type ApproveScenesRequest = Message<"app.studio.v1.ApproveScenesRequest">
  * Use `create(ApproveScenesRequestSchema)` to create a new message.
  */
 export const ApproveScenesRequestSchema: GenMessage<ApproveScenesRequest> = /*@__PURE__*/
-  messageDesc(file_app_studio_v1_video, 22);
+  messageDesc(file_app_studio_v1_video, 23);
 
 /**
  * @generated from message app.studio.v1.ApproveScenesResponse
@@ -564,7 +600,7 @@ export type ApproveScenesResponse = Message<"app.studio.v1.ApproveScenesResponse
  * Use `create(ApproveScenesResponseSchema)` to create a new message.
  */
 export const ApproveScenesResponseSchema: GenMessage<ApproveScenesResponse> = /*@__PURE__*/
-  messageDesc(file_app_studio_v1_video, 23);
+  messageDesc(file_app_studio_v1_video, 24);
 
 /**
  * VideoStatus mirrors the canonical pipeline state machine (ROADMAP.md).

@@ -145,9 +145,20 @@ func (s *VideoService) GetVideo(
 	}
 
 	resp := &studiov1.GetVideoResponse{
-		Video:         videoToProto(&video),
-		Artifacts:     s.artifactPresence(video.Slug),
-		StatusHistory: []*studiov1.StatusChange{},
+		Video:           videoToProto(&video),
+		Artifacts:       s.artifactPresence(video.Slug),
+		StatusHistory:   []*studiov1.StatusChange{},
+		RenderArtifacts: []*studiov1.RenderArtifactView{},
+	}
+
+	if rows, rErr := s.queries.ListRenderArtifacts(ctx, video.ID); rErr == nil {
+		for _, row := range rows {
+			resp.RenderArtifacts = append(resp.RenderArtifacts, &studiov1.RenderArtifactView{
+				Path:      row.Path,
+				Bytes:     uint64(row.Bytes),
+				DurationS: row.DurationS,
+			})
+		}
 	}
 
 	history, err := s.queries.ListStatusHistoryByVideo(ctx, video.ID)

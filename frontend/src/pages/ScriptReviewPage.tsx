@@ -200,6 +200,12 @@ export default function ScriptReviewPage() {
           >
             Cenas
           </Link>
+          <Link
+            to={`/videos/${video.id}/final`}
+            className="rounded-md border border-line px-3 py-1.5 hover:border-accent hover:text-accent"
+          >
+            Corte
+          </Link>
         </nav>
         {script.target && (
           <span className="text-xs text-ink/50">alvo: {script.target.durationMin} min</span>

@@ -70,6 +70,14 @@ message GetVideoResponse {
   StudioScript original_script = 3;
   VideoArtifacts artifacts = 4;
   repeated StatusChange status_history = 5;
+  // Verified render outputs (S5-07) — final review page consumes these.
+  repeated RenderArtifactView render_artifacts = 6;
+}
+
+message RenderArtifactView {
+  string path = 1;      // "renders/long.mp4"
+  uint64 bytes = 2;
+  double duration_s = 3;
 }
 
 message CreateVideoRequest {

@@ -5,7 +5,7 @@ sprint: 5
 prioridade: P0
 depende_de: [S5-07]
 estimativa_h: 2
-status: todo
+status: done
 ---
 
 # S5-10 — Revisão final consolidada na UI
@@ -49,11 +49,11 @@ mutação/invalidação via TanStack Query + SSE (S1-05, D-03). Estado do vídeo
 
 ## Critérios de aceite
 
-- [ ] Long e todos os shorts tocam lado a lado sem recarregar a página
-- [ ] Duração/tamanho de cada render visíveis; badge de desvio vs alvo correto
-- [ ] Aprovar dispara o builder e a UI reflete os artefatos gerados
-- [ ] Pedir re-render retorna o vídeo a `queued` com novo job (`rerender=true`)
-- [ ] lint+build do frontend limpos; nenhum estado morto/travado após SSE
+- [x] Long (player grande) + faixa de cards shorts tocam lado a lado — <video> streaming com URL autenticada + Range, sem fetch→blob
+- [x] Duração mm:ss e MB humanizado de cada render (metadados em PG via GetVideo.render_artifacts); badge verde/amarelo/vermelho por desvio ≤60s/≤180s/>180s — helpers puros testados
+- [x] Aprovar abre modal → ApproveFinalCut → toast com generated_paths; SSE invalida e reflete transições
+- [x] Pedir re-render (motivo opcional) → RequestRerender → queued + job novo rerender=true; UI reflete via SSE
+- [x] lint+build limpos; botões disabled/busy durante mutações; erros RPC mostram motivo estruturado
 
 ## Verificação
 
@@ -65,6 +65,10 @@ npm run build --workspaces --if-present
 
 ## Notas
 
+## Notas
+
+- Badge do alvo é orientação humana: desvio nunca bloqueia aprovação.
+- Sem target.durationMin no script o badge é omitido (campo opcional).
 - Não baixar MP4 inteiro para memória: `<video>` com URL autenticada + Range (S5-07)
   faz streaming; evitar `fetch`→blob para arquivos grandes.
 - Badge de alvo é orientação humana, não validação dura: nunca bloquear aprovação por
