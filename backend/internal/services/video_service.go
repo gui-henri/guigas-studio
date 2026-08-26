@@ -602,6 +602,115 @@ func (s *VideoService) ApproveFinalCut(
 	}), nil
 }
 
+// GetReleaseChecklist returns the launch checklist items (S5-11).
+func (s *VideoService) GetReleaseChecklist(
+	ctx context.Context,
+	req *connect.Request[studiov1.GetReleaseChecklistRequest],
+) (*connect.Response[studiov1.GetReleaseChecklistResponse], error) {
+	videoID, err := parseUUID(req.Msg.GetVideoId())
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("invalid video id"))
+	}
+	rows, err := s.queries.ListReleaseChecklist(ctx, videoID)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInternal, errors.New("failed to list checklist"))
+	}
+	resp := &studiov1.GetReleaseChecklistResponse{Items: []*studiov1.ChecklistItemView{}}
+	for _, row := range rows {
+		resp.Items = append(resp.Items, &studiov1.ChecklistItemView{
+			ItemKey:      row.ItemKey,
+			Label:        row.Label,
+			DownloadPath: row.DownloadPath,
+			Published:    row.Published,
+		})
+	}
+	return connect.NewResponse(resp), nil
+}
+
+// SetChecklistItemPublished toggles one item; when EVERY item is published
+// and the video sits in final_review, the SAME transaction flips it to
+// released — the canonical closing trigger (SPEC §7).
+func (s *VideoService) SetChecklistItemPublished(
+	ctx context.Context,
+	req *connect.Request[studiov1.SetChecklistItemPublishedRequest],
+) (*connect.Response[studiov1.SetChecklistItemPublishedResponse], error) {
+	if s.pool == nil {
+		return nil, connect.NewError(connect.CodeInternal, errors.New("service not configured for transactions"))
+	}
+	videoID, err := parseUUID(req.Msg.GetVideoId())
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("invalid video id"))
+	}
+	itemKey := req.Msg.GetItemKey()
+	if itemKey == "" {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("item_key is required"))
+	}
+
+	video, err := s.queries.GetVideo(ctx, videoID)
+	if err != nil {
+		if errors.Is(err, errNoRows) {
+			return nil, connect.NewError(connect.CodeNotFound, errors.New("video not found"))
+		}
+		return nil, connect.NewError(connect.CodeInternal, errors.New("failed to load video"))
+	}
+
+	actor := auth.ActorFromContext(ctx)
+	releasedNow := false
+
+	tx, txErr := s.pool.Begin(ctx)
+	if txErr != nil {
+		return nil, connect.NewError(connect.CodeInternal, errors.New("transaction failed"))
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+	q := s.queries.WithTx(tx)
+
+	if _, err := q.SetChecklistItemPublished(ctx, sqlc.SetChecklistItemPublishedParams{
+		VideoID: videoID, ItemKey: itemKey, Published: req.Msg.GetPublished(),
+	}); err != nil {
+		return nil, connect.NewError(connect.CodeNotFound, errors.New("checklist item not found"))
+	}
+
+	open, cErr := q.CountUnpublishedItems(ctx, videoID)
+	if cErr != nil {
+		return nil, connect.NewError(connect.CodeInternal, errors.New("failed to count checklist"))
+	}
+
+	from := videostate.State(video.Status)
+	if open == 0 && from == videostate.StateFinalReview && req.Msg.GetPublished() {
+		if err := videostate.Transition(from, videostate.StateReleased); err != nil {
+			return nil, connect.NewError(connect.CodeFailedPrecondition, err)
+		}
+		if err := q.UpdateVideoStatus(ctx, sqlc.UpdateVideoStatusParams{
+			ID: videoID, Status: string(videostate.StateReleased),
+		}); err != nil {
+			return nil, connect.NewError(connect.CodeInternal, errors.New("failed to update status"))
+		}
+		if err := q.InsertStatusChange(ctx, sqlc.InsertStatusChangeParams{
+			VideoID: videoID, Status: string(videostate.StateReleased),
+			Reason: "launch checklist completed", Actor: actor,
+		}); err != nil {
+			slog.Warn("history insert failed", "error", err)
+		}
+		releasedNow = true
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return nil, connect.NewError(connect.CodeInternal, errors.New("transaction failed"))
+	}
+
+	if releasedNow {
+		s.publishStatusChanged(video.ID.String(), video.Slug, string(from), string(videostate.StateReleased))
+	}
+
+	updated, gErr := s.queries.GetVideo(ctx, videoID)
+	if gErr != nil {
+		return nil, connect.NewError(connect.CodeInternal, errors.New("failed to reload video"))
+	}
+	return connect.NewResponse(&studiov1.SetChecklistItemPublishedResponse{
+		Video: videoToProto(&updated), Released: releasedNow,
+	}), nil
+}
+
 // videoForReview loads a video by id; nil (with error already handled) when absent.
 func (s *VideoService) videoForReview(ctx context.Context, rawID string) (*sqlc.Video, func()) {
 	id, err := parseUUID(rawID)

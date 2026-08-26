@@ -53,3 +53,13 @@ export const requestRerender = VideoService.method.requestRerender;
  * @generated from rpc app.studio.v1.VideoService.ApproveFinalCut
  */
 export const approveFinalCut = VideoService.method.approveFinalCut;
+
+/**
+ * @generated from rpc app.studio.v1.VideoService.GetReleaseChecklist
+ */
+export const getReleaseChecklist = VideoService.method.getReleaseChecklist;
+
+/**
+ * @generated from rpc app.studio.v1.VideoService.SetChecklistItemPublished
+ */
+export const setChecklistItemPublished = VideoService.method.setChecklistItemPublished;

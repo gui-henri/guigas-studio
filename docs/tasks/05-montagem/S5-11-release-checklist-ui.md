@@ -5,7 +5,7 @@ sprint: 5
 prioridade: P1
 depende_de: [S5-09]
 estimativa_h: 2
-status: todo
+status: done
 ---
 
 # S5-11 — Checklist de lançamento na UI
@@ -53,11 +53,11 @@ a página da S5-10 apenas navega/acompanha.
 
 ## Critérios de aceite
 
-- [ ] Itens aparecem 1:1 com os diretórios gerados pelo builder (inclui shorts dinâmicos)
-- [ ] Link de download baixa o arquivo correto autenticado
-- [ ] Marcar todos → vídeo `released`; marcar parcialmente → nada muda de estado
-- [ ] Checkbox sobrevive a reload (persistido em PG)
-- [ ] Unit test cobre conclusão e caso parcial (D-18)
+- [x] Itens 1:1 com os pacotes gerados (youtube/x/linkedin/instagram + short-N dinâmicos; seeds do builder com label e download_path)
+- [x] Link de download aponta para o endpoint de mídia autenticado (Range) com o arquivo do pacote
+- [x] Marcar todos → released na MESMA transação + SSE; parcial não muda estado; desmarcar NÃO reverte released (terminal v1) — testado
+- [x] Checkbox persistido em PG (published/published_at), sobrevive a reload — testado via GetReleaseChecklist
+- [x] Teste de integração cobre caso parcial, conclusão, desmarcar pós-released, persistência e guard de estado errado
 
 ## Verificação
 
@@ -69,6 +69,11 @@ cd backend && go test ./internal/services/ -run 'Checklist'
 
 ## Notas
 
+## Notas
+
+- Migration 0011 reescrita para o shape canônico da tarefa (item_key/label/
+  download_path/published); banco local recriado manualmente durante o desenvolvimento.
+- Escrita do checklist é só-JWT: RUNNER_TOKEN nunca passa no VideoService (S5-02).
 - `released` sem volta é decisão consciente da v1: histórico real fica nos commits do
   workspace e no YouTube; reabrir vídeo = fluxo de re-render (S5-10), não toggle.
 - Não copiar arquivos no clique: download direto do workspace via endpoint de mídia —

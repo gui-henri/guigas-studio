@@ -12,7 +12,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file app/studio/v1/video.proto.
  */
 export const file_app_studio_v1_video: GenFile = /*@__PURE__*/
-  fileDesc("ChlhcHAvc3R1ZGlvL3YxL3ZpZGVvLnByb3RvEg1hcHAuc3R1ZGlvLnYxIpgBCgVWaWRlbxIKCgJpZBgBIAEoCRIMCgRzbHVnGAIgASgJEg0KBXRpdGxlGAMgASgJEhIKCnNvdXJjZV91cmwYBCABKAkSKgoGc3RhdHVzGAUgASgOMhouYXBwLnN0dWRpby52MS5WaWRlb1N0YXR1cxISCgpjcmVhdGVkX2F0GAYgASgJEhIKCnVwZGF0ZWRfYXQYByABKAkiUwoOVmlkZW9BcnRpZmFjdHMSDgoGc2NyaXB0GAEgASgIEg0KBWF1ZGlvGAIgASgIEhEKCXRpbWVsaW5lcxgDIAEoCBIPCgdyZW5kZXJzGAQgASgIIlEKDFN0YXR1c0NoYW5nZRIOCgZzdGF0dXMYASABKAkSDgoGcmVhc29uGAIgASgJEg0KBWFjdG9yGAMgASgJEhIKCmNoYW5nZWRfYXQYBCABKAkiEwoRTGlzdFZpZGVvc1JlcXVlc3QiOgoSTGlzdFZpZGVvc1Jlc3BvbnNlEiQKBnZpZGVvcxgBIAMoCzIULmFwcC5zdHVkaW8udjEuVmlkZW8iHQoPR2V0VmlkZW9SZXF1ZXN0EgoKAmlkGAEgASgJIr4CChBHZXRWaWRlb1Jlc3BvbnNlEiMKBXZpZGVvGAEgASgLMhQuYXBwLnN0dWRpby52MS5WaWRlbxIrCgZzY3JpcHQYAiABKAsyGy5hcHAuc3R1ZGlvLnYxLlN0dWRpb1NjcmlwdBI0Cg9vcmlnaW5hbF9zY3JpcHQYAyABKAsyGy5hcHAuc3R1ZGlvLnYxLlN0dWRpb1NjcmlwdBIwCglhcnRpZmFjdHMYBCABKAsyHS5hcHAuc3R1ZGlvLnYxLlZpZGVvQXJ0aWZhY3RzEjMKDnN0YXR1c19oaXN0b3J5GAUgAygLMhsuYXBwLnN0dWRpby52MS5TdGF0dXNDaGFuZ2USOwoQcmVuZGVyX2FydGlmYWN0cxgGIAMoCzIhLmFwcC5zdHVkaW8udjEuUmVuZGVyQXJ0aWZhY3RWaWV3IkUKElJlbmRlckFydGlmYWN0VmlldxIMCgRwYXRoGAEgASgJEg0KBWJ5dGVzGAIgASgEEhIKCmR1cmF0aW9uX3MYAyABKAEiRQoSQ3JlYXRlVmlkZW9SZXF1ZXN0EgwKBHNsdWcYASABKAkSDQoFdGl0bGUYAiABKAkSEgoKc291cmNlX3VybBgDIAEoCSI6ChNDcmVhdGVWaWRlb1Jlc3BvbnNlEiMKBXZpZGVvGAEgASgLMhQuYXBwLnN0dWRpby52MS5WaWRlbyJUChNVcGRhdGVTY3JpcHRSZXF1ZXN0EhAKCHZpZGVvX2lkGAEgASgJEisKBnNjcmlwdBgCIAEoCzIbLmFwcC5zdHVkaW8udjEuU3R1ZGlvU2NyaXB0IlMKFFVwZGF0ZVNjcmlwdFJlc3BvbnNlEg4KBmVycm9ycxgBIAMoCRIrCgZzY3JpcHQYAiABKAsyGy5hcHAuc3R1ZGlvLnYxLlN0dWRpb1NjcmlwdCIoChRBcHByb3ZlU2NyaXB0UmVxdWVzdBIQCgh2aWRlb19pZBgBIAEoCSI8ChVBcHByb3ZlU2NyaXB0UmVzcG9uc2USIwoFdmlkZW8YASABKAsyFC5hcHAuc3R1ZGlvLnYxLlZpZGVvIjgKE1JlamVjdFNjcmlwdFJlcXVlc3QSEAoIdmlkZW9faWQYASABKAkSDwoHY29tbWVudBgCIAEoCSI7ChRSZWplY3RTY3JpcHRSZXNwb25zZRIjCgV2aWRlbxgBIAEoCzIULmFwcC5zdHVkaW8udjEuVmlkZW8iZwoLVGFrZVN1bW1hcnkSEgoKc2VnbWVudF9pZBgBIAEoCRIMCgRraW5kGAIgASgJEg4KBnNoYTI1NhgDIAEoCRISCgpzaXplX2J5dGVzGAQgASgDEhIKCmNyZWF0ZWRfYXQYBSABKAkiJgoQTGlzdFRha2VzUmVxdWVzdBISCgp2aWRlb19zbHVnGAEgASgJIj4KEUxpc3RUYWtlc1Jlc3BvbnNlEikKBXRha2VzGAEgAygLMhouYXBwLnN0dWRpby52MS5UYWtlU3VtbWFyeSIqChZSZXF1ZXN0UmVyZW5kZXJSZXF1ZXN0EhAKCHZpZGVvX2lkGAEgASgJIj4KF1JlcXVlc3RSZXJlbmRlclJlc3BvbnNlEiMKBXZpZGVvGAEgASgLMhQuYXBwLnN0dWRpby52MS5WaWRlbyIqChZBcHByb3ZlRmluYWxDdXRSZXF1ZXN0EhAKCHZpZGVvX2lkGAEgASgJIlcKF0FwcHJvdmVGaW5hbEN1dFJlc3BvbnNlEiMKBXZpZGVvGAEgASgLMhQuYXBwLnN0dWRpby52MS5WaWRlbxIXCg9nZW5lcmF0ZWRfcGF0aHMYAiADKAkiKAoUQXBwcm92ZVNjZW5lc1JlcXVlc3QSEAoIdmlkZW9faWQYASABKAkiPAoVQXBwcm92ZVNjZW5lc1Jlc3BvbnNlEiMKBXZpZGVvGAEgASgLMhQuYXBwLnN0dWRpby52MS5WaWRlbyqtAwoLVmlkZW9TdGF0dXMSHAoYVklERU9fU1RBVFVTX1VOU1BFQ0lGSUVEEAASFAoQVklERU9fU1RBVFVTX05FVxABEh8KG1ZJREVPX1NUQVRVU19TQ1JJUFRfUEVORElORxACEh4KGlZJREVPX1NUQVRVU19TQ1JJUFRfUkVWSUVXEAMSIAocVklERU9fU1RBVFVTX1NDUklQVF9BUFBST1ZFRBAEEhoKFlZJREVPX1NUQVRVU19SRUNPUkRJTkcQBRIhCh1WSURFT19TVEFUVVNfVk9JQ0VfUFJPQ0VTU0lORxAGEh8KG1ZJREVPX1NUQVRVU19TQ0VORVNfUEVORElORxAHEh4KGlZJREVPX1NUQVRVU19TQ0VORVNfUkVWSUVXEAgSFwoTVklERU9fU1RBVFVTX1FVRVVFRBAJEhoKFlZJREVPX1NUQVRVU19SRU5ERVJJTkcQChIdChlWSURFT19TVEFUVVNfRklOQUxfUkVWSUVXEAsSGQoVVklERU9fU1RBVFVTX1JFTEVBU0VEEAwSGAoUVklERU9fU1RBVFVTX0JMT0NLRUQQDTKCBwoMVmlkZW9TZXJ2aWNlElEKCkxpc3RWaWRlb3MSIC5hcHAuc3R1ZGlvLnYxLkxpc3RWaWRlb3NSZXF1ZXN0GiEuYXBwLnN0dWRpby52MS5MaXN0VmlkZW9zUmVzcG9uc2USSwoIR2V0VmlkZW8SHi5hcHAuc3R1ZGlvLnYxLkdldFZpZGVvUmVxdWVzdBofLmFwcC5zdHVkaW8udjEuR2V0VmlkZW9SZXNwb25zZRJUCgtDcmVhdGVWaWRlbxIhLmFwcC5zdHVkaW8udjEuQ3JlYXRlVmlkZW9SZXF1ZXN0GiIuYXBwLnN0dWRpby52MS5DcmVhdGVWaWRlb1Jlc3BvbnNlElcKDFVwZGF0ZVNjcmlwdBIiLmFwcC5zdHVkaW8udjEuVXBkYXRlU2NyaXB0UmVxdWVzdBojLmFwcC5zdHVkaW8udjEuVXBkYXRlU2NyaXB0UmVzcG9uc2USWgoNQXBwcm92ZVNjcmlwdBIjLmFwcC5zdHVkaW8udjEuQXBwcm92ZVNjcmlwdFJlcXVlc3QaJC5hcHAuc3R1ZGlvLnYxLkFwcHJvdmVTY3JpcHRSZXNwb25zZRJXCgxSZWplY3RTY3JpcHQSIi5hcHAuc3R1ZGlvLnYxLlJlamVjdFNjcmlwdFJlcXVlc3QaIy5hcHAuc3R1ZGlvLnYxLlJlamVjdFNjcmlwdFJlc3BvbnNlEk4KCUxpc3RUYWtlcxIfLmFwcC5zdHVkaW8udjEuTGlzdFRha2VzUmVxdWVzdBogLmFwcC5zdHVkaW8udjEuTGlzdFRha2VzUmVzcG9uc2USWgoNQXBwcm92ZVNjZW5lcxIjLmFwcC5zdHVkaW8udjEuQXBwcm92ZVNjZW5lc1JlcXVlc3QaJC5hcHAuc3R1ZGlvLnYxLkFwcHJvdmVTY2VuZXNSZXNwb25zZRJgCg9SZXF1ZXN0UmVyZW5kZXISJS5hcHAuc3R1ZGlvLnYxLlJlcXVlc3RSZXJlbmRlclJlcXVlc3QaJi5hcHAuc3R1ZGlvLnYxLlJlcXVlc3RSZXJlbmRlclJlc3BvbnNlEmAKD0FwcHJvdmVGaW5hbEN1dBIlLmFwcC5zdHVkaW8udjEuQXBwcm92ZUZpbmFsQ3V0UmVxdWVzdBomLmFwcC5zdHVkaW8udjEuQXBwcm92ZUZpbmFsQ3V0UmVzcG9uc2VCR1pFZ2l0aHViLmNvbS9ndWktaGVucmkvZ3VpZ2FzLXN0dWRpby9iYWNrZW5kL2dlbi9hcHAvc3R1ZGlvL3YxO3N0dWRpb3YxYgZwcm90bzM", [file_app_studio_v1_script]);
+  fileDesc("ChlhcHAvc3R1ZGlvL3YxL3ZpZGVvLnByb3RvEg1hcHAuc3R1ZGlvLnYxIpgBCgVWaWRlbxIKCgJpZBgBIAEoCRIMCgRzbHVnGAIgASgJEg0KBXRpdGxlGAMgASgJEhIKCnNvdXJjZV91cmwYBCABKAkSKgoGc3RhdHVzGAUgASgOMhouYXBwLnN0dWRpby52MS5WaWRlb1N0YXR1cxISCgpjcmVhdGVkX2F0GAYgASgJEhIKCnVwZGF0ZWRfYXQYByABKAkiUwoOVmlkZW9BcnRpZmFjdHMSDgoGc2NyaXB0GAEgASgIEg0KBWF1ZGlvGAIgASgIEhEKCXRpbWVsaW5lcxgDIAEoCBIPCgdyZW5kZXJzGAQgASgIIlEKDFN0YXR1c0NoYW5nZRIOCgZzdGF0dXMYASABKAkSDgoGcmVhc29uGAIgASgJEg0KBWFjdG9yGAMgASgJEhIKCmNoYW5nZWRfYXQYBCABKAkiEwoRTGlzdFZpZGVvc1JlcXVlc3QiOgoSTGlzdFZpZGVvc1Jlc3BvbnNlEiQKBnZpZGVvcxgBIAMoCzIULmFwcC5zdHVkaW8udjEuVmlkZW8iHQoPR2V0VmlkZW9SZXF1ZXN0EgoKAmlkGAEgASgJIr4CChBHZXRWaWRlb1Jlc3BvbnNlEiMKBXZpZGVvGAEgASgLMhQuYXBwLnN0dWRpby52MS5WaWRlbxIrCgZzY3JpcHQYAiABKAsyGy5hcHAuc3R1ZGlvLnYxLlN0dWRpb1NjcmlwdBI0Cg9vcmlnaW5hbF9zY3JpcHQYAyABKAsyGy5hcHAuc3R1ZGlvLnYxLlN0dWRpb1NjcmlwdBIwCglhcnRpZmFjdHMYBCABKAsyHS5hcHAuc3R1ZGlvLnYxLlZpZGVvQXJ0aWZhY3RzEjMKDnN0YXR1c19oaXN0b3J5GAUgAygLMhsuYXBwLnN0dWRpby52MS5TdGF0dXNDaGFuZ2USOwoQcmVuZGVyX2FydGlmYWN0cxgGIAMoCzIhLmFwcC5zdHVkaW8udjEuUmVuZGVyQXJ0aWZhY3RWaWV3IkUKElJlbmRlckFydGlmYWN0VmlldxIMCgRwYXRoGAEgASgJEg0KBWJ5dGVzGAIgASgEEhIKCmR1cmF0aW9uX3MYAyABKAEiRQoSQ3JlYXRlVmlkZW9SZXF1ZXN0EgwKBHNsdWcYASABKAkSDQoFdGl0bGUYAiABKAkSEgoKc291cmNlX3VybBgDIAEoCSI6ChNDcmVhdGVWaWRlb1Jlc3BvbnNlEiMKBXZpZGVvGAEgASgLMhQuYXBwLnN0dWRpby52MS5WaWRlbyJUChNVcGRhdGVTY3JpcHRSZXF1ZXN0EhAKCHZpZGVvX2lkGAEgASgJEisKBnNjcmlwdBgCIAEoCzIbLmFwcC5zdHVkaW8udjEuU3R1ZGlvU2NyaXB0IlMKFFVwZGF0ZVNjcmlwdFJlc3BvbnNlEg4KBmVycm9ycxgBIAMoCRIrCgZzY3JpcHQYAiABKAsyGy5hcHAuc3R1ZGlvLnYxLlN0dWRpb1NjcmlwdCIoChRBcHByb3ZlU2NyaXB0UmVxdWVzdBIQCgh2aWRlb19pZBgBIAEoCSI8ChVBcHByb3ZlU2NyaXB0UmVzcG9uc2USIwoFdmlkZW8YASABKAsyFC5hcHAuc3R1ZGlvLnYxLlZpZGVvIjgKE1JlamVjdFNjcmlwdFJlcXVlc3QSEAoIdmlkZW9faWQYASABKAkSDwoHY29tbWVudBgCIAEoCSI7ChRSZWplY3RTY3JpcHRSZXNwb25zZRIjCgV2aWRlbxgBIAEoCzIULmFwcC5zdHVkaW8udjEuVmlkZW8iZwoLVGFrZVN1bW1hcnkSEgoKc2VnbWVudF9pZBgBIAEoCRIMCgRraW5kGAIgASgJEg4KBnNoYTI1NhgDIAEoCRISCgpzaXplX2J5dGVzGAQgASgDEhIKCmNyZWF0ZWRfYXQYBSABKAkiJgoQTGlzdFRha2VzUmVxdWVzdBISCgp2aWRlb19zbHVnGAEgASgJIj4KEUxpc3RUYWtlc1Jlc3BvbnNlEikKBXRha2VzGAEgAygLMhouYXBwLnN0dWRpby52MS5UYWtlU3VtbWFyeSJeChFDaGVja2xpc3RJdGVtVmlldxIQCghpdGVtX2tleRgBIAEoCRINCgVsYWJlbBgCIAEoCRIVCg1kb3dubG9hZF9wYXRoGAMgASgJEhEKCXB1Ymxpc2hlZBgEIAEoCCIuChpHZXRSZWxlYXNlQ2hlY2tsaXN0UmVxdWVzdBIQCgh2aWRlb19pZBgBIAEoCSJOChtHZXRSZWxlYXNlQ2hlY2tsaXN0UmVzcG9uc2USLwoFaXRlbXMYASADKAsyIC5hcHAuc3R1ZGlvLnYxLkNoZWNrbGlzdEl0ZW1WaWV3IlkKIFNldENoZWNrbGlzdEl0ZW1QdWJsaXNoZWRSZXF1ZXN0EhAKCHZpZGVvX2lkGAEgASgJEhAKCGl0ZW1fa2V5GAIgASgJEhEKCXB1Ymxpc2hlZBgDIAEoCCJaCiFTZXRDaGVja2xpc3RJdGVtUHVibGlzaGVkUmVzcG9uc2USIwoFdmlkZW8YASABKAsyFC5hcHAuc3R1ZGlvLnYxLlZpZGVvEhAKCHJlbGVhc2VkGAIgASgIIioKFlJlcXVlc3RSZXJlbmRlclJlcXVlc3QSEAoIdmlkZW9faWQYASABKAkiPgoXUmVxdWVzdFJlcmVuZGVyUmVzcG9uc2USIwoFdmlkZW8YASABKAsyFC5hcHAuc3R1ZGlvLnYxLlZpZGVvIioKFkFwcHJvdmVGaW5hbEN1dFJlcXVlc3QSEAoIdmlkZW9faWQYASABKAkiVwoXQXBwcm92ZUZpbmFsQ3V0UmVzcG9uc2USIwoFdmlkZW8YASABKAsyFC5hcHAuc3R1ZGlvLnYxLlZpZGVvEhcKD2dlbmVyYXRlZF9wYXRocxgCIAMoCSIoChRBcHByb3ZlU2NlbmVzUmVxdWVzdBIQCgh2aWRlb19pZBgBIAEoCSI8ChVBcHByb3ZlU2NlbmVzUmVzcG9uc2USIwoFdmlkZW8YASABKAsyFC5hcHAuc3R1ZGlvLnYxLlZpZGVvKq0DCgtWaWRlb1N0YXR1cxIcChhWSURFT19TVEFUVVNfVU5TUEVDSUZJRUQQABIUChBWSURFT19TVEFUVVNfTkVXEAESHwobVklERU9fU1RBVFVTX1NDUklQVF9QRU5ESU5HEAISHgoaVklERU9fU1RBVFVTX1NDUklQVF9SRVZJRVcQAxIgChxWSURFT19TVEFUVVNfU0NSSVBUX0FQUFJPVkVEEAQSGgoWVklERU9fU1RBVFVTX1JFQ09SRElORxAFEiEKHVZJREVPX1NUQVRVU19WT0lDRV9QUk9DRVNTSU5HEAYSHwobVklERU9fU1RBVFVTX1NDRU5FU19QRU5ESU5HEAcSHgoaVklERU9fU1RBVFVTX1NDRU5FU19SRVZJRVcQCBIXChNWSURFT19TVEFUVVNfUVVFVUVEEAkSGgoWVklERU9fU1RBVFVTX1JFTkRFUklORxAKEh0KGVZJREVPX1NUQVRVU19GSU5BTF9SRVZJRVcQCxIZChVWSURFT19TVEFUVVNfUkVMRUFTRUQQDBIYChRWSURFT19TVEFUVVNfQkxPQ0tFRBANMvAICgxWaWRlb1NlcnZpY2USUQoKTGlzdFZpZGVvcxIgLmFwcC5zdHVkaW8udjEuTGlzdFZpZGVvc1JlcXVlc3QaIS5hcHAuc3R1ZGlvLnYxLkxpc3RWaWRlb3NSZXNwb25zZRJLCghHZXRWaWRlbxIeLmFwcC5zdHVkaW8udjEuR2V0VmlkZW9SZXF1ZXN0Gh8uYXBwLnN0dWRpby52MS5HZXRWaWRlb1Jlc3BvbnNlElQKC0NyZWF0ZVZpZGVvEiEuYXBwLnN0dWRpby52MS5DcmVhdGVWaWRlb1JlcXVlc3QaIi5hcHAuc3R1ZGlvLnYxLkNyZWF0ZVZpZGVvUmVzcG9uc2USVwoMVXBkYXRlU2NyaXB0EiIuYXBwLnN0dWRpby52MS5VcGRhdGVTY3JpcHRSZXF1ZXN0GiMuYXBwLnN0dWRpby52MS5VcGRhdGVTY3JpcHRSZXNwb25zZRJaCg1BcHByb3ZlU2NyaXB0EiMuYXBwLnN0dWRpby52MS5BcHByb3ZlU2NyaXB0UmVxdWVzdBokLmFwcC5zdHVkaW8udjEuQXBwcm92ZVNjcmlwdFJlc3BvbnNlElcKDFJlamVjdFNjcmlwdBIiLmFwcC5zdHVkaW8udjEuUmVqZWN0U2NyaXB0UmVxdWVzdBojLmFwcC5zdHVkaW8udjEuUmVqZWN0U2NyaXB0UmVzcG9uc2USTgoJTGlzdFRha2VzEh8uYXBwLnN0dWRpby52MS5MaXN0VGFrZXNSZXF1ZXN0GiAuYXBwLnN0dWRpby52MS5MaXN0VGFrZXNSZXNwb25zZRJaCg1BcHByb3ZlU2NlbmVzEiMuYXBwLnN0dWRpby52MS5BcHByb3ZlU2NlbmVzUmVxdWVzdBokLmFwcC5zdHVkaW8udjEuQXBwcm92ZVNjZW5lc1Jlc3BvbnNlEmAKD1JlcXVlc3RSZXJlbmRlchIlLmFwcC5zdHVkaW8udjEuUmVxdWVzdFJlcmVuZGVyUmVxdWVzdBomLmFwcC5zdHVkaW8udjEuUmVxdWVzdFJlcmVuZGVyUmVzcG9uc2USYAoPQXBwcm92ZUZpbmFsQ3V0EiUuYXBwLnN0dWRpby52MS5BcHByb3ZlRmluYWxDdXRSZXF1ZXN0GiYuYXBwLnN0dWRpby52MS5BcHByb3ZlRmluYWxDdXRSZXNwb25zZRJsChNHZXRSZWxlYXNlQ2hlY2tsaXN0EikuYXBwLnN0dWRpby52MS5HZXRSZWxlYXNlQ2hlY2tsaXN0UmVxdWVzdBoqLmFwcC5zdHVkaW8udjEuR2V0UmVsZWFzZUNoZWNrbGlzdFJlc3BvbnNlEn4KGVNldENoZWNrbGlzdEl0ZW1QdWJsaXNoZWQSLy5hcHAuc3R1ZGlvLnYxLlNldENoZWNrbGlzdEl0ZW1QdWJsaXNoZWRSZXF1ZXN0GjAuYXBwLnN0dWRpby52MS5TZXRDaGVja2xpc3RJdGVtUHVibGlzaGVkUmVzcG9uc2VCR1pFZ2l0aHViLmNvbS9ndWktaGVucmkvZ3VpZ2FzLXN0dWRpby9iYWNrZW5kL2dlbi9hcHAvc3R1ZGlvL3YxO3N0dWRpb3YxYgZwcm90bzM", [file_app_studio_v1_script]);
 
 /**
  * Video is the pipeline index entry kept in Postgres (D-02); heavy artifacts live on disk.
@@ -494,6 +494,123 @@ export const ListTakesResponseSchema: GenMessage<ListTakesResponse> = /*@__PURE_
   messageDesc(file_app_studio_v1_video, 18);
 
 /**
+ * @generated from message app.studio.v1.ChecklistItemView
+ */
+export type ChecklistItemView = Message<"app.studio.v1.ChecklistItemView"> & {
+  /**
+   * @generated from field: string item_key = 1;
+   */
+  itemKey: string;
+
+  /**
+   * @generated from field: string label = 2;
+   */
+  label: string;
+
+  /**
+   * @generated from field: string download_path = 3;
+   */
+  downloadPath: string;
+
+  /**
+   * @generated from field: bool published = 4;
+   */
+  published: boolean;
+};
+
+/**
+ * Describes the message app.studio.v1.ChecklistItemView.
+ * Use `create(ChecklistItemViewSchema)` to create a new message.
+ */
+export const ChecklistItemViewSchema: GenMessage<ChecklistItemView> = /*@__PURE__*/
+  messageDesc(file_app_studio_v1_video, 19);
+
+/**
+ * @generated from message app.studio.v1.GetReleaseChecklistRequest
+ */
+export type GetReleaseChecklistRequest = Message<"app.studio.v1.GetReleaseChecklistRequest"> & {
+  /**
+   * @generated from field: string video_id = 1;
+   */
+  videoId: string;
+};
+
+/**
+ * Describes the message app.studio.v1.GetReleaseChecklistRequest.
+ * Use `create(GetReleaseChecklistRequestSchema)` to create a new message.
+ */
+export const GetReleaseChecklistRequestSchema: GenMessage<GetReleaseChecklistRequest> = /*@__PURE__*/
+  messageDesc(file_app_studio_v1_video, 20);
+
+/**
+ * @generated from message app.studio.v1.GetReleaseChecklistResponse
+ */
+export type GetReleaseChecklistResponse = Message<"app.studio.v1.GetReleaseChecklistResponse"> & {
+  /**
+   * @generated from field: repeated app.studio.v1.ChecklistItemView items = 1;
+   */
+  items: ChecklistItemView[];
+};
+
+/**
+ * Describes the message app.studio.v1.GetReleaseChecklistResponse.
+ * Use `create(GetReleaseChecklistResponseSchema)` to create a new message.
+ */
+export const GetReleaseChecklistResponseSchema: GenMessage<GetReleaseChecklistResponse> = /*@__PURE__*/
+  messageDesc(file_app_studio_v1_video, 21);
+
+/**
+ * @generated from message app.studio.v1.SetChecklistItemPublishedRequest
+ */
+export type SetChecklistItemPublishedRequest = Message<"app.studio.v1.SetChecklistItemPublishedRequest"> & {
+  /**
+   * @generated from field: string video_id = 1;
+   */
+  videoId: string;
+
+  /**
+   * @generated from field: string item_key = 2;
+   */
+  itemKey: string;
+
+  /**
+   * @generated from field: bool published = 3;
+   */
+  published: boolean;
+};
+
+/**
+ * Describes the message app.studio.v1.SetChecklistItemPublishedRequest.
+ * Use `create(SetChecklistItemPublishedRequestSchema)` to create a new message.
+ */
+export const SetChecklistItemPublishedRequestSchema: GenMessage<SetChecklistItemPublishedRequest> = /*@__PURE__*/
+  messageDesc(file_app_studio_v1_video, 22);
+
+/**
+ * @generated from message app.studio.v1.SetChecklistItemPublishedResponse
+ */
+export type SetChecklistItemPublishedResponse = Message<"app.studio.v1.SetChecklistItemPublishedResponse"> & {
+  /**
+   * @generated from field: app.studio.v1.Video video = 1;
+   */
+  video?: Video | undefined;
+
+  /**
+   * True when this update completed the checklist and flipped released.
+   *
+   * @generated from field: bool released = 2;
+   */
+  released: boolean;
+};
+
+/**
+ * Describes the message app.studio.v1.SetChecklistItemPublishedResponse.
+ * Use `create(SetChecklistItemPublishedResponseSchema)` to create a new message.
+ */
+export const SetChecklistItemPublishedResponseSchema: GenMessage<SetChecklistItemPublishedResponse> = /*@__PURE__*/
+  messageDesc(file_app_studio_v1_video, 23);
+
+/**
  * @generated from message app.studio.v1.RequestRerenderRequest
  */
 export type RequestRerenderRequest = Message<"app.studio.v1.RequestRerenderRequest"> & {
@@ -508,7 +625,7 @@ export type RequestRerenderRequest = Message<"app.studio.v1.RequestRerenderReque
  * Use `create(RequestRerenderRequestSchema)` to create a new message.
  */
 export const RequestRerenderRequestSchema: GenMessage<RequestRerenderRequest> = /*@__PURE__*/
-  messageDesc(file_app_studio_v1_video, 19);
+  messageDesc(file_app_studio_v1_video, 24);
 
 /**
  * @generated from message app.studio.v1.RequestRerenderResponse
@@ -525,7 +642,7 @@ export type RequestRerenderResponse = Message<"app.studio.v1.RequestRerenderResp
  * Use `create(RequestRerenderResponseSchema)` to create a new message.
  */
 export const RequestRerenderResponseSchema: GenMessage<RequestRerenderResponse> = /*@__PURE__*/
-  messageDesc(file_app_studio_v1_video, 20);
+  messageDesc(file_app_studio_v1_video, 25);
 
 /**
  * @generated from message app.studio.v1.ApproveFinalCutRequest
@@ -542,7 +659,7 @@ export type ApproveFinalCutRequest = Message<"app.studio.v1.ApproveFinalCutReque
  * Use `create(ApproveFinalCutRequestSchema)` to create a new message.
  */
 export const ApproveFinalCutRequestSchema: GenMessage<ApproveFinalCutRequest> = /*@__PURE__*/
-  messageDesc(file_app_studio_v1_video, 21);
+  messageDesc(file_app_studio_v1_video, 26);
 
 /**
  * @generated from message app.studio.v1.ApproveFinalCutResponse
@@ -566,7 +683,7 @@ export type ApproveFinalCutResponse = Message<"app.studio.v1.ApproveFinalCutResp
  * Use `create(ApproveFinalCutResponseSchema)` to create a new message.
  */
 export const ApproveFinalCutResponseSchema: GenMessage<ApproveFinalCutResponse> = /*@__PURE__*/
-  messageDesc(file_app_studio_v1_video, 22);
+  messageDesc(file_app_studio_v1_video, 27);
 
 /**
  * @generated from message app.studio.v1.ApproveScenesRequest
@@ -583,7 +700,7 @@ export type ApproveScenesRequest = Message<"app.studio.v1.ApproveScenesRequest">
  * Use `create(ApproveScenesRequestSchema)` to create a new message.
  */
 export const ApproveScenesRequestSchema: GenMessage<ApproveScenesRequest> = /*@__PURE__*/
-  messageDesc(file_app_studio_v1_video, 23);
+  messageDesc(file_app_studio_v1_video, 28);
 
 /**
  * @generated from message app.studio.v1.ApproveScenesResponse
@@ -600,7 +717,7 @@ export type ApproveScenesResponse = Message<"app.studio.v1.ApproveScenesResponse
  * Use `create(ApproveScenesResponseSchema)` to create a new message.
  */
 export const ApproveScenesResponseSchema: GenMessage<ApproveScenesResponse> = /*@__PURE__*/
-  messageDesc(file_app_studio_v1_video, 24);
+  messageDesc(file_app_studio_v1_video, 29);
 
 /**
  * VideoStatus mirrors the canonical pipeline state machine (ROADMAP.md).
@@ -771,6 +888,22 @@ export const VideoService: GenService<{
     methodKind: "unary";
     input: typeof ApproveFinalCutRequestSchema;
     output: typeof ApproveFinalCutResponseSchema;
+  },
+  /**
+   * @generated from rpc app.studio.v1.VideoService.GetReleaseChecklist
+   */
+  getReleaseChecklist: {
+    methodKind: "unary";
+    input: typeof GetReleaseChecklistRequestSchema;
+    output: typeof GetReleaseChecklistResponseSchema;
+  },
+  /**
+   * @generated from rpc app.studio.v1.VideoService.SetChecklistItemPublished
+   */
+  setChecklistItemPublished: {
+    methodKind: "unary";
+    input: typeof SetChecklistItemPublishedRequestSchema;
+    output: typeof SetChecklistItemPublishedResponseSchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_app_studio_v1_video, 0);

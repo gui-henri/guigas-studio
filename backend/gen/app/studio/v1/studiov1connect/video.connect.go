@@ -60,6 +60,12 @@ const (
 	// VideoServiceApproveFinalCutProcedure is the fully-qualified name of the VideoService's
 	// ApproveFinalCut RPC.
 	VideoServiceApproveFinalCutProcedure = "/app.studio.v1.VideoService/ApproveFinalCut"
+	// VideoServiceGetReleaseChecklistProcedure is the fully-qualified name of the VideoService's
+	// GetReleaseChecklist RPC.
+	VideoServiceGetReleaseChecklistProcedure = "/app.studio.v1.VideoService/GetReleaseChecklist"
+	// VideoServiceSetChecklistItemPublishedProcedure is the fully-qualified name of the VideoService's
+	// SetChecklistItemPublished RPC.
+	VideoServiceSetChecklistItemPublishedProcedure = "/app.studio.v1.VideoService/SetChecklistItemPublished"
 )
 
 // VideoServiceClient is a client for the app.studio.v1.VideoService service.
@@ -74,6 +80,8 @@ type VideoServiceClient interface {
 	ApproveScenes(context.Context, *connect.Request[v1.ApproveScenesRequest]) (*connect.Response[v1.ApproveScenesResponse], error)
 	RequestRerender(context.Context, *connect.Request[v1.RequestRerenderRequest]) (*connect.Response[v1.RequestRerenderResponse], error)
 	ApproveFinalCut(context.Context, *connect.Request[v1.ApproveFinalCutRequest]) (*connect.Response[v1.ApproveFinalCutResponse], error)
+	GetReleaseChecklist(context.Context, *connect.Request[v1.GetReleaseChecklistRequest]) (*connect.Response[v1.GetReleaseChecklistResponse], error)
+	SetChecklistItemPublished(context.Context, *connect.Request[v1.SetChecklistItemPublishedRequest]) (*connect.Response[v1.SetChecklistItemPublishedResponse], error)
 }
 
 // NewVideoServiceClient constructs a client for the app.studio.v1.VideoService service. By default,
@@ -147,21 +155,35 @@ func NewVideoServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			connect.WithSchema(videoServiceMethods.ByName("ApproveFinalCut")),
 			connect.WithClientOptions(opts...),
 		),
+		getReleaseChecklist: connect.NewClient[v1.GetReleaseChecklistRequest, v1.GetReleaseChecklistResponse](
+			httpClient,
+			baseURL+VideoServiceGetReleaseChecklistProcedure,
+			connect.WithSchema(videoServiceMethods.ByName("GetReleaseChecklist")),
+			connect.WithClientOptions(opts...),
+		),
+		setChecklistItemPublished: connect.NewClient[v1.SetChecklistItemPublishedRequest, v1.SetChecklistItemPublishedResponse](
+			httpClient,
+			baseURL+VideoServiceSetChecklistItemPublishedProcedure,
+			connect.WithSchema(videoServiceMethods.ByName("SetChecklistItemPublished")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // videoServiceClient implements VideoServiceClient.
 type videoServiceClient struct {
-	listVideos      *connect.Client[v1.ListVideosRequest, v1.ListVideosResponse]
-	getVideo        *connect.Client[v1.GetVideoRequest, v1.GetVideoResponse]
-	createVideo     *connect.Client[v1.CreateVideoRequest, v1.CreateVideoResponse]
-	updateScript    *connect.Client[v1.UpdateScriptRequest, v1.UpdateScriptResponse]
-	approveScript   *connect.Client[v1.ApproveScriptRequest, v1.ApproveScriptResponse]
-	rejectScript    *connect.Client[v1.RejectScriptRequest, v1.RejectScriptResponse]
-	listTakes       *connect.Client[v1.ListTakesRequest, v1.ListTakesResponse]
-	approveScenes   *connect.Client[v1.ApproveScenesRequest, v1.ApproveScenesResponse]
-	requestRerender *connect.Client[v1.RequestRerenderRequest, v1.RequestRerenderResponse]
-	approveFinalCut *connect.Client[v1.ApproveFinalCutRequest, v1.ApproveFinalCutResponse]
+	listVideos                *connect.Client[v1.ListVideosRequest, v1.ListVideosResponse]
+	getVideo                  *connect.Client[v1.GetVideoRequest, v1.GetVideoResponse]
+	createVideo               *connect.Client[v1.CreateVideoRequest, v1.CreateVideoResponse]
+	updateScript              *connect.Client[v1.UpdateScriptRequest, v1.UpdateScriptResponse]
+	approveScript             *connect.Client[v1.ApproveScriptRequest, v1.ApproveScriptResponse]
+	rejectScript              *connect.Client[v1.RejectScriptRequest, v1.RejectScriptResponse]
+	listTakes                 *connect.Client[v1.ListTakesRequest, v1.ListTakesResponse]
+	approveScenes             *connect.Client[v1.ApproveScenesRequest, v1.ApproveScenesResponse]
+	requestRerender           *connect.Client[v1.RequestRerenderRequest, v1.RequestRerenderResponse]
+	approveFinalCut           *connect.Client[v1.ApproveFinalCutRequest, v1.ApproveFinalCutResponse]
+	getReleaseChecklist       *connect.Client[v1.GetReleaseChecklistRequest, v1.GetReleaseChecklistResponse]
+	setChecklistItemPublished *connect.Client[v1.SetChecklistItemPublishedRequest, v1.SetChecklistItemPublishedResponse]
 }
 
 // ListVideos calls app.studio.v1.VideoService.ListVideos.
@@ -214,6 +236,16 @@ func (c *videoServiceClient) ApproveFinalCut(ctx context.Context, req *connect.R
 	return c.approveFinalCut.CallUnary(ctx, req)
 }
 
+// GetReleaseChecklist calls app.studio.v1.VideoService.GetReleaseChecklist.
+func (c *videoServiceClient) GetReleaseChecklist(ctx context.Context, req *connect.Request[v1.GetReleaseChecklistRequest]) (*connect.Response[v1.GetReleaseChecklistResponse], error) {
+	return c.getReleaseChecklist.CallUnary(ctx, req)
+}
+
+// SetChecklistItemPublished calls app.studio.v1.VideoService.SetChecklistItemPublished.
+func (c *videoServiceClient) SetChecklistItemPublished(ctx context.Context, req *connect.Request[v1.SetChecklistItemPublishedRequest]) (*connect.Response[v1.SetChecklistItemPublishedResponse], error) {
+	return c.setChecklistItemPublished.CallUnary(ctx, req)
+}
+
 // VideoServiceHandler is an implementation of the app.studio.v1.VideoService service.
 type VideoServiceHandler interface {
 	ListVideos(context.Context, *connect.Request[v1.ListVideosRequest]) (*connect.Response[v1.ListVideosResponse], error)
@@ -226,6 +258,8 @@ type VideoServiceHandler interface {
 	ApproveScenes(context.Context, *connect.Request[v1.ApproveScenesRequest]) (*connect.Response[v1.ApproveScenesResponse], error)
 	RequestRerender(context.Context, *connect.Request[v1.RequestRerenderRequest]) (*connect.Response[v1.RequestRerenderResponse], error)
 	ApproveFinalCut(context.Context, *connect.Request[v1.ApproveFinalCutRequest]) (*connect.Response[v1.ApproveFinalCutResponse], error)
+	GetReleaseChecklist(context.Context, *connect.Request[v1.GetReleaseChecklistRequest]) (*connect.Response[v1.GetReleaseChecklistResponse], error)
+	SetChecklistItemPublished(context.Context, *connect.Request[v1.SetChecklistItemPublishedRequest]) (*connect.Response[v1.SetChecklistItemPublishedResponse], error)
 }
 
 // NewVideoServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -295,6 +329,18 @@ func NewVideoServiceHandler(svc VideoServiceHandler, opts ...connect.HandlerOpti
 		connect.WithSchema(videoServiceMethods.ByName("ApproveFinalCut")),
 		connect.WithHandlerOptions(opts...),
 	)
+	videoServiceGetReleaseChecklistHandler := connect.NewUnaryHandler(
+		VideoServiceGetReleaseChecklistProcedure,
+		svc.GetReleaseChecklist,
+		connect.WithSchema(videoServiceMethods.ByName("GetReleaseChecklist")),
+		connect.WithHandlerOptions(opts...),
+	)
+	videoServiceSetChecklistItemPublishedHandler := connect.NewUnaryHandler(
+		VideoServiceSetChecklistItemPublishedProcedure,
+		svc.SetChecklistItemPublished,
+		connect.WithSchema(videoServiceMethods.ByName("SetChecklistItemPublished")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/app.studio.v1.VideoService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case VideoServiceListVideosProcedure:
@@ -317,6 +363,10 @@ func NewVideoServiceHandler(svc VideoServiceHandler, opts ...connect.HandlerOpti
 			videoServiceRequestRerenderHandler.ServeHTTP(w, r)
 		case VideoServiceApproveFinalCutProcedure:
 			videoServiceApproveFinalCutHandler.ServeHTTP(w, r)
+		case VideoServiceGetReleaseChecklistProcedure:
+			videoServiceGetReleaseChecklistHandler.ServeHTTP(w, r)
+		case VideoServiceSetChecklistItemPublishedProcedure:
+			videoServiceSetChecklistItemPublishedHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -364,4 +414,12 @@ func (UnimplementedVideoServiceHandler) RequestRerender(context.Context, *connec
 
 func (UnimplementedVideoServiceHandler) ApproveFinalCut(context.Context, *connect.Request[v1.ApproveFinalCutRequest]) (*connect.Response[v1.ApproveFinalCutResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("app.studio.v1.VideoService.ApproveFinalCut is not implemented"))
+}
+
+func (UnimplementedVideoServiceHandler) GetReleaseChecklist(context.Context, *connect.Request[v1.GetReleaseChecklistRequest]) (*connect.Response[v1.GetReleaseChecklistResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("app.studio.v1.VideoService.GetReleaseChecklist is not implemented"))
+}
+
+func (UnimplementedVideoServiceHandler) SetChecklistItemPublished(context.Context, *connect.Request[v1.SetChecklistItemPublishedRequest]) (*connect.Response[v1.SetChecklistItemPublishedResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("app.studio.v1.VideoService.SetChecklistItemPublished is not implemented"))
 }

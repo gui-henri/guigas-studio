@@ -136,8 +136,11 @@ func (b *ReleaseBuilder) Build(ctx context.Context, videoID uuid.UUID) ([]string
 		os.WriteFile(rel(dir+"/copy.json"), copyJSON, 0o644)
 		generated = append(generated, dir+"/copy.json")
 
-		if err := b.queries.SeedReleaseChecklistItem(ctx, sqlc.SeedReleaseChecklistItemParams{
-			VideoID: videoID, Platform: fmt.Sprintf("short-%d", n),
+		if err := b.queries.UpsertChecklistItem(ctx, sqlc.UpsertChecklistItemParams{
+			VideoID:      videoID,
+			ItemKey:      fmt.Sprintf("short-%d", n),
+			Label:        fmt.Sprintf("Short %d", n),
+			DownloadPath: fmt.Sprintf("releases/shorts/short-%d/video.mp4", n),
 		}); err != nil {
 			return nil, err
 		}
@@ -160,9 +163,16 @@ func (b *ReleaseBuilder) Build(ctx context.Context, videoID uuid.UUID) ([]string
 	}
 
 	// ---- checklist seeds (platform rows) ----
-	for _, platform := range []string{"youtube", "x", "linkedin", "instagram"} {
-		if err := b.queries.SeedReleaseChecklistItem(ctx, sqlc.SeedReleaseChecklistItemParams{
-			VideoID: videoID, Platform: platform,
+	checklistSeeds := []struct{ key, label, download string }{
+		{"youtube", "YouTube", "releases/youtube/video.mp4"},
+		{"x", "X / Twitter", "releases/x/thread.md"},
+		{"linkedin", "LinkedIn", "releases/linkedin/post.md"},
+		{"instagram", "Instagram", "releases/instagram/caption.txt"},
+	}
+	for _, seed := range checklistSeeds {
+		if err := b.queries.UpsertChecklistItem(ctx, sqlc.UpsertChecklistItemParams{
+			VideoID: videoID, ItemKey: seed.key,
+			Label: seed.label, DownloadPath: seed.download,
 		}); err != nil {
 			return nil, err
 		}

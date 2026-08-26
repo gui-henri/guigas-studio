@@ -814,7 +814,7 @@ func TestReleaseBuilderBuildsCanonicalLayout(t *testing.T) {
 	items, _ := queries.ListReleaseChecklist(ctx, videoID)
 	platforms := map[string]bool{}
 	for _, it := range items {
-		platforms[it.Platform] = true
+		platforms[it.ItemKey] = true
 	}
 	for _, want := range []string{"youtube", "x", "linkedin", "instagram", "short-1"} {
 		if !platforms[want] {
@@ -835,4 +835,100 @@ func TestReleaseBuilderBuildsCanonicalLayout(t *testing.T) {
 	}
 
 	_ = pool
+}
+
+// ---- S5-11: launch checklist → released ----
+
+func TestReleaseChecklistReleasesVideo(t *testing.T) {
+	ctx := context.Background()
+	pool, queries := setupJobsDB(t, ctx)
+	videoID := insertJobVideo(t, ctx, queries, "checklist-release")
+	walkToScenesReview(t, ctx, queries, videoID)
+	for _, st := range []string{"queued", "rendering", "final_review"} {
+		if err := queries.UpdateVideoStatus(ctx, sqlc.UpdateVideoStatusParams{ID: videoID, Status: st}); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	// Seed three items (as the S5-09 builder would).
+	for _, key := range []string{"youtube", "x", "short-1"} {
+		if err := queries.UpsertChecklistItem(ctx, sqlc.UpsertChecklistItemParams{
+			VideoID: videoID, ItemKey: key,
+			Label: key, DownloadPath: "releases/" + key + "/video.mp4",
+		}); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	dataDir := t.TempDir()
+	svc := services.NewVideoService(queries, dataDir, nil, pool)
+
+	publish := func(key string, published bool) *studiov1.SetChecklistItemPublishedResponse {
+		resp, err := svc.SetChecklistItemPublished(ctx, connectReq(
+			&studiov1.SetChecklistItemPublishedRequest{VideoId: videoID.String(), ItemKey: key, Published: published}))
+		if err != nil {
+			t.Fatalf("publish %s=%v: %v", key, published, err)
+		}
+		return resp.Msg
+	}
+
+	// Partial completion never changes state.
+	publish("youtube", true)
+	v, _ := queries.GetVideo(ctx, videoID)
+	if v.Status != "final_review" {
+		t.Fatalf("partial publish changed status to %s", v.Status)
+	}
+
+	// Complete everything → released.
+	publish("x", true)
+	last := publish("short-1", true)
+	if !last.Released {
+		t.Fatal("completing checklist must report released=true")
+	}
+	v, _ = queries.GetVideo(ctx, videoID)
+	if v.Status != "released" {
+		t.Fatalf("status=%s want released", v.Status)
+	}
+
+	// Persistence survives reload; unchecking does NOT revert released.
+	publish("youtube", false)
+	v, _ = queries.GetVideo(ctx, videoID)
+	if v.Status != "released" {
+		t.Fatalf("unpublish reverted released to %s", v.Status)
+	}
+	items, err := svc.GetReleaseChecklist(ctx, connectReq(&studiov1.GetReleaseChecklistRequest{VideoId: videoID.String()}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	byKey := map[string]bool{}
+	for _, it := range items.Msg.GetItems() {
+		byKey[it.GetItemKey()] = it.GetPublished()
+	}
+	if byKey["youtube"] || !byKey["x"] || !byKey["short-1"] {
+		t.Fatalf("published flags not persisted correctly: %v", byKey)
+	}
+
+	// Wrong-state guard: a new video in script_pending cannot release even
+	// with a full checklist.
+	videoID2 := insertJobVideo(t, ctx, queries, "checklist-wrongstate")
+	for _, key := range []string{"youtube", "x"} {
+		if err := queries.UpsertChecklistItem(ctx, sqlc.UpsertChecklistItemParams{
+			VideoID: videoID2, ItemKey: key, Label: key, DownloadPath: "releases/x",
+		}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	publishWrong := func(key string) {
+		_, err := svc.SetChecklistItemPublished(ctx, connectReq(
+			&studiov1.SetChecklistItemPublishedRequest{VideoId: videoID2.String(), ItemKey: key, Published: true}))
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	publishWrong("youtube")
+	publishWrong("x")
+	v2, _ := queries.GetVideo(ctx, videoID2)
+	if v2.Status == "released" {
+		t.Fatal("non final_review video must not be released via checklist")
+	}
 }

@@ -147,6 +147,35 @@ service VideoService {
   rpc ApproveScenes(ApproveScenesRequest) returns (ApproveScenesResponse);
   rpc RequestRerender(RequestRerenderRequest) returns (RequestRerenderResponse);
   rpc ApproveFinalCut(ApproveFinalCutRequest) returns (ApproveFinalCutResponse);
+  rpc GetReleaseChecklist(GetReleaseChecklistRequest) returns (GetReleaseChecklistResponse);
+  rpc SetChecklistItemPublished(SetChecklistItemPublishedRequest) returns (SetChecklistItemPublishedResponse);
+}
+
+message ChecklistItemView {
+  string item_key = 1;
+  string label = 2;
+  string download_path = 3;
+  bool published = 4;
+}
+
+message GetReleaseChecklistRequest {
+  string video_id = 1;
+}
+
+message GetReleaseChecklistResponse {
+  repeated ChecklistItemView items = 1;
+}
+
+message SetChecklistItemPublishedRequest {
+  string video_id = 1;
+  string item_key = 2;
+  bool published = 3;
+}
+
+message SetChecklistItemPublishedResponse {
+  Video video = 1;
+  // True when this update completed the checklist and flipped released.
+  bool released = 2;
 }
 
 message RequestRerenderRequest {

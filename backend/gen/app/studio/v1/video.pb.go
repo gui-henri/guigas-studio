@@ -1165,6 +1165,275 @@ func (x *ListTakesResponse) GetTakes() []*TakeSummary {
 	return nil
 }
 
+type ChecklistItemView struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ItemKey       string                 `protobuf:"bytes,1,opt,name=item_key,json=itemKey,proto3" json:"item_key,omitempty"`
+	Label         string                 `protobuf:"bytes,2,opt,name=label,proto3" json:"label,omitempty"`
+	DownloadPath  string                 `protobuf:"bytes,3,opt,name=download_path,json=downloadPath,proto3" json:"download_path,omitempty"`
+	Published     bool                   `protobuf:"varint,4,opt,name=published,proto3" json:"published,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ChecklistItemView) Reset() {
+	*x = ChecklistItemView{}
+	mi := &file_app_studio_v1_video_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ChecklistItemView) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ChecklistItemView) ProtoMessage() {}
+
+func (x *ChecklistItemView) ProtoReflect() protoreflect.Message {
+	mi := &file_app_studio_v1_video_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ChecklistItemView.ProtoReflect.Descriptor instead.
+func (*ChecklistItemView) Descriptor() ([]byte, []int) {
+	return file_app_studio_v1_video_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *ChecklistItemView) GetItemKey() string {
+	if x != nil {
+		return x.ItemKey
+	}
+	return ""
+}
+
+func (x *ChecklistItemView) GetLabel() string {
+	if x != nil {
+		return x.Label
+	}
+	return ""
+}
+
+func (x *ChecklistItemView) GetDownloadPath() string {
+	if x != nil {
+		return x.DownloadPath
+	}
+	return ""
+}
+
+func (x *ChecklistItemView) GetPublished() bool {
+	if x != nil {
+		return x.Published
+	}
+	return false
+}
+
+type GetReleaseChecklistRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	VideoId       string                 `protobuf:"bytes,1,opt,name=video_id,json=videoId,proto3" json:"video_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetReleaseChecklistRequest) Reset() {
+	*x = GetReleaseChecklistRequest{}
+	mi := &file_app_studio_v1_video_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetReleaseChecklistRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetReleaseChecklistRequest) ProtoMessage() {}
+
+func (x *GetReleaseChecklistRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_app_studio_v1_video_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetReleaseChecklistRequest.ProtoReflect.Descriptor instead.
+func (*GetReleaseChecklistRequest) Descriptor() ([]byte, []int) {
+	return file_app_studio_v1_video_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *GetReleaseChecklistRequest) GetVideoId() string {
+	if x != nil {
+		return x.VideoId
+	}
+	return ""
+}
+
+type GetReleaseChecklistResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Items         []*ChecklistItemView   `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetReleaseChecklistResponse) Reset() {
+	*x = GetReleaseChecklistResponse{}
+	mi := &file_app_studio_v1_video_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetReleaseChecklistResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetReleaseChecklistResponse) ProtoMessage() {}
+
+func (x *GetReleaseChecklistResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_app_studio_v1_video_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetReleaseChecklistResponse.ProtoReflect.Descriptor instead.
+func (*GetReleaseChecklistResponse) Descriptor() ([]byte, []int) {
+	return file_app_studio_v1_video_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *GetReleaseChecklistResponse) GetItems() []*ChecklistItemView {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
+type SetChecklistItemPublishedRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	VideoId       string                 `protobuf:"bytes,1,opt,name=video_id,json=videoId,proto3" json:"video_id,omitempty"`
+	ItemKey       string                 `protobuf:"bytes,2,opt,name=item_key,json=itemKey,proto3" json:"item_key,omitempty"`
+	Published     bool                   `protobuf:"varint,3,opt,name=published,proto3" json:"published,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SetChecklistItemPublishedRequest) Reset() {
+	*x = SetChecklistItemPublishedRequest{}
+	mi := &file_app_studio_v1_video_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetChecklistItemPublishedRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetChecklistItemPublishedRequest) ProtoMessage() {}
+
+func (x *SetChecklistItemPublishedRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_app_studio_v1_video_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SetChecklistItemPublishedRequest.ProtoReflect.Descriptor instead.
+func (*SetChecklistItemPublishedRequest) Descriptor() ([]byte, []int) {
+	return file_app_studio_v1_video_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *SetChecklistItemPublishedRequest) GetVideoId() string {
+	if x != nil {
+		return x.VideoId
+	}
+	return ""
+}
+
+func (x *SetChecklistItemPublishedRequest) GetItemKey() string {
+	if x != nil {
+		return x.ItemKey
+	}
+	return ""
+}
+
+func (x *SetChecklistItemPublishedRequest) GetPublished() bool {
+	if x != nil {
+		return x.Published
+	}
+	return false
+}
+
+type SetChecklistItemPublishedResponse struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	Video *Video                 `protobuf:"bytes,1,opt,name=video,proto3" json:"video,omitempty"`
+	// True when this update completed the checklist and flipped released.
+	Released      bool `protobuf:"varint,2,opt,name=released,proto3" json:"released,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SetChecklistItemPublishedResponse) Reset() {
+	*x = SetChecklistItemPublishedResponse{}
+	mi := &file_app_studio_v1_video_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetChecklistItemPublishedResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetChecklistItemPublishedResponse) ProtoMessage() {}
+
+func (x *SetChecklistItemPublishedResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_app_studio_v1_video_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SetChecklistItemPublishedResponse.ProtoReflect.Descriptor instead.
+func (*SetChecklistItemPublishedResponse) Descriptor() ([]byte, []int) {
+	return file_app_studio_v1_video_proto_rawDescGZIP(), []int{23}
+}
+
+func (x *SetChecklistItemPublishedResponse) GetVideo() *Video {
+	if x != nil {
+		return x.Video
+	}
+	return nil
+}
+
+func (x *SetChecklistItemPublishedResponse) GetReleased() bool {
+	if x != nil {
+		return x.Released
+	}
+	return false
+}
+
 type RequestRerenderRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	VideoId       string                 `protobuf:"bytes,1,opt,name=video_id,json=videoId,proto3" json:"video_id,omitempty"`
@@ -1174,7 +1443,7 @@ type RequestRerenderRequest struct {
 
 func (x *RequestRerenderRequest) Reset() {
 	*x = RequestRerenderRequest{}
-	mi := &file_app_studio_v1_video_proto_msgTypes[19]
+	mi := &file_app_studio_v1_video_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1186,7 +1455,7 @@ func (x *RequestRerenderRequest) String() string {
 func (*RequestRerenderRequest) ProtoMessage() {}
 
 func (x *RequestRerenderRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_app_studio_v1_video_proto_msgTypes[19]
+	mi := &file_app_studio_v1_video_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1199,7 +1468,7 @@ func (x *RequestRerenderRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RequestRerenderRequest.ProtoReflect.Descriptor instead.
 func (*RequestRerenderRequest) Descriptor() ([]byte, []int) {
-	return file_app_studio_v1_video_proto_rawDescGZIP(), []int{19}
+	return file_app_studio_v1_video_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *RequestRerenderRequest) GetVideoId() string {
@@ -1218,7 +1487,7 @@ type RequestRerenderResponse struct {
 
 func (x *RequestRerenderResponse) Reset() {
 	*x = RequestRerenderResponse{}
-	mi := &file_app_studio_v1_video_proto_msgTypes[20]
+	mi := &file_app_studio_v1_video_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1230,7 +1499,7 @@ func (x *RequestRerenderResponse) String() string {
 func (*RequestRerenderResponse) ProtoMessage() {}
 
 func (x *RequestRerenderResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_app_studio_v1_video_proto_msgTypes[20]
+	mi := &file_app_studio_v1_video_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1243,7 +1512,7 @@ func (x *RequestRerenderResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RequestRerenderResponse.ProtoReflect.Descriptor instead.
 func (*RequestRerenderResponse) Descriptor() ([]byte, []int) {
-	return file_app_studio_v1_video_proto_rawDescGZIP(), []int{20}
+	return file_app_studio_v1_video_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *RequestRerenderResponse) GetVideo() *Video {
@@ -1262,7 +1531,7 @@ type ApproveFinalCutRequest struct {
 
 func (x *ApproveFinalCutRequest) Reset() {
 	*x = ApproveFinalCutRequest{}
-	mi := &file_app_studio_v1_video_proto_msgTypes[21]
+	mi := &file_app_studio_v1_video_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1274,7 +1543,7 @@ func (x *ApproveFinalCutRequest) String() string {
 func (*ApproveFinalCutRequest) ProtoMessage() {}
 
 func (x *ApproveFinalCutRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_app_studio_v1_video_proto_msgTypes[21]
+	mi := &file_app_studio_v1_video_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1287,7 +1556,7 @@ func (x *ApproveFinalCutRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ApproveFinalCutRequest.ProtoReflect.Descriptor instead.
 func (*ApproveFinalCutRequest) Descriptor() ([]byte, []int) {
-	return file_app_studio_v1_video_proto_rawDescGZIP(), []int{21}
+	return file_app_studio_v1_video_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *ApproveFinalCutRequest) GetVideoId() string {
@@ -1308,7 +1577,7 @@ type ApproveFinalCutResponse struct {
 
 func (x *ApproveFinalCutResponse) Reset() {
 	*x = ApproveFinalCutResponse{}
-	mi := &file_app_studio_v1_video_proto_msgTypes[22]
+	mi := &file_app_studio_v1_video_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1320,7 +1589,7 @@ func (x *ApproveFinalCutResponse) String() string {
 func (*ApproveFinalCutResponse) ProtoMessage() {}
 
 func (x *ApproveFinalCutResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_app_studio_v1_video_proto_msgTypes[22]
+	mi := &file_app_studio_v1_video_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1333,7 +1602,7 @@ func (x *ApproveFinalCutResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ApproveFinalCutResponse.ProtoReflect.Descriptor instead.
 func (*ApproveFinalCutResponse) Descriptor() ([]byte, []int) {
-	return file_app_studio_v1_video_proto_rawDescGZIP(), []int{22}
+	return file_app_studio_v1_video_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *ApproveFinalCutResponse) GetVideo() *Video {
@@ -1359,7 +1628,7 @@ type ApproveScenesRequest struct {
 
 func (x *ApproveScenesRequest) Reset() {
 	*x = ApproveScenesRequest{}
-	mi := &file_app_studio_v1_video_proto_msgTypes[23]
+	mi := &file_app_studio_v1_video_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1371,7 +1640,7 @@ func (x *ApproveScenesRequest) String() string {
 func (*ApproveScenesRequest) ProtoMessage() {}
 
 func (x *ApproveScenesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_app_studio_v1_video_proto_msgTypes[23]
+	mi := &file_app_studio_v1_video_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1384,7 +1653,7 @@ func (x *ApproveScenesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ApproveScenesRequest.ProtoReflect.Descriptor instead.
 func (*ApproveScenesRequest) Descriptor() ([]byte, []int) {
-	return file_app_studio_v1_video_proto_rawDescGZIP(), []int{23}
+	return file_app_studio_v1_video_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *ApproveScenesRequest) GetVideoId() string {
@@ -1403,7 +1672,7 @@ type ApproveScenesResponse struct {
 
 func (x *ApproveScenesResponse) Reset() {
 	*x = ApproveScenesResponse{}
-	mi := &file_app_studio_v1_video_proto_msgTypes[24]
+	mi := &file_app_studio_v1_video_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1415,7 +1684,7 @@ func (x *ApproveScenesResponse) String() string {
 func (*ApproveScenesResponse) ProtoMessage() {}
 
 func (x *ApproveScenesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_app_studio_v1_video_proto_msgTypes[24]
+	mi := &file_app_studio_v1_video_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1428,7 +1697,7 @@ func (x *ApproveScenesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ApproveScenesResponse.ProtoReflect.Descriptor instead.
 func (*ApproveScenesResponse) Descriptor() ([]byte, []int) {
-	return file_app_studio_v1_video_proto_rawDescGZIP(), []int{24}
+	return file_app_studio_v1_video_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *ApproveScenesResponse) GetVideo() *Video {
@@ -1517,7 +1786,23 @@ const file_app_studio_v1_video_proto_rawDesc = "" +
 	"\n" +
 	"video_slug\x18\x01 \x01(\tR\tvideoSlug\"E\n" +
 	"\x11ListTakesResponse\x120\n" +
-	"\x05takes\x18\x01 \x03(\v2\x1a.app.studio.v1.TakeSummaryR\x05takes\"3\n" +
+	"\x05takes\x18\x01 \x03(\v2\x1a.app.studio.v1.TakeSummaryR\x05takes\"\x87\x01\n" +
+	"\x11ChecklistItemView\x12\x19\n" +
+	"\bitem_key\x18\x01 \x01(\tR\aitemKey\x12\x14\n" +
+	"\x05label\x18\x02 \x01(\tR\x05label\x12#\n" +
+	"\rdownload_path\x18\x03 \x01(\tR\fdownloadPath\x12\x1c\n" +
+	"\tpublished\x18\x04 \x01(\bR\tpublished\"7\n" +
+	"\x1aGetReleaseChecklistRequest\x12\x19\n" +
+	"\bvideo_id\x18\x01 \x01(\tR\avideoId\"U\n" +
+	"\x1bGetReleaseChecklistResponse\x126\n" +
+	"\x05items\x18\x01 \x03(\v2 .app.studio.v1.ChecklistItemViewR\x05items\"v\n" +
+	" SetChecklistItemPublishedRequest\x12\x19\n" +
+	"\bvideo_id\x18\x01 \x01(\tR\avideoId\x12\x19\n" +
+	"\bitem_key\x18\x02 \x01(\tR\aitemKey\x12\x1c\n" +
+	"\tpublished\x18\x03 \x01(\bR\tpublished\"k\n" +
+	"!SetChecklistItemPublishedResponse\x12*\n" +
+	"\x05video\x18\x01 \x01(\v2\x14.app.studio.v1.VideoR\x05video\x12\x1a\n" +
+	"\breleased\x18\x02 \x01(\bR\breleased\"3\n" +
 	"\x16RequestRerenderRequest\x12\x19\n" +
 	"\bvideo_id\x18\x01 \x01(\tR\avideoId\"E\n" +
 	"\x17RequestRerenderResponse\x12*\n" +
@@ -1546,7 +1831,7 @@ const file_app_studio_v1_video_proto_rawDesc = "" +
 	"\x12\x1d\n" +
 	"\x19VIDEO_STATUS_FINAL_REVIEW\x10\v\x12\x19\n" +
 	"\x15VIDEO_STATUS_RELEASED\x10\f\x12\x18\n" +
-	"\x14VIDEO_STATUS_BLOCKED\x10\r2\x82\a\n" +
+	"\x14VIDEO_STATUS_BLOCKED\x10\r2\xf0\b\n" +
 	"\fVideoService\x12Q\n" +
 	"\n" +
 	"ListVideos\x12 .app.studio.v1.ListVideosRequest\x1a!.app.studio.v1.ListVideosResponse\x12K\n" +
@@ -1558,7 +1843,9 @@ const file_app_studio_v1_video_proto_rawDesc = "" +
 	"\tListTakes\x12\x1f.app.studio.v1.ListTakesRequest\x1a .app.studio.v1.ListTakesResponse\x12Z\n" +
 	"\rApproveScenes\x12#.app.studio.v1.ApproveScenesRequest\x1a$.app.studio.v1.ApproveScenesResponse\x12`\n" +
 	"\x0fRequestRerender\x12%.app.studio.v1.RequestRerenderRequest\x1a&.app.studio.v1.RequestRerenderResponse\x12`\n" +
-	"\x0fApproveFinalCut\x12%.app.studio.v1.ApproveFinalCutRequest\x1a&.app.studio.v1.ApproveFinalCutResponseBGZEgithub.com/gui-henri/guigas-studio/backend/gen/app/studio/v1;studiov1b\x06proto3"
+	"\x0fApproveFinalCut\x12%.app.studio.v1.ApproveFinalCutRequest\x1a&.app.studio.v1.ApproveFinalCutResponse\x12l\n" +
+	"\x13GetReleaseChecklist\x12).app.studio.v1.GetReleaseChecklistRequest\x1a*.app.studio.v1.GetReleaseChecklistResponse\x12~\n" +
+	"\x19SetChecklistItemPublished\x12/.app.studio.v1.SetChecklistItemPublishedRequest\x1a0.app.studio.v1.SetChecklistItemPublishedResponseBGZEgithub.com/gui-henri/guigas-studio/backend/gen/app/studio/v1;studiov1b\x06proto3"
 
 var (
 	file_app_studio_v1_video_proto_rawDescOnce sync.Once
@@ -1573,79 +1860,90 @@ func file_app_studio_v1_video_proto_rawDescGZIP() []byte {
 }
 
 var file_app_studio_v1_video_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_app_studio_v1_video_proto_msgTypes = make([]protoimpl.MessageInfo, 25)
+var file_app_studio_v1_video_proto_msgTypes = make([]protoimpl.MessageInfo, 30)
 var file_app_studio_v1_video_proto_goTypes = []any{
-	(VideoStatus)(0),                // 0: app.studio.v1.VideoStatus
-	(*Video)(nil),                   // 1: app.studio.v1.Video
-	(*VideoArtifacts)(nil),          // 2: app.studio.v1.VideoArtifacts
-	(*StatusChange)(nil),            // 3: app.studio.v1.StatusChange
-	(*ListVideosRequest)(nil),       // 4: app.studio.v1.ListVideosRequest
-	(*ListVideosResponse)(nil),      // 5: app.studio.v1.ListVideosResponse
-	(*GetVideoRequest)(nil),         // 6: app.studio.v1.GetVideoRequest
-	(*GetVideoResponse)(nil),        // 7: app.studio.v1.GetVideoResponse
-	(*RenderArtifactView)(nil),      // 8: app.studio.v1.RenderArtifactView
-	(*CreateVideoRequest)(nil),      // 9: app.studio.v1.CreateVideoRequest
-	(*CreateVideoResponse)(nil),     // 10: app.studio.v1.CreateVideoResponse
-	(*UpdateScriptRequest)(nil),     // 11: app.studio.v1.UpdateScriptRequest
-	(*UpdateScriptResponse)(nil),    // 12: app.studio.v1.UpdateScriptResponse
-	(*ApproveScriptRequest)(nil),    // 13: app.studio.v1.ApproveScriptRequest
-	(*ApproveScriptResponse)(nil),   // 14: app.studio.v1.ApproveScriptResponse
-	(*RejectScriptRequest)(nil),     // 15: app.studio.v1.RejectScriptRequest
-	(*RejectScriptResponse)(nil),    // 16: app.studio.v1.RejectScriptResponse
-	(*TakeSummary)(nil),             // 17: app.studio.v1.TakeSummary
-	(*ListTakesRequest)(nil),        // 18: app.studio.v1.ListTakesRequest
-	(*ListTakesResponse)(nil),       // 19: app.studio.v1.ListTakesResponse
-	(*RequestRerenderRequest)(nil),  // 20: app.studio.v1.RequestRerenderRequest
-	(*RequestRerenderResponse)(nil), // 21: app.studio.v1.RequestRerenderResponse
-	(*ApproveFinalCutRequest)(nil),  // 22: app.studio.v1.ApproveFinalCutRequest
-	(*ApproveFinalCutResponse)(nil), // 23: app.studio.v1.ApproveFinalCutResponse
-	(*ApproveScenesRequest)(nil),    // 24: app.studio.v1.ApproveScenesRequest
-	(*ApproveScenesResponse)(nil),   // 25: app.studio.v1.ApproveScenesResponse
-	(*StudioScript)(nil),            // 26: app.studio.v1.StudioScript
+	(VideoStatus)(0),                          // 0: app.studio.v1.VideoStatus
+	(*Video)(nil),                             // 1: app.studio.v1.Video
+	(*VideoArtifacts)(nil),                    // 2: app.studio.v1.VideoArtifacts
+	(*StatusChange)(nil),                      // 3: app.studio.v1.StatusChange
+	(*ListVideosRequest)(nil),                 // 4: app.studio.v1.ListVideosRequest
+	(*ListVideosResponse)(nil),                // 5: app.studio.v1.ListVideosResponse
+	(*GetVideoRequest)(nil),                   // 6: app.studio.v1.GetVideoRequest
+	(*GetVideoResponse)(nil),                  // 7: app.studio.v1.GetVideoResponse
+	(*RenderArtifactView)(nil),                // 8: app.studio.v1.RenderArtifactView
+	(*CreateVideoRequest)(nil),                // 9: app.studio.v1.CreateVideoRequest
+	(*CreateVideoResponse)(nil),               // 10: app.studio.v1.CreateVideoResponse
+	(*UpdateScriptRequest)(nil),               // 11: app.studio.v1.UpdateScriptRequest
+	(*UpdateScriptResponse)(nil),              // 12: app.studio.v1.UpdateScriptResponse
+	(*ApproveScriptRequest)(nil),              // 13: app.studio.v1.ApproveScriptRequest
+	(*ApproveScriptResponse)(nil),             // 14: app.studio.v1.ApproveScriptResponse
+	(*RejectScriptRequest)(nil),               // 15: app.studio.v1.RejectScriptRequest
+	(*RejectScriptResponse)(nil),              // 16: app.studio.v1.RejectScriptResponse
+	(*TakeSummary)(nil),                       // 17: app.studio.v1.TakeSummary
+	(*ListTakesRequest)(nil),                  // 18: app.studio.v1.ListTakesRequest
+	(*ListTakesResponse)(nil),                 // 19: app.studio.v1.ListTakesResponse
+	(*ChecklistItemView)(nil),                 // 20: app.studio.v1.ChecklistItemView
+	(*GetReleaseChecklistRequest)(nil),        // 21: app.studio.v1.GetReleaseChecklistRequest
+	(*GetReleaseChecklistResponse)(nil),       // 22: app.studio.v1.GetReleaseChecklistResponse
+	(*SetChecklistItemPublishedRequest)(nil),  // 23: app.studio.v1.SetChecklistItemPublishedRequest
+	(*SetChecklistItemPublishedResponse)(nil), // 24: app.studio.v1.SetChecklistItemPublishedResponse
+	(*RequestRerenderRequest)(nil),            // 25: app.studio.v1.RequestRerenderRequest
+	(*RequestRerenderResponse)(nil),           // 26: app.studio.v1.RequestRerenderResponse
+	(*ApproveFinalCutRequest)(nil),            // 27: app.studio.v1.ApproveFinalCutRequest
+	(*ApproveFinalCutResponse)(nil),           // 28: app.studio.v1.ApproveFinalCutResponse
+	(*ApproveScenesRequest)(nil),              // 29: app.studio.v1.ApproveScenesRequest
+	(*ApproveScenesResponse)(nil),             // 30: app.studio.v1.ApproveScenesResponse
+	(*StudioScript)(nil),                      // 31: app.studio.v1.StudioScript
 }
 var file_app_studio_v1_video_proto_depIdxs = []int32{
 	0,  // 0: app.studio.v1.Video.status:type_name -> app.studio.v1.VideoStatus
 	1,  // 1: app.studio.v1.ListVideosResponse.videos:type_name -> app.studio.v1.Video
 	1,  // 2: app.studio.v1.GetVideoResponse.video:type_name -> app.studio.v1.Video
-	26, // 3: app.studio.v1.GetVideoResponse.script:type_name -> app.studio.v1.StudioScript
-	26, // 4: app.studio.v1.GetVideoResponse.original_script:type_name -> app.studio.v1.StudioScript
+	31, // 3: app.studio.v1.GetVideoResponse.script:type_name -> app.studio.v1.StudioScript
+	31, // 4: app.studio.v1.GetVideoResponse.original_script:type_name -> app.studio.v1.StudioScript
 	2,  // 5: app.studio.v1.GetVideoResponse.artifacts:type_name -> app.studio.v1.VideoArtifacts
 	3,  // 6: app.studio.v1.GetVideoResponse.status_history:type_name -> app.studio.v1.StatusChange
 	8,  // 7: app.studio.v1.GetVideoResponse.render_artifacts:type_name -> app.studio.v1.RenderArtifactView
 	1,  // 8: app.studio.v1.CreateVideoResponse.video:type_name -> app.studio.v1.Video
-	26, // 9: app.studio.v1.UpdateScriptRequest.script:type_name -> app.studio.v1.StudioScript
-	26, // 10: app.studio.v1.UpdateScriptResponse.script:type_name -> app.studio.v1.StudioScript
+	31, // 9: app.studio.v1.UpdateScriptRequest.script:type_name -> app.studio.v1.StudioScript
+	31, // 10: app.studio.v1.UpdateScriptResponse.script:type_name -> app.studio.v1.StudioScript
 	1,  // 11: app.studio.v1.ApproveScriptResponse.video:type_name -> app.studio.v1.Video
 	1,  // 12: app.studio.v1.RejectScriptResponse.video:type_name -> app.studio.v1.Video
 	17, // 13: app.studio.v1.ListTakesResponse.takes:type_name -> app.studio.v1.TakeSummary
-	1,  // 14: app.studio.v1.RequestRerenderResponse.video:type_name -> app.studio.v1.Video
-	1,  // 15: app.studio.v1.ApproveFinalCutResponse.video:type_name -> app.studio.v1.Video
-	1,  // 16: app.studio.v1.ApproveScenesResponse.video:type_name -> app.studio.v1.Video
-	4,  // 17: app.studio.v1.VideoService.ListVideos:input_type -> app.studio.v1.ListVideosRequest
-	6,  // 18: app.studio.v1.VideoService.GetVideo:input_type -> app.studio.v1.GetVideoRequest
-	9,  // 19: app.studio.v1.VideoService.CreateVideo:input_type -> app.studio.v1.CreateVideoRequest
-	11, // 20: app.studio.v1.VideoService.UpdateScript:input_type -> app.studio.v1.UpdateScriptRequest
-	13, // 21: app.studio.v1.VideoService.ApproveScript:input_type -> app.studio.v1.ApproveScriptRequest
-	15, // 22: app.studio.v1.VideoService.RejectScript:input_type -> app.studio.v1.RejectScriptRequest
-	18, // 23: app.studio.v1.VideoService.ListTakes:input_type -> app.studio.v1.ListTakesRequest
-	24, // 24: app.studio.v1.VideoService.ApproveScenes:input_type -> app.studio.v1.ApproveScenesRequest
-	20, // 25: app.studio.v1.VideoService.RequestRerender:input_type -> app.studio.v1.RequestRerenderRequest
-	22, // 26: app.studio.v1.VideoService.ApproveFinalCut:input_type -> app.studio.v1.ApproveFinalCutRequest
-	5,  // 27: app.studio.v1.VideoService.ListVideos:output_type -> app.studio.v1.ListVideosResponse
-	7,  // 28: app.studio.v1.VideoService.GetVideo:output_type -> app.studio.v1.GetVideoResponse
-	10, // 29: app.studio.v1.VideoService.CreateVideo:output_type -> app.studio.v1.CreateVideoResponse
-	12, // 30: app.studio.v1.VideoService.UpdateScript:output_type -> app.studio.v1.UpdateScriptResponse
-	14, // 31: app.studio.v1.VideoService.ApproveScript:output_type -> app.studio.v1.ApproveScriptResponse
-	16, // 32: app.studio.v1.VideoService.RejectScript:output_type -> app.studio.v1.RejectScriptResponse
-	19, // 33: app.studio.v1.VideoService.ListTakes:output_type -> app.studio.v1.ListTakesResponse
-	25, // 34: app.studio.v1.VideoService.ApproveScenes:output_type -> app.studio.v1.ApproveScenesResponse
-	21, // 35: app.studio.v1.VideoService.RequestRerender:output_type -> app.studio.v1.RequestRerenderResponse
-	23, // 36: app.studio.v1.VideoService.ApproveFinalCut:output_type -> app.studio.v1.ApproveFinalCutResponse
-	27, // [27:37] is the sub-list for method output_type
-	17, // [17:27] is the sub-list for method input_type
-	17, // [17:17] is the sub-list for extension type_name
-	17, // [17:17] is the sub-list for extension extendee
-	0,  // [0:17] is the sub-list for field type_name
+	20, // 14: app.studio.v1.GetReleaseChecklistResponse.items:type_name -> app.studio.v1.ChecklistItemView
+	1,  // 15: app.studio.v1.SetChecklistItemPublishedResponse.video:type_name -> app.studio.v1.Video
+	1,  // 16: app.studio.v1.RequestRerenderResponse.video:type_name -> app.studio.v1.Video
+	1,  // 17: app.studio.v1.ApproveFinalCutResponse.video:type_name -> app.studio.v1.Video
+	1,  // 18: app.studio.v1.ApproveScenesResponse.video:type_name -> app.studio.v1.Video
+	4,  // 19: app.studio.v1.VideoService.ListVideos:input_type -> app.studio.v1.ListVideosRequest
+	6,  // 20: app.studio.v1.VideoService.GetVideo:input_type -> app.studio.v1.GetVideoRequest
+	9,  // 21: app.studio.v1.VideoService.CreateVideo:input_type -> app.studio.v1.CreateVideoRequest
+	11, // 22: app.studio.v1.VideoService.UpdateScript:input_type -> app.studio.v1.UpdateScriptRequest
+	13, // 23: app.studio.v1.VideoService.ApproveScript:input_type -> app.studio.v1.ApproveScriptRequest
+	15, // 24: app.studio.v1.VideoService.RejectScript:input_type -> app.studio.v1.RejectScriptRequest
+	18, // 25: app.studio.v1.VideoService.ListTakes:input_type -> app.studio.v1.ListTakesRequest
+	29, // 26: app.studio.v1.VideoService.ApproveScenes:input_type -> app.studio.v1.ApproveScenesRequest
+	25, // 27: app.studio.v1.VideoService.RequestRerender:input_type -> app.studio.v1.RequestRerenderRequest
+	27, // 28: app.studio.v1.VideoService.ApproveFinalCut:input_type -> app.studio.v1.ApproveFinalCutRequest
+	21, // 29: app.studio.v1.VideoService.GetReleaseChecklist:input_type -> app.studio.v1.GetReleaseChecklistRequest
+	23, // 30: app.studio.v1.VideoService.SetChecklistItemPublished:input_type -> app.studio.v1.SetChecklistItemPublishedRequest
+	5,  // 31: app.studio.v1.VideoService.ListVideos:output_type -> app.studio.v1.ListVideosResponse
+	7,  // 32: app.studio.v1.VideoService.GetVideo:output_type -> app.studio.v1.GetVideoResponse
+	10, // 33: app.studio.v1.VideoService.CreateVideo:output_type -> app.studio.v1.CreateVideoResponse
+	12, // 34: app.studio.v1.VideoService.UpdateScript:output_type -> app.studio.v1.UpdateScriptResponse
+	14, // 35: app.studio.v1.VideoService.ApproveScript:output_type -> app.studio.v1.ApproveScriptResponse
+	16, // 36: app.studio.v1.VideoService.RejectScript:output_type -> app.studio.v1.RejectScriptResponse
+	19, // 37: app.studio.v1.VideoService.ListTakes:output_type -> app.studio.v1.ListTakesResponse
+	30, // 38: app.studio.v1.VideoService.ApproveScenes:output_type -> app.studio.v1.ApproveScenesResponse
+	26, // 39: app.studio.v1.VideoService.RequestRerender:output_type -> app.studio.v1.RequestRerenderResponse
+	28, // 40: app.studio.v1.VideoService.ApproveFinalCut:output_type -> app.studio.v1.ApproveFinalCutResponse
+	22, // 41: app.studio.v1.VideoService.GetReleaseChecklist:output_type -> app.studio.v1.GetReleaseChecklistResponse
+	24, // 42: app.studio.v1.VideoService.SetChecklistItemPublished:output_type -> app.studio.v1.SetChecklistItemPublishedResponse
+	31, // [31:43] is the sub-list for method output_type
+	19, // [19:31] is the sub-list for method input_type
+	19, // [19:19] is the sub-list for extension type_name
+	19, // [19:19] is the sub-list for extension extendee
+	0,  // [0:19] is the sub-list for field type_name
 }
 
 func init() { file_app_studio_v1_video_proto_init() }
@@ -1660,7 +1958,7 @@ func file_app_studio_v1_video_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_app_studio_v1_video_proto_rawDesc), len(file_app_studio_v1_video_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   25,
+			NumMessages:   30,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -11,20 +11,31 @@ import (
 	"github.com/google/uuid"
 )
 
-const countReleaseChecklistOpen = `-- name: CountReleaseChecklistOpen :one
-SELECT count(*) AS open FROM release_checklist
-WHERE video_id = $1 AND done = false
+const countChecklistItems = `-- name: CountChecklistItems :one
+SELECT count(*) AS total FROM release_checklist WHERE video_id = $1
 `
 
-func (q *Queries) CountReleaseChecklistOpen(ctx context.Context, videoID uuid.UUID) (int64, error) {
-	row := q.db.QueryRow(ctx, countReleaseChecklistOpen, videoID)
+func (q *Queries) CountChecklistItems(ctx context.Context, videoID uuid.UUID) (int64, error) {
+	row := q.db.QueryRow(ctx, countChecklistItems, videoID)
+	var total int64
+	err := row.Scan(&total)
+	return total, err
+}
+
+const countUnpublishedItems = `-- name: CountUnpublishedItems :one
+SELECT count(*) AS open FROM release_checklist
+WHERE video_id = $1 AND published = false
+`
+
+func (q *Queries) CountUnpublishedItems(ctx context.Context, videoID uuid.UUID) (int64, error) {
+	row := q.db.QueryRow(ctx, countUnpublishedItems, videoID)
 	var open int64
 	err := row.Scan(&open)
 	return open, err
 }
 
 const listReleaseChecklist = `-- name: ListReleaseChecklist :many
-SELECT id, video_id, platform, item, done, done_at, created_at FROM release_checklist WHERE video_id = $1 ORDER BY created_at
+SELECT id, video_id, item_key, label, download_path, published, published_at, created_at FROM release_checklist WHERE video_id = $1 ORDER BY created_at
 `
 
 func (q *Queries) ListReleaseChecklist(ctx context.Context, videoID uuid.UUID) ([]ReleaseChecklist, error) {
@@ -39,10 +50,11 @@ func (q *Queries) ListReleaseChecklist(ctx context.Context, videoID uuid.UUID) (
 		if err := rows.Scan(
 			&i.ID,
 			&i.VideoID,
-			&i.Platform,
-			&i.Item,
-			&i.Done,
-			&i.DoneAt,
+			&i.ItemKey,
+			&i.Label,
+			&i.DownloadPath,
+			&i.Published,
+			&i.PublishedAt,
 			&i.CreatedAt,
 		); err != nil {
 			return nil, err
@@ -55,44 +67,55 @@ func (q *Queries) ListReleaseChecklist(ctx context.Context, videoID uuid.UUID) (
 	return items, nil
 }
 
-const seedReleaseChecklistItem = `-- name: SeedReleaseChecklistItem :exec
-INSERT INTO release_checklist (video_id, platform)
-VALUES ($1, $2)
-ON CONFLICT (video_id, platform) DO NOTHING
+const setChecklistItemPublished = `-- name: SetChecklistItemPublished :one
+UPDATE release_checklist SET published = $3, published_at = CASE WHEN $3 THEN now() ELSE NULL END
+WHERE video_id = $1 AND item_key = $2
+RETURNING id, video_id, item_key, label, download_path, published, published_at, created_at
 `
 
-type SeedReleaseChecklistItemParams struct {
-	VideoID  uuid.UUID `json:"video_id"`
-	Platform string    `json:"platform"`
+type SetChecklistItemPublishedParams struct {
+	VideoID   uuid.UUID `json:"video_id"`
+	ItemKey   string    `json:"item_key"`
+	Published bool      `json:"published"`
 }
 
-func (q *Queries) SeedReleaseChecklistItem(ctx context.Context, arg SeedReleaseChecklistItemParams) error {
-	_, err := q.db.Exec(ctx, seedReleaseChecklistItem, arg.VideoID, arg.Platform)
-	return err
-}
-
-const setReleaseChecklistDone = `-- name: SetReleaseChecklistDone :one
-UPDATE release_checklist SET done = true, done_at = now()
-WHERE video_id = $1 AND platform = $2
-RETURNING id, video_id, platform, item, done, done_at, created_at
-`
-
-type SetReleaseChecklistDoneParams struct {
-	VideoID  uuid.UUID `json:"video_id"`
-	Platform string    `json:"platform"`
-}
-
-func (q *Queries) SetReleaseChecklistDone(ctx context.Context, arg SetReleaseChecklistDoneParams) (ReleaseChecklist, error) {
-	row := q.db.QueryRow(ctx, setReleaseChecklistDone, arg.VideoID, arg.Platform)
+func (q *Queries) SetChecklistItemPublished(ctx context.Context, arg SetChecklistItemPublishedParams) (ReleaseChecklist, error) {
+	row := q.db.QueryRow(ctx, setChecklistItemPublished, arg.VideoID, arg.ItemKey, arg.Published)
 	var i ReleaseChecklist
 	err := row.Scan(
 		&i.ID,
 		&i.VideoID,
-		&i.Platform,
-		&i.Item,
-		&i.Done,
-		&i.DoneAt,
+		&i.ItemKey,
+		&i.Label,
+		&i.DownloadPath,
+		&i.Published,
+		&i.PublishedAt,
 		&i.CreatedAt,
 	)
 	return i, err
+}
+
+const upsertChecklistItem = `-- name: UpsertChecklistItem :exec
+INSERT INTO release_checklist (video_id, item_key, label, download_path)
+VALUES ($1, $2, $3, $4)
+ON CONFLICT (video_id, item_key) DO UPDATE SET
+  label = excluded.label,
+  download_path = excluded.download_path
+`
+
+type UpsertChecklistItemParams struct {
+	VideoID      uuid.UUID `json:"video_id"`
+	ItemKey      string    `json:"item_key"`
+	Label        string    `json:"label"`
+	DownloadPath string    `json:"download_path"`
+}
+
+func (q *Queries) UpsertChecklistItem(ctx context.Context, arg UpsertChecklistItemParams) error {
+	_, err := q.db.Exec(ctx, upsertChecklistItem,
+		arg.VideoID,
+		arg.ItemKey,
+		arg.Label,
+		arg.DownloadPath,
+	)
+	return err
 }

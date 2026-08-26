@@ -5,8 +5,10 @@ import { useQueryClient } from "@tanstack/react-query";
 
 import {
   approveFinalCut,
+  getReleaseChecklist,
   getVideo,
   requestRerender,
+  setChecklistItemPublished,
 } from "../gen/app/studio/v1/video-VideoService_connectquery";
 import { TOKEN_STORAGE_KEY } from "../lib/transport";
 import { VideoStatus } from "../gen/app/studio/v1/video_pb";
@@ -59,6 +61,17 @@ export default function FinalReviewPage() {
 
   const approve = useMutation(approveFinalCut, { onSuccess: invalidate });
   const rerender = useMutation(requestRerender, { onSuccess: invalidate });
+
+  const checklistEnabled =
+    status === VideoStatus.FINAL_REVIEW || status === VideoStatus.RELEASED;
+  const checklistQuery = useQuery(
+    getReleaseChecklist,
+    { videoId: id },
+    { enabled: checklistEnabled && id !== "" }
+  );
+  const publishMutation = useMutation(setChecklistItemPublished, {
+    onSuccess: invalidate,
+  });
 
   const [modal, setModal] = useState<"approve" | "rerender" | null>(null);
   const [rerenderReason, setRerenderReason] = useState("");
@@ -152,6 +165,61 @@ export default function FinalReviewPage() {
           Nenhum render registrado ainda para este vídeo.
         </p>
       )}
+
+      {checklistEnabled && checklistQuery.data ? (
+        <section data-testid="release-checklist" className="rounded-xl border border-line bg-surface p-4">
+          <header className="mb-3 flex items-center gap-2">
+            <h2 className="font-serif text-lg">Lançamento</h2>
+            {(() => {
+              const items = checklistQuery.data.items;
+              const done = items.filter((i) => i.published).length;
+              return (
+                <span
+                  data-testid="checklist-progress"
+                  className={`ml-auto rounded-full px-3 py-1 text-xs font-medium ${
+                    done === items.length
+                      ? "bg-added/10 text-added"
+                      : "bg-accent/10 text-accent"
+                  }`}
+                >
+                  {done}/{items.length} publicados
+                </span>
+              );
+            })()}
+          </header>
+          <ul className="space-y-2">
+            {checklistQuery.data.items.map((item) => (
+              <li key={item.itemKey} className="flex items-center gap-3 text-sm">
+                <input
+                  type="checkbox"
+                  checked={item.published}
+                  onChange={(e) =>
+                    publishMutation.mutate({
+                      videoId: id,
+                      itemKey: item.itemKey,
+                      published: e.target.checked,
+                    })
+                  }
+                  aria-label={`Marcar ${item.label} como publicado`}
+                />
+                <a
+                  href={mediaUrl(id, item.downloadPath)}
+                  download
+                  className="text-accent hover:underline"
+                  title="Baixar pacote"
+                >
+                  {item.label || item.itemKey}
+                </a>
+                <span className="font-mono text-xs text-ink/50">{item.downloadPath}</span>
+                {publishMutation.isPending &&
+                publishMutation.variables?.itemKey === item.itemKey ? (
+                  <span className="text-xs text-ink/40">salvando…</span>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       {shorts.length > 0 ? (
         <section>
