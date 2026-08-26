@@ -231,7 +231,10 @@ export default function ScenesReviewPage() {
   const slug = videoQuery.data?.video?.slug ?? "";
   const updatedAt = videoQuery.data?.video?.updatedAt ?? "";
   const status = videoQuery.data?.video?.status;
-  const segments = videoQuery.data?.script?.segments ?? [];
+  const segments = useMemo(
+    () => videoQuery.data?.script?.segments ?? [],
+    [videoQuery.data]
+  );
   const takesQuery = useQuery(listTakes, { videoSlug: slug }, { enabled: slug !== "" });
 
   const recordedSegments = useMemo(() => {

@@ -1,31 +1,13 @@
 import React from "react";
-import { create } from "@bufbuild/protobuf";
 import { Composition, registerRoot } from "remotion";
 
-import { StudioScriptSchema } from "./gen/app/studio/v1/script_pb";
-import type { StudioVideoProps } from "./props";
-import { PlaceholderScene } from "./scenes/PlaceholderScene";
 import { SmokeRender } from "./SmokeRender";
 import { LongFormVideo } from "./compositions/LongFormVideo";
 
 const FPS = 30;
 
-const defaultScript = create(StudioScriptSchema, {
-  post: "default",
-  language: { spoken: "pt-BR", subtitles: "en" },
-  target: { durationMin: 8 },
-  segments: [],
-});
-
-const defaultProps: StudioVideoProps = {
-  title: "Guigas Studio",
-  durationMs: 30000,
-  script: defaultScript,
-};
-
 // Remotion's schema-less Composition infers Record<string, unknown>; our
 // public typing lives on StudioVideoProps/PlayerHost (proto-derived).
-const scene = PlaceholderScene as unknown as React.FC<Record<string, unknown>>;
 const longFormScene = LongFormVideo as unknown as React.FC<Record<string, unknown>>;
 
 const Root: React.FC = () => (
