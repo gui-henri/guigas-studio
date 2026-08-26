@@ -17,6 +17,8 @@
     "lint": "npm run lint --workspaces --if-present",
     "build": "npm run build --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
-    "check": "npm run lint && npm run build && buf lint && npm run backend:check"
+    "check": "npm run lint && npm run build && buf lint && npm run backend:check",
+    "smoke:render": "npm run smoke:render -w remotion-kit",
+    "smoke:verify": "npm run smoke:verify -w remotion-kit"
   }
 }

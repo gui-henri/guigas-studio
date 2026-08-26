@@ -1,5 +1,5 @@
 import React from "react";
-import { Composition, registerRoot, staticFile } from "remotion";
+import { Composition, registerRoot } from "remotion";
 
 import type { TimelineView } from "./selectors";
 import { AvatarSegmentScene } from "./scenes/AvatarSegmentScene";
@@ -12,7 +12,7 @@ const SpriteStill: React.FC<{ frameMs: number }> = ({ frameMs }) => {
   return (
     <AvatarSegmentScene
       timeline={tl}
-      wavUrl={staticFile("noop.wav")}
+      wavUrl=""
       spriteSheetUrl={new URL("../assets/sprite-placeholder.png", import.meta.url).href}
       spriteMeta={{ ...spriteMeta }}
       scale={900}

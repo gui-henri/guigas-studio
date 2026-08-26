@@ -12,7 +12,9 @@
   "scripts": {
     "build": "tsc --noEmit",
     "test": "vitest run",
-    "still:avatar": "node tools/render-stills.mjs"
+    "still:avatar": "node tools/render-stills.mjs",
+    "smoke:render": "node tools/smoke-render.mjs",
+    "smoke:verify": "node tools/smoke-verify.mjs"
   },
   "peerDependencies": {
     "react": ">=18",

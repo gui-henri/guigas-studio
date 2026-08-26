@@ -5,6 +5,7 @@ import { Composition, registerRoot } from "remotion";
 import { StudioScriptSchema } from "./gen/app/studio/v1/script_pb";
 import type { StudioVideoProps } from "./props";
 import { PlaceholderScene } from "./scenes/PlaceholderScene";
+import { SmokeRender } from "./SmokeRender";
 
 const FPS = 30;
 
@@ -63,11 +64,19 @@ const Root: React.FC = () => (
         };
       }}
     />
+    <Composition
+      id="SmokeRender"
+      component={SmokeRender as unknown as React.FC<Record<string, unknown>>}
+      durationInFrames={30 * FPS}
+      fps={FPS}
+      width={1280}
+      height={720}
+      defaultProps={{}}
+    />
   </>
 );
 
 registerRoot(Root);
-
 export { PlayerHost } from "./PlayerHost";
 export type { PlayerHostProps } from "./PlayerHost";
 export type { StudioVideoProps } from "./props";
@@ -76,3 +85,5 @@ export type { AvatarPreviewPlayerProps } from "./AvatarPreviewPlayer";
 export { AvatarSprite } from "./AvatarSprite";
 export type { SpriteMeta, AvatarSpriteProps } from "./AvatarSprite";
 export type { TimelineView, MouthCue } from "./selectors";
+
+export { SmokeRender } from "./SmokeRender";

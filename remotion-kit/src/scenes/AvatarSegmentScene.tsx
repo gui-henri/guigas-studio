@@ -32,7 +32,7 @@ export const AvatarSegmentScene: React.FC<AvatarSegmentSceneProps> = ({
   return (
     <AbsoluteFill style={{ background }}>
       <Sequence>
-        <Audio src={wavUrl} />
+        {wavUrl ? <Audio src={wavUrl} /> : null}
         <AvatarSprite
           timeline={timeline}
           spriteSheetUrl={spriteSheetUrl}
