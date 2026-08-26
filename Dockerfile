@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # Stage 1: Build do Frontend React / Vite
-FROM node:22-alpine AS frontend-builder
+FROM node:22-slim AS frontend-builder
 WORKDIR /app
 
 # Copia manifestos do monorepo para cache de dependências
@@ -10,7 +10,7 @@ COPY frontend/package.json ./frontend/
 COPY remotion-kit/package.json ./remotion-kit/
 COPY runner/package.json ./runner/
 
-RUN npm ci
+RUN npm ci --include=optional
 
 # Copia código do frontend e pacotes dependentes
 COPY frontend/ ./frontend/
