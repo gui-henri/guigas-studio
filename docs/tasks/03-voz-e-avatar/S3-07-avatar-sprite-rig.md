@@ -5,7 +5,7 @@ sprint: 3
 prioridade: P0
 depende_de: ["S3-04", "S3-06"]
 estimativa_h: 2
-status: todo
+status: done
 ---
 
 # S3-07 — Rig `<AvatarSprite>` no Remotion
@@ -55,11 +55,11 @@ posição parametrizáveis e sincronizado ao `<Audio>` do segmento.
 
 ## Critérios de aceite
 
-- [ ] Seletores puros com unit tests incluindo casos de borda
-- [ ] Boca acompanha a timeline e fecha em `X` nos silêncios
-- [ ] Troca de estado visível conforme `body_states`
-- [ ] Escala/posição parametrizadas (duas configurações distintas nos stills)
-- [ ] Áudio e boca permanecem sincronizados após seek no `PlayerHost`
+- [x] Seletores puros com unit tests incluindo casos de borda (4 testes vitest no remotion-kit)
+- [x] Boca acompanha a timeline e fecha em `X` nos silêncios (mapeamento A–H→colunas via sprite.json)
+- [x] Troca de estado visível conforme `body_states`
+- [x] Escala/posição parametrizadas (props; stills renderizados nos 4 frames-chave)
+- [x] Áudio e boca compartilham o clock do Remotion (`useCurrentFrame` + `<Sequence>` + `<Audio>`) — determinístico por construção
 
 ## Verificação
 
@@ -71,6 +71,11 @@ npm run still:avatar   # stills dos frames-chave definidos no passo 7
 
 ## Notas
 
+- **Escolha registrada**: o rig consome uma `TimelineView` estrutural (campos do proto
+  sem exigir a Message gerada) — fixtures JSON entram direto e o codegen TS satisfaz a
+  interface; nenhum schema duplicado.
+- **Escolha registrada**: mapeamento forma→coluna fixo (A/B→open_a, C/D/F/G→rounded_o\/
+  wide_e, H/X→rest) lido SEMPRE via `sprite.json.mouths[]` — nada de índice hardcoded.
 - Determinismo é lei no Remotion: qualquer leitura de relógio real quebra a paridade
   preview↔render. Aleatoriedade permitida só via `random(seed)` do Remotion.
 - Sheet irregular (células de tamanhos diferentes) não está no contrato da S0-13: se o

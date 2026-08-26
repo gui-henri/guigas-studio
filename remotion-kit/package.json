@@ -6,10 +6,13 @@
   "devDependencies": {
     "pngjs": "^7.0.0",
     "remotion": "4.0.517",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "vitest": "^3.2.4"
   },
   "scripts": {
-    "build": "tsc --noEmit"
+    "build": "tsc --noEmit",
+    "test": "vitest run",
+    "still:avatar": "node tools/render-stills.mjs"
   },
   "peerDependencies": {
     "react": ">=18",

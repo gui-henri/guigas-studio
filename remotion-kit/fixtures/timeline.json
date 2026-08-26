@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "segmentId": "hook",
+  "durationMs": 3000,
+  "mouthCues": [
+    { "shape": "X", "startMs": 0, "endMs": 200 },
+    { "shape": "A", "startMs": 200, "endMs": 500 },
+    { "shape": "B", "startMs": 500, "endMs": 800 },
+    { "shape": "E", "startMs": 800, "endMs": 1100 },
+    { "shape": "C", "startMs": 1100, "endMs": 1400 },
+    { "shape": "A", "startMs": 1400, "endMs": 1800 },
+    { "shape": "X", "startMs": 1800, "endMs": 3000 }
+  ],
+  "bodyStates": [
+    { "state": "idle", "startMs": 0, "endMs": 200 },
+    { "state": "surprised", "startMs": 200, "endMs": 1100 },
+    { "state": "happy", "startMs": 1100, "endMs": 1800 },
+    { "state": "idle", "startMs": 1800, "endMs": 3000 }
+  ]
+}
