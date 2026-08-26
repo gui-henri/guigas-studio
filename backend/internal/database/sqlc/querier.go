@@ -8,24 +8,39 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Querier interface {
+	// ClaimJob must stay a SINGLE statement: SELECT … FOR UPDATE SKIP LOCKED
+	// inside the UPDATE subquery is what makes concurrent claims safe (D-02).
+	ClaimJob(ctx context.Context, claimedBy pgtype.Text) (Job, error)
+	CompleteJob(ctx context.Context, arg CompleteJobParams) (Job, error)
 	CountRssItems(ctx context.Context) (int64, error)
 	CountTakesForVideo(ctx context.Context, videoSlug string) (int64, error)
 	CreateUserIfNotExists(ctx context.Context, arg CreateUserIfNotExistsParams) (int64, error)
 	CreateVideo(ctx context.Context, arg CreateVideoParams) (Video, error)
+	EnqueueJob(ctx context.Context, arg EnqueueJobParams) (Job, error)
+	// FailJob increments attempts; below max_attempts the job returns to pending
+	// with exponential backoff (2^attempts × 30 s), otherwise it settles failed.
+	FailJob(ctx context.Context, arg FailJobParams) (Job, error)
+	GetJob(ctx context.Context, id uuid.UUID) (Job, error)
 	GetOriginalScript(ctx context.Context, id uuid.UUID) ([]byte, error)
 	GetUserByUsername(ctx context.Context, username string) (User, error)
 	GetVideo(ctx context.Context, id uuid.UUID) (Video, error)
 	GetVideoBySlug(ctx context.Context, slug string) (Video, error)
+	HeartbeatJob(ctx context.Context, arg HeartbeatJobParams) (Job, error)
 	InsertArtifactParse(ctx context.Context, arg InsertArtifactParseParams) (VideoArtifactParse, error)
 	InsertRssItem(ctx context.Context, arg InsertRssItemParams) (int64, error)
 	InsertStatusChange(ctx context.Context, arg InsertStatusChangeParams) error
+	ListJobsByVideo(ctx context.Context, videoID uuid.UUID) ([]Job, error)
 	ListParsesByVideo(ctx context.Context, videoID uuid.UUID) ([]VideoArtifactParse, error)
 	ListStatusHistoryByVideo(ctx context.Context, videoID uuid.UUID) ([]VideoStatusHistory, error)
 	ListTakesByVideo(ctx context.Context, videoSlug string) ([]Take, error)
 	ListVideos(ctx context.Context) ([]Video, error)
+	// Cancel is cooperative: a pending job with cancel_requested is skipped by
+	// the claim scan; a claimed job sees the flag via GetJob/Heartbeat.
+	MarkCancelRequested(ctx context.Context, id uuid.UUID) (Job, error)
 	SetOriginalScript(ctx context.Context, arg SetOriginalScriptParams) (int64, error)
 	SetRssItemVideo(ctx context.Context, arg SetRssItemVideoParams) error
 	UpdateVideoStatus(ctx context.Context, arg UpdateVideoStatusParams) error

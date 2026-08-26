@@ -51,6 +51,9 @@ const (
 	VideoServiceRejectScriptProcedure = "/app.studio.v1.VideoService/RejectScript"
 	// VideoServiceListTakesProcedure is the fully-qualified name of the VideoService's ListTakes RPC.
 	VideoServiceListTakesProcedure = "/app.studio.v1.VideoService/ListTakes"
+	// VideoServiceApproveScenesProcedure is the fully-qualified name of the VideoService's
+	// ApproveScenes RPC.
+	VideoServiceApproveScenesProcedure = "/app.studio.v1.VideoService/ApproveScenes"
 )
 
 // VideoServiceClient is a client for the app.studio.v1.VideoService service.
@@ -62,6 +65,7 @@ type VideoServiceClient interface {
 	ApproveScript(context.Context, *connect.Request[v1.ApproveScriptRequest]) (*connect.Response[v1.ApproveScriptResponse], error)
 	RejectScript(context.Context, *connect.Request[v1.RejectScriptRequest]) (*connect.Response[v1.RejectScriptResponse], error)
 	ListTakes(context.Context, *connect.Request[v1.ListTakesRequest]) (*connect.Response[v1.ListTakesResponse], error)
+	ApproveScenes(context.Context, *connect.Request[v1.ApproveScenesRequest]) (*connect.Response[v1.ApproveScenesResponse], error)
 }
 
 // NewVideoServiceClient constructs a client for the app.studio.v1.VideoService service. By default,
@@ -117,6 +121,12 @@ func NewVideoServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			connect.WithSchema(videoServiceMethods.ByName("ListTakes")),
 			connect.WithClientOptions(opts...),
 		),
+		approveScenes: connect.NewClient[v1.ApproveScenesRequest, v1.ApproveScenesResponse](
+			httpClient,
+			baseURL+VideoServiceApproveScenesProcedure,
+			connect.WithSchema(videoServiceMethods.ByName("ApproveScenes")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -129,6 +139,7 @@ type videoServiceClient struct {
 	approveScript *connect.Client[v1.ApproveScriptRequest, v1.ApproveScriptResponse]
 	rejectScript  *connect.Client[v1.RejectScriptRequest, v1.RejectScriptResponse]
 	listTakes     *connect.Client[v1.ListTakesRequest, v1.ListTakesResponse]
+	approveScenes *connect.Client[v1.ApproveScenesRequest, v1.ApproveScenesResponse]
 }
 
 // ListVideos calls app.studio.v1.VideoService.ListVideos.
@@ -166,6 +177,11 @@ func (c *videoServiceClient) ListTakes(ctx context.Context, req *connect.Request
 	return c.listTakes.CallUnary(ctx, req)
 }
 
+// ApproveScenes calls app.studio.v1.VideoService.ApproveScenes.
+func (c *videoServiceClient) ApproveScenes(ctx context.Context, req *connect.Request[v1.ApproveScenesRequest]) (*connect.Response[v1.ApproveScenesResponse], error) {
+	return c.approveScenes.CallUnary(ctx, req)
+}
+
 // VideoServiceHandler is an implementation of the app.studio.v1.VideoService service.
 type VideoServiceHandler interface {
 	ListVideos(context.Context, *connect.Request[v1.ListVideosRequest]) (*connect.Response[v1.ListVideosResponse], error)
@@ -175,6 +191,7 @@ type VideoServiceHandler interface {
 	ApproveScript(context.Context, *connect.Request[v1.ApproveScriptRequest]) (*connect.Response[v1.ApproveScriptResponse], error)
 	RejectScript(context.Context, *connect.Request[v1.RejectScriptRequest]) (*connect.Response[v1.RejectScriptResponse], error)
 	ListTakes(context.Context, *connect.Request[v1.ListTakesRequest]) (*connect.Response[v1.ListTakesResponse], error)
+	ApproveScenes(context.Context, *connect.Request[v1.ApproveScenesRequest]) (*connect.Response[v1.ApproveScenesResponse], error)
 }
 
 // NewVideoServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -226,6 +243,12 @@ func NewVideoServiceHandler(svc VideoServiceHandler, opts ...connect.HandlerOpti
 		connect.WithSchema(videoServiceMethods.ByName("ListTakes")),
 		connect.WithHandlerOptions(opts...),
 	)
+	videoServiceApproveScenesHandler := connect.NewUnaryHandler(
+		VideoServiceApproveScenesProcedure,
+		svc.ApproveScenes,
+		connect.WithSchema(videoServiceMethods.ByName("ApproveScenes")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/app.studio.v1.VideoService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case VideoServiceListVideosProcedure:
@@ -242,6 +265,8 @@ func NewVideoServiceHandler(svc VideoServiceHandler, opts ...connect.HandlerOpti
 			videoServiceRejectScriptHandler.ServeHTTP(w, r)
 		case VideoServiceListTakesProcedure:
 			videoServiceListTakesHandler.ServeHTTP(w, r)
+		case VideoServiceApproveScenesProcedure:
+			videoServiceApproveScenesHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -277,4 +302,8 @@ func (UnimplementedVideoServiceHandler) RejectScript(context.Context, *connect.R
 
 func (UnimplementedVideoServiceHandler) ListTakes(context.Context, *connect.Request[v1.ListTakesRequest]) (*connect.Response[v1.ListTakesResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("app.studio.v1.VideoService.ListTakes is not implemented"))
+}
+
+func (UnimplementedVideoServiceHandler) ApproveScenes(context.Context, *connect.Request[v1.ApproveScenesRequest]) (*connect.Response[v1.ApproveScenesResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("app.studio.v1.VideoService.ApproveScenes is not implemented"))
 }

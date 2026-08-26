@@ -38,3 +38,8 @@ export const rejectScript = VideoService.method.rejectScript;
  * @generated from rpc app.studio.v1.VideoService.ListTakes
  */
 export const listTakes = VideoService.method.listTakes;
+
+/**
+ * @generated from rpc app.studio.v1.VideoService.ApproveScenes
+ */
+export const approveScenes = VideoService.method.approveScenes;

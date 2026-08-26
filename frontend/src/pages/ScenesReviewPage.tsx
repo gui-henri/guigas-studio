@@ -5,7 +5,12 @@ import { useQueryClient } from "@tanstack/react-query";
 
 import { VideoStatus } from "../gen/app/studio/v1/video_pb";
 
-import { getVideo, listTakes } from "../gen/app/studio/v1/video-VideoService_connectquery";
+import {
+  approveScenes,
+  getVideo,
+  listTakes,
+} from "../gen/app/studio/v1/video-VideoService_connectquery";
+import { useMutation } from "@connectrpc/connect-query";
 import {
   SegmentPreviewPlayer,
   type SpriteMeta,
@@ -268,14 +273,27 @@ export default function ScenesReviewPage() {
   const progress = reviewProgress(cards);
   const reviewing = status === VideoStatus.SCENES_REVIEW;
 
+  const approveScenesMutation = useMutation(approveScenes, {
+    onSuccess: () => {
+      setPrepared(true);
+      void queryClient.invalidateQueries({
+        predicate: (q) => String(q.queryKey[0]).includes("VideoService"),
+      });
+    },
+    onError: (err) => {
+      setPrepareError(err.message ?? "falha ao preparar render");
+    },
+  });
+
   const [prepared, setPrepared] = useState(false);
+  const [prepareError, setPrepareError] = useState<string | null>(null);
+
   function prepareRender() {
-    // S5-01 plugs the real enqueue + scenes_review → queued here.
-    if (!progress.isComplete) return;
-    setPrepared(true);
-    void queryClient.invalidateQueries({
-      predicate: (q) => String(q.queryKey[0]).includes("VideoService"),
-    });
+    // Re-validates preconditions at click time; server re-checks the state
+    // and enqueues exactly one render job inside a transaction (S5-01).
+    if (!progress.isComplete || !reviewing || prepared) return;
+    setPrepareError(null);
+    approveScenesMutation.mutate({ videoId: id });
   }
 
   if (videoQuery.isLoading) {
@@ -309,9 +327,19 @@ export default function ScenesReviewPage() {
           }
           className="rounded-md bg-ink px-4 py-2 text-sm font-medium text-paper disabled:opacity-40"
         >
-          {prepared ? "render preparado ✓" : "Aprovar tudo"}
+          {approveScenesMutation.isPending
+            ? "preparando…"
+            : prepared
+              ? "render preparado ✓"
+              : "Aprovar tudo"}
         </button>
       </header>
+
+      {prepareError ? (
+        <p className="rounded-lg border border-removed/50 bg-surface px-4 py-2 text-sm text-removed">
+          {prepareError}
+        </p>
+      ) : null}
 
       {!reviewing ? (
         <p className="rounded-lg border border-line bg-surface px-4 py-2 text-sm text-ink/70">

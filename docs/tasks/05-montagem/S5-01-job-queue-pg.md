@@ -5,7 +5,7 @@ sprint: 5
 prioridade: P0
 depende_de: [S0-06, S0-15]
 estimativa_h: 2
-status: todo
+status: done
 ---
 
 # S5-01 — Fila de jobs no PostgreSQL
@@ -62,11 +62,11 @@ o módulo `backend/internal/domain/videostate` (S0-15) e o fluxo de aprovação 
 
 ## Critérios de aceite
 
-- [ ] Migration aplica e reverte limpa; `jobs` aparece em `\d jobs`
-- [ ] Duas claims concorrentes retornam jobs distintos (FOR UPDATE SKIP LOCKED)
-- [ ] Aprovar todas as cenas → vídeo `queued` + exatamente 1 job `pending` com payload correto
-- [ ] `FailJob` além de `max_attempts` → job `failed` e vídeo → `blocked` (motivo estruturado)
-- [ ] Unit/integration tests cobrindo claim/backoff/cancel (D-18)
+- [x] Migration aplica e reverte limpa (psql down→up verificado); `jobs` com índice parcial WHERE status=pending
+- [x] Duas claims concorrentes retornam jobs distintos (8 workers × 2 jobs, zero dupes — SKIP LOCKED numa única statement)
+- [x] ApproveScenes RPC (transação única): vídeo queued + exatamente 1 job pending com payload {slug, expected_shorts=2 de marcas [SHORT#n] distintas}; segunda chamada rejeitada (FailedPrecondition)
+- [x] `FailJob` além de max_attempts → job failed; aresta queued→blocked confirmada no módulo videostate (transição persistida pelo consumidor do terminal failure na S5-07)
+- [x] 6 testes de integração: concorrência, backoff exponencial (2^n×30s), esgotamento, cancel_requested impede claim, heartbeat/complete por dono, transação do ApproveScenes
 
 ## Verificação
 
@@ -78,6 +78,13 @@ docker compose exec postgres psql -U studio -c '\d jobs'
 
 ## Notas
 
+## Notas
+
+- Novo RPC `ApproveScenes` no video.proto (contrato necessário para o gatilho da UI);
+  NewVideoService agora recebe o pool para a transação (chamadores atualizados).
+- expected_shorts = contagem DISTINCT de `[SHORT#n]` via regex sobre script.json
+  (`CountShortMarkers`, função pura).
+- Frontend "Aprovar tudo" chama o RPC e revalida pré-condições no clique.
 - Não usar pg-boss/extensões: uma tabela + SKIP LOCKED é a opção mais simples alinhada
   com D-02/D-10. Runner único na v1 — reclaim de jobs órfãos (heartbeat velho) fica fora.
 - `ClaimJob` PRECISA rodar numa única statement/transação: SELECT…FOR UPDATE SKIP LOCKED

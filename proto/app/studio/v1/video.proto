@@ -136,4 +136,13 @@ service VideoService {
   rpc ApproveScript(ApproveScriptRequest) returns (ApproveScriptResponse);
   rpc RejectScript(RejectScriptRequest) returns (RejectScriptResponse);
   rpc ListTakes(ListTakesRequest) returns (ListTakesResponse);
+  rpc ApproveScenes(ApproveScenesRequest) returns (ApproveScenesResponse);
+}
+
+message ApproveScenesRequest {
+  string video_id = 1;
+}
+
+message ApproveScenesResponse {
+  Video video = 1;
 }

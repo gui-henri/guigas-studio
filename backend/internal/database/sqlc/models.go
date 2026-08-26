@@ -11,6 +11,24 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type Job struct {
+	ID              uuid.UUID          `json:"id"`
+	VideoID         uuid.UUID          `json:"video_id"`
+	Type            string             `json:"type"`
+	Status          string             `json:"status"`
+	Attempts        int32              `json:"attempts"`
+	MaxAttempts     int32              `json:"max_attempts"`
+	RunAfter        time.Time          `json:"run_after"`
+	ClaimedBy       pgtype.Text        `json:"claimed_by"`
+	ClaimedAt       pgtype.Timestamptz `json:"claimed_at"`
+	HeartbeatAt     pgtype.Timestamptz `json:"heartbeat_at"`
+	Payload         []byte             `json:"payload"`
+	LastError       pgtype.Text        `json:"last_error"`
+	CancelRequested bool               `json:"cancel_requested"`
+	CreatedAt       time.Time          `json:"created_at"`
+	UpdatedAt       time.Time          `json:"updated_at"`
+}
+
 type RssItem struct {
 	Guid    string      `json:"guid"`
 	VideoID pgtype.UUID `json:"video_id"`

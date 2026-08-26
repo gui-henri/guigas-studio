@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -9,6 +10,7 @@ import (
 	"path/filepath"
 
 	"connectrpc.com/connect"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/google/uuid"
@@ -52,13 +54,22 @@ func statusToProto(status string) studiov1.VideoStatus {
 // flow (S1-04).
 type VideoService struct {
 	queries *sqlc.Queries
+	pool    *pgxpool.Pool // enables transactional multi-step mutations
 	dataDir string
 	hub     *events.Hub // optional; nil disables SSE publishing
+	jobs    *JobsQueue
 }
 
-// NewVideoService returns the Connect handler for VideoService.
-func NewVideoService(queries *sqlc.Queries, dataDir string, hub *events.Hub) studiov1connect.VideoServiceHandler {
-	return &VideoService{queries: queries, dataDir: dataDir, hub: hub}
+// NewVideoService returns the Connect handler for VideoService. The pool may
+// be nil in tests that never hit transactional paths (ApproveScenes).
+func NewVideoService(queries *sqlc.Queries, dataDir string, hub *events.Hub, pool *pgxpool.Pool) studiov1connect.VideoServiceHandler {
+	return &VideoService{
+		queries: queries,
+		pool:    pool,
+		dataDir: dataDir,
+		hub:     hub,
+		jobs:    NewJobsQueue(queries),
+	}
 }
 
 // publishStatusChanged emits video.status_changed to global + per-video topics.
@@ -341,6 +352,109 @@ func (s *VideoService) transitionAndRecord(ctx context.Context, video *sqlc.Vide
 	}
 	s.publishStatusChanged(video.ID.String(), video.Slug, string(from), string(to))
 	return nil
+}
+
+// ApproveScenes arms the render (S5-01): scenes_review → queued plus exactly
+// one pending render job, both inside a single transaction. Rejected unless
+// the video sits in scenes_review.
+func (s *VideoService) ApproveScenes(
+	ctx context.Context,
+	req *connect.Request[studiov1.ApproveScenesRequest],
+) (*connect.Response[studiov1.ApproveScenesResponse], error) {
+	if s.pool == nil {
+		return nil, connect.NewError(connect.CodeInternal, errors.New("service not configured for transactions"))
+	}
+	videoID, err := parseUUID(req.Msg.GetVideoId())
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("invalid video id"))
+	}
+	video, err := s.queries.GetVideo(ctx, videoID)
+	if err != nil {
+		if errors.Is(err, errNoRows) {
+			return nil, connect.NewError(connect.CodeNotFound, errors.New("video not found"))
+		}
+		slog.Error("approve scenes: load failed", "error", err)
+		return nil, connect.NewError(connect.CodeInternal, errors.New("failed to load video"))
+	}
+
+	from := videostate.State(video.Status)
+	if from != videostate.StateScenesReview {
+		return nil, connect.NewError(connect.CodeFailedPrecondition,
+			fmt.Errorf("video is %s; scenes approval requires scenes_review", from))
+	}
+
+	// Payload preconditions are validated BEFORE the transaction touches state.
+	scriptPath := filepath.Join(s.workspaceRoot(video.Slug), artifacts.ScriptFileName)
+	rawScript, readErr := os.ReadFile(scriptPath)
+	if readErr != nil {
+		return nil, connect.NewError(connect.CodeFailedPrecondition,
+			errors.New("script.json missing from workspace — cannot arm render"))
+	}
+	payload := JobPayload{
+		Slug:           video.Slug,
+		ExpectedShorts: CountShortMarkers(rawScript),
+	}
+
+	actor := auth.ActorFromContext(ctx)
+
+	tx, txErr := s.pool.Begin(ctx)
+	if txErr != nil {
+		slog.Error("approve scenes: begin failed", "error", txErr)
+		return nil, connect.NewError(connect.CodeInternal, errors.New("transaction failed"))
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+	txQueries := s.queries.WithTx(tx)
+
+	if err := videostate.Transition(from, videostate.StateQueued); err != nil {
+		return nil, connect.NewError(connect.CodeFailedPrecondition, err)
+	}
+	if err := txQueries.UpdateVideoStatus(ctx, sqlc.UpdateVideoStatusParams{
+		ID:     video.ID,
+		Status: string(videostate.StateQueued),
+	}); err != nil {
+		slog.Error("approve scenes: status update failed", "error", err)
+		return nil, connect.NewError(connect.CodeInternal, errors.New("failed to update status"))
+	}
+	if err := txQueries.InsertStatusChange(ctx, sqlc.InsertStatusChangeParams{
+		VideoID: video.ID,
+		Status:  string(videostate.StateQueued),
+		Reason:  "scenes approved",
+		Actor:   actor,
+	}); err != nil {
+		slog.Error("approve scenes: history insert failed", "error", err)
+	}
+	job, err := txQueries.EnqueueJob(ctx, sqlc.EnqueueJobParams{
+		VideoID: video.ID,
+		Type:    JobTypeRenderLongShorts,
+		Payload: mustJSON(payload),
+	})
+	if err != nil {
+		slog.Error("approve scenes: enqueue failed", "error", err)
+		return nil, connect.NewError(connect.CodeInternal, errors.New("failed to enqueue render job"))
+	}
+	if err := tx.Commit(ctx); err != nil {
+		slog.Error("approve scenes: commit failed", "error", err)
+		return nil, connect.NewError(connect.CodeInternal, errors.New("transaction failed"))
+	}
+
+	s.publishStatusChanged(video.ID.String(), video.Slug, string(from), string(videostate.StateQueued))
+	slog.Info("render queued",
+		"video_id", video.ID.String(), "job_id", job.ID.String(),
+		"expected_shorts", payload.ExpectedShorts)
+
+	updated, gErr := s.queries.GetVideo(ctx, video.ID)
+	if gErr != nil {
+		return nil, connect.NewError(connect.CodeInternal, errors.New("failed to reload video"))
+	}
+	return connect.NewResponse(&studiov1.ApproveScenesResponse{Video: videoToProto(&updated)}), nil
+}
+
+func mustJSON(v any) []byte {
+	raw, err := json.Marshal(v)
+	if err != nil {
+		panic(fmt.Sprintf("marshal job payload: %v", err))
+	}
+	return raw
 }
 
 // videoForReview loads a video by id; nil (with error already handled) when absent.

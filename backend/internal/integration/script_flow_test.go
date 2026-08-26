@@ -151,7 +151,7 @@ func TestScriptFlowEndToEnd(t *testing.T) {
 	}()
 
 	mux := new(http.ServeMux)
-	mux.Handle(studiov1connect.NewVideoServiceHandler(services.NewVideoService(db.Queries, dataDir, nil)))
+	mux.Handle(studiov1connect.NewVideoServiceHandler(services.NewVideoService(db.Queries, dataDir, nil, db.Pool)))
 	apiSrv := httptest.NewServer(mux)
 	defer apiSrv.Close()
 	videoSvc := studiov1connect.NewVideoServiceClient(apiSrv.Client(), apiSrv.URL)
