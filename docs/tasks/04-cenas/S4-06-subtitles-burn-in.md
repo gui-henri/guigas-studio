@@ -5,7 +5,7 @@ sprint: 4
 prioridade: P1
 depende_de: [S3-05, S4-01]
 estimativa_h: 2
-status: todo
+status: done
 ---
 
 # S4-06 — Componente de legenda EN burn-in
@@ -49,11 +49,11 @@ preview (S4-08) e no render final (S5-05).
 
 ## Critérios de aceite
 
-- [ ] Nenhum cue excede `maxLineChars` por linha nem 2 linhas
-- [ ] Frame limítrofe correto: cue visível em `startFrame`, ausente em `endFrame`
-- [ ] Word timing faltando para um trecho → cue descartado com warning, sem inventar tempo
-- [ ] Toggle desligado remove o componente da árvore (custo zero de render)
-- [ ] `buildCues` coberta por unit tests (D-18)
+- [x] Nenhum cue excede `maxLineChars` por linha nem 2 linhas (wrap greedy + balanceamento; overflow força novo cue, palavra nunca cortada)
+- [x] Frame limítrofe correto: visível em startFrame (inclusivo), ausente em endFrame (exclusivo) — testado
+- [x] Word timing faltando/inválido → palavra descartada com console.warn, sem inventar tempo
+- [x] Toggle desligado remove o componente da árvore (showSubtitles default OFF no compositor)
+- [x] `buildCues` coberta por unit tests: fala longa, gap de respiração, palavra única, overflow, timing inválido + fixture ponta a ponta (9 casos)
 
 ## Verificação
 
@@ -64,6 +64,12 @@ npm run test -w remotion-kit -- src/subtitles
 
 ## Notas
 
+## Notas
+
+- Cues calculados uma vez por mount (`useMemo`) no compositor; o frame só seleciona
+  qual cue mostrar via `selectCue`.
+- Fixture subtitles.json segue o contrato de cues da S3-05; SegmentComposition aceita
+  word timings (`subtitleWords`) e delega a quebra ao buildCues.
 - Opção mais simples registrada: cues calculados uma vez por segmento (memo por props),
   não por frame; o frame só seleciona qual cue mostrar.
 - Estilo de legenda segue tokens do blog mesmo sobre cenas técnicas — identidade única

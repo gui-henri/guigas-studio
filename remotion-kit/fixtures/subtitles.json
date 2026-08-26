@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "segment_id": "hook",
+  "cues": [
+    { "start_ms": 0, "end_ms": 1800, "text": "What if your blog post could edit itself into a video?" },
+    { "start_ms": 2100, "end_ms": 3400, "text": "That is the whole point of this studio." }
+  ]
+}

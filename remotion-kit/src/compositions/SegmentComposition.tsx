@@ -1,5 +1,5 @@
 import React from "react";
-import { AbsoluteFill, Audio, useCurrentFrame, useVideoConfig } from "remotion";
+import { AbsoluteFill, Audio, useVideoConfig } from "remotion";
 
 import { theme } from "../theme";
 import { AvatarSprite, type SpriteMeta } from "../AvatarSprite";
@@ -15,6 +15,11 @@ import {
   resolveSceneComponent,
 } from "./registry";
 import { selectLayout } from "./layout";
+import { Subtitles } from "../subtitles/Subtitles";
+import {
+  buildCues,
+  type SubtitleWord,
+} from "../subtitles/cues";
 
 const AVATAR_SPLIT_FRACTION = 0.4;
 
@@ -30,7 +35,8 @@ export interface SegmentCompositionProps {
   scene?: unknown;
   layout?: "fullscreen" | "split" | "overlay";
   showSubtitles?: boolean;
-  subtitleCues?: Array<{ startMs: number; endMs: number; text: string }>;
+  /** Word timings (S3-05 contract) — converted to frame cues once per mount. */
+  subtitleWords?: ReadonlyArray<SubtitleWord>;
   spriteSheetUrl: string;
   spriteMeta: SpriteMeta;
   avatarScale?: number;
@@ -84,15 +90,13 @@ export const SegmentComposition: React.FC<SegmentCompositionProps> = ({
   scene,
   layout,
   showSubtitles = false,
-  subtitleCues,
+  subtitleWords,
   spriteSheetUrl,
   spriteMeta,
   avatarScale = 1080,
   registry,
 }) => {
-  const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const ms = (frame * 1000) / fps;
 
   if (!avatarTimeline) {
     return <AbsoluteFill style={{ background: theme.color.paper }} />;
@@ -124,10 +128,13 @@ export const SegmentComposition: React.FC<SegmentCompositionProps> = ({
       })()
     : null;
 
-  const cue =
-    showSubtitles && subtitleCues
-      ? subtitleCues.find((c) => ms >= c.startMs && ms < c.endMs)
-      : undefined;
+  const cues = React.useMemo(
+    () =>
+      showSubtitles && subtitleWords && subtitleWords.length > 0
+        ? buildCues(subtitleWords, { fps })
+        : [],
+    [showSubtitles, subtitleWords, fps]
+  );
 
   const avatar = (
     <AvatarSprite
@@ -187,26 +194,7 @@ export const SegmentComposition: React.FC<SegmentCompositionProps> = ({
         </>
       )}
 
-      {cue ? (
-        <div
-          style={{
-            position: "absolute",
-            bottom: "4%",
-            left: 0,
-            right: 0,
-            textAlign: "center",
-            fontFamily: theme.font.sans,
-            fontSize: "2vw",
-            fontWeight: 600,
-            color: theme.color.ink,
-            textShadow:
-              "0 2px 8px rgba(246,241,231,0.9), 0 0 16px rgba(246,241,231,0.9)",
-            padding: "0 8%",
-          }}
-        >
-          {cue.text}
-        </div>
-      ) : null}
+      {showSubtitles ? <Subtitles cues={cues} /> : null}
     </AbsoluteFill>
   );
 };

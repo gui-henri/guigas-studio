@@ -96,6 +96,13 @@ export { BigNumber } from "./scenes/big-number/BigNumber";
 export { Timeline } from "./scenes/timeline/Timeline";
 export { SegmentComposition, type SegmentCompositionProps } from "./compositions/SegmentComposition";
 export { selectLayout, type SegmentLayout } from "./compositions/layout";
+export { Subtitles, type SubtitlesProps } from "./subtitles/Subtitles";
+export {
+  buildCues,
+  selectCue,
+  type SubtitleCue,
+  type SubtitleWord,
+} from "./subtitles/cues";
 export {
   createSceneResolver,
   defaultSceneRegistry,
