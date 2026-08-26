@@ -10,7 +10,7 @@ COPY frontend/package.json ./frontend/
 COPY remotion-kit/package.json ./remotion-kit/
 COPY runner/package.json ./runner/
 
-RUN npm ci --include=optional
+RUN npm install --no-audit
 
 # Copia código do frontend e pacotes dependentes
 COPY frontend/ ./frontend/
