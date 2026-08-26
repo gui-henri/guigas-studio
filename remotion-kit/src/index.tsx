@@ -71,3 +71,8 @@ registerRoot(Root);
 export { PlayerHost } from "./PlayerHost";
 export type { PlayerHostProps } from "./PlayerHost";
 export type { StudioVideoProps } from "./props";
+export { AvatarPreviewPlayer } from "./AvatarPreviewPlayer";
+export type { AvatarPreviewPlayerProps } from "./AvatarPreviewPlayer";
+export { AvatarSprite } from "./AvatarSprite";
+export type { SpriteMeta, AvatarSpriteProps } from "./AvatarSprite";
+export type { TimelineView, MouthCue } from "./selectors";

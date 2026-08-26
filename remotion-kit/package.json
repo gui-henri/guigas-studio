@@ -25,6 +25,8 @@
   "main": "src/index.tsx",
   "types": "src/index.tsx",
   "exports": {
-    ".": "./src/index.tsx"
+    ".": "./src/index.tsx",
+    "./assets/sprite.json": "./assets/sprite.json",
+    "./assets/sprite-placeholder.png": "./assets/sprite-placeholder.png"
   }
 }

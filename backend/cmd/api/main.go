@@ -58,6 +58,11 @@ func newHandler(cfg config.Config, db *database.DB, appHub *events.Hub) http.Han
 	takeUpload := upload.NewHandler(db.Queries, db.Pool, cfg.DataDir, func(raw string) (*auth.Claims, error) {
 		return auth.ParseToken(cfg.Auth.JWTSecret, raw)
 	})
+	artifactDownload := artifacts.NewDownloadHandler(db.Queries, cfg.DataDir, func(raw string) (*auth.Claims, error) {
+		return auth.ParseToken(cfg.Auth.JWTSecret, raw)
+	})
+	mux.Handle("GET /api/v1/videos/{videoID}/artifacts/{path...}", artifactDownload)
+
 	takeUpload.SetAfterUpsert(func(videoSlug string) {
 		go func() {
 			bgCtx := context.WithoutCancel(context.Background())

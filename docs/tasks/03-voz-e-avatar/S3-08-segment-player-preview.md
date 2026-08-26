@@ -5,7 +5,7 @@ sprint: 3
 prioridade: P0
 depende_de: ["S3-07"]
 estimativa_h: 2
-status: todo
+status: done
 ---
 
 # S3-08 — Preview por segmento no dashboard
@@ -49,11 +49,11 @@ checagem humana da voz antes de avançar às cenas — fecha o laço
 
 ## Critérios de aceite
 
-- [ ] Download sem Bearer falha 401; com Bearer streama o arquivo
-- [ ] Path traversal (`../`) e extensão fora da allowlist ⇒ 400/404
-- [ ] Preview toca áudio + avatar sincronizados; seek funciona
-- [ ] Lista reflete chegada de timelines via SSE em tempo real
-- [ ] Sem timeline, UI mostra estado vazio (não crash)
+- [x] Download sem Bearer falha 401; com Bearer streama o arquivo
+- [x] Path traversal e extensão fora da allowlist ⇒ rejeitados (unit do sanitizador + matriz HTTP; mux normaliza `..` a montante → 404)
+- [x] Preview toca áudio + avatar sincronizados (clock Remotion); seek via controles nativos do Player
+- [x] Lista reflete chegada de timelines em tempo real (SSE useStudioEvents + invalidação)
+- [x] Sem timeline, UI mostra estado vazio (2 testes de componente: vazio e com player mockado)
 
 ## Verificação
 
