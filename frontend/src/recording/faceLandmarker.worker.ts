@@ -125,7 +125,7 @@ self.onmessage = (ev: MessageEvent) => {
 
           // If actively recording, accumulate into synchronized batch
           if (t0 !== null) {
-            batch.push({ t, bs, names });
+            batch.push({ t: t - t0, bs, names });
             if (batch.length >= 32) flushBatch();
           }
         } else {

@@ -95,17 +95,24 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "invalid segment_id", http.StatusBadRequest)
 		return
 	}
-	ext, ok := kindExt[kind]
-	if !ok {
-		http.Error(w, "kind must be audio or blendshapes", http.StatusBadRequest)
-		return
-	}
 	if _, err := h.queries.GetVideoBySlug(r.Context(), videoSlug); err != nil {
 		http.Error(w, "unknown video", http.StatusNotFound)
 		return
 	}
 
 	audioDir := filepath.Join(h.dataDir, "videos", videoSlug, "audio")
+
+	if r.Method == http.MethodDelete {
+		h.deleteTake(w, r, videoSlug, segmentID, audioDir)
+		return
+	}
+
+	ext, ok := kindExt[kind]
+	if !ok {
+		http.Error(w, "kind must be audio or blendshapes", http.StatusBadRequest)
+		return
+	}
+
 	partialPath := filepath.Join(audioDir, partialDir, segmentID+"."+kind+".part")
 	finalPath := filepath.Join(audioDir, segmentID+ext)
 
@@ -115,9 +122,30 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPost:
 		h.receiveChunk(w, r, videoSlug, segmentID, kind, ext, audioDir, partialPath, finalPath)
 	default:
-		w.Header().Set("Allow", "GET, POST")
+		w.Header().Set("Allow", "GET, POST, DELETE")
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 	}
+}
+
+func (h *Handler) deleteTake(w http.ResponseWriter, r *http.Request, videoSlug, segmentID, audioDir string) {
+	ctx := r.Context()
+	if err := h.queries.DeleteTakesBySegment(ctx, sqlc.DeleteTakesBySegmentParams{
+		VideoSlug: videoSlug,
+		SegmentID: segmentID,
+	}); err != nil {
+		slog.Error("delete take failed", "error", err, "slug", videoSlug, "segment", segmentID)
+		http.Error(w, "failed to delete take", http.StatusInternalServerError)
+		return
+	}
+
+	// Remove physical files
+	_ = os.Remove(filepath.Join(audioDir, segmentID+".wav"))
+	_ = os.Remove(filepath.Join(audioDir, segmentID+".blendshapes.json"))
+	_ = os.Remove(filepath.Join(audioDir, partialDir, segmentID+".audio.part"))
+	_ = os.Remove(filepath.Join(audioDir, partialDir, segmentID+".blendshapes.part"))
+
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(map[string]any{"deleted": true})
 }
 
 func (h *Handler) probe(w http.ResponseWriter, _ *http.Request, partialPath string) {

@@ -204,7 +204,11 @@ export function useSegmentRecorder(
     landmarker.start(t0);
     try {
       captureRef.current = await startMicCapture({
-        onLevel: (lvl) => setAudioLevel(lvl),
+        onLevel: (dbfs) => {
+          // Normalize -60 dBFS .. 0 dBFS to 0.0 .. 1.0
+          const clamped = Math.max(0, Math.min(1, (dbfs + 60) / 60));
+          setAudioLevel(clamped);
+        },
       });
     } catch (err: unknown) {
       landmarker.stop();

@@ -20,6 +20,20 @@ func (q *Queries) CountTakesForVideo(ctx context.Context, videoSlug string) (int
 	return count, err
 }
 
+const deleteTakesBySegment = `-- name: DeleteTakesBySegment :exec
+DELETE FROM takes WHERE video_slug = $1 AND segment_id = $2
+`
+
+type DeleteTakesBySegmentParams struct {
+	VideoSlug string `json:"video_slug"`
+	SegmentID string `json:"segment_id"`
+}
+
+func (q *Queries) DeleteTakesBySegment(ctx context.Context, arg DeleteTakesBySegmentParams) error {
+	_, err := q.db.Exec(ctx, deleteTakesBySegment, arg.VideoSlug, arg.SegmentID)
+	return err
+}
+
 const listTakesByVideo = `-- name: ListTakesByVideo :many
 SELECT id, video_slug, segment_id, kind, rel_path, size_bytes, sha256, duration_ms, created_at FROM takes WHERE video_slug = $1 ORDER BY created_at ASC
 `

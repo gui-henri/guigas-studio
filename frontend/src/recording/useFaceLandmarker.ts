@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { VideoFrameCallbackMetadata } from "./types";
 
 export interface FaceLandmarkerState {
   delegate: "webgpu" | "cpu" | null;
@@ -37,13 +36,13 @@ export function useFaceLandmarker(
 ): FaceLandmarkerState {
   const workerRef = useRef<Worker | null>(null);
   const rafRef = useRef<number>(0);
-  const runningRef = useRef(false);
   const samplesRef = useRef(onSamples);
   const liveSampleRef = useRef(onLiveSample);
   const [delegate, setDelegate] = useState<"webgpu" | "cpu" | null>(null);
   const [fps, setFps] = useState(0);
   const [faceDetected, setFaceDetected] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     samplesRef.current = onSamples;
@@ -53,49 +52,7 @@ export function useFaceLandmarker(
     liveSampleRef.current = onLiveSample;
   }, [onLiveSample]);
 
-  const feedLoop = useCallback(() => {
-    const video = videoRef.current;
-    const worker = workerRef.current;
-    if (!video || !worker || !runningRef.current) return;
-
-    const send = (metadata?: VideoFrameCallbackMetadata) => {
-      void metadata;
-      if (!runningRef.current || !video.videoWidth || video.paused || video.ended) {
-        if (runningRef.current) {
-          rafRef.current = requestAnimationFrame(() => send());
-        }
-        return;
-      }
-      const bitmap = createImageBitmap(video);
-      bitmap
-        .then((bm) => {
-          if (!runningRef.current) {
-            bm.close();
-            return;
-          }
-          worker.postMessage(
-            { type: "frame", bitmap: bm, t: performance.now() },
-            [bm]
-          );
-        })
-        .catch(() => {});
-
-      if ("requestVideoFrameCallback" in video) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (video as any).requestVideoFrameCallback(send);
-      } else {
-        rafRef.current = requestAnimationFrame(() => send());
-      }
-    };
-
-    if ("requestVideoFrameCallback" in video) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (video as any).requestVideoFrameCallback(send);
-    } else {
-      rafRef.current = requestAnimationFrame(() => send());
-    }
-  }, [videoRef]);
-
+  // Worker initialization
   useEffect(() => {
     if (!enabled) return;
     const worker = new Worker(
@@ -109,8 +66,7 @@ export function useFaceLandmarker(
       switch (msg.type) {
         case "ready":
           setDelegate(msg.delegate);
-          runningRef.current = true;
-          feedLoop();
+          setReady(true);
           break;
         case "samples":
           samplesRef.current?.(msg.batch);
@@ -130,23 +86,63 @@ export function useFaceLandmarker(
     worker.postMessage({ type: "init" });
 
     return () => {
-      cancelAnimationFrame(rafRef.current);
-      runningRef.current = false;
+      setReady(false);
       worker.terminate();
       workerRef.current = null;
     };
-  }, [enabled, feedLoop]);
+  }, [enabled]);
 
-  const start = useCallback(
-    (t0: number) => {
-      workerRef.current?.postMessage({ type: "start", t0 });
-      if (!runningRef.current) {
-        runningRef.current = true;
-        feedLoop();
+  // Continuous frame pumping loop (runs whenever worker is ready and video is playing)
+  useEffect(() => {
+    if (!ready || !enabled) return;
+    let cancelled = false;
+    let inFlight = false;
+
+    const pump = () => {
+      if (cancelled) return;
+      const video = videoRef.current;
+      const worker = workerRef.current;
+
+      if (
+        video &&
+        worker &&
+        !video.paused &&
+        !video.ended &&
+        video.readyState >= 2 &&
+        video.videoWidth > 0 &&
+        !inFlight
+      ) {
+        inFlight = true;
+        createImageBitmap(video)
+          .then((bm) => {
+            if (cancelled) {
+              bm.close();
+              return;
+            }
+            worker.postMessage(
+              { type: "frame", bitmap: bm, t: performance.now() },
+              [bm]
+            );
+          })
+          .catch(() => {})
+          .finally(() => {
+            inFlight = false;
+          });
       }
-    },
-    [feedLoop]
-  );
+      rafRef.current = requestAnimationFrame(pump);
+    };
+
+    rafRef.current = requestAnimationFrame(pump);
+
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(rafRef.current);
+    };
+  }, [ready, enabled, videoRef]);
+
+  const start = useCallback((t0: number) => {
+    workerRef.current?.postMessage({ type: "start", t0 });
+  }, []);
 
   const stop = useCallback(() => {
     workerRef.current?.postMessage({ type: "stop" });

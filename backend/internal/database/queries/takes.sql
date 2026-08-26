@@ -14,3 +14,6 @@ SELECT * FROM takes WHERE video_slug = $1 ORDER BY created_at ASC;
 
 -- name: CountTakesForVideo :one
 SELECT count(*) FROM takes WHERE video_slug = $1;
+
+-- name: DeleteTakesBySegment :exec
+DELETE FROM takes WHERE video_slug = $1 AND segment_id = $2;

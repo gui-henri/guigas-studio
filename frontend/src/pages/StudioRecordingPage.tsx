@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { useQuery } from "@connectrpc/connect-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { VideoStatus } from "../gen/app/studio/v1/video_pb";
 
 import {
@@ -11,6 +12,7 @@ import LiveAvatar from "../components/LiveAvatar";
 import Teleprompter from "../features/studio/Teleprompter";
 import { useSegmentRecorder } from "../features/studio/useSegmentRecorder";
 import { presentStatus, statusGroupClasses } from "../lib/videoStatus";
+import { deleteTake } from "../lib/uploadClient";
 
 const isRecordable = (s: VideoStatus | undefined): s is VideoStatus =>
   s === VideoStatus.SCRIPT_APPROVED || s === VideoStatus.RECORDING;
@@ -91,6 +93,31 @@ export default function StudioRecordingPage() {
     currentIndex >= 0 && currentIndex < segments.length - 1
       ? segments[currentIndex + 1]
       : null;
+
+  const queryClient = useQueryClient();
+  const [deletingTake, setDeletingTake] = useState(false);
+
+  const handleDiscardTake = async () => {
+    if (!activeSegment) return;
+    if (
+      !window.confirm(
+        `Deseja realmente descartar a gravação do segmento "${activeSegment}"?`
+      )
+    )
+      return;
+    setDeletingTake(true);
+    try {
+      await deleteTake(slug, activeSegment);
+      await queryClient.invalidateQueries({
+        predicate: (q) => String(q.queryKey[0]).includes("VideoService"),
+      });
+      setConfirmRedo(null);
+    } catch (err: unknown) {
+      alert(`Falha ao descartar: ${String((err as Error).message ?? err)}`);
+    } finally {
+      setDeletingTake(false);
+    }
+  };
 
   const toggleRecording = useCallback(() => {
     if (recorder.phase === "recording") {
@@ -333,16 +360,13 @@ export default function StudioRecordingPage() {
                 <div
                   className="h-full rounded-full transition-all duration-75"
                   style={{
-                    width: `${Math.min(
-                      100,
-                      Math.round(recorder.audioLevel * 250)
-                    )}%`,
+                    width: `${Math.round(recorder.audioLevel * 100)}%`,
                     backgroundColor:
-                      recorder.audioLevel > 0.7
+                      recorder.audioLevel > 0.85
                         ? "#ef4444"
-                        : recorder.audioLevel > 0.4
-                        ? "#eab308"
-                        : "#22c55e",
+                        : recorder.audioLevel > 0.6
+                        ? "#22c55e"
+                        : "#94a3b8",
                   }}
                 />
               </div>
@@ -426,18 +450,29 @@ export default function StudioRecordingPage() {
               </span>
             </div>
 
-            {/* Replay do Take Gravado & Próximo Segmento */}
-            <div className="flex items-center gap-3">
+            {/* Replay do Take Gravado, Descartar & Próximo Segmento */}
+            <div className="flex flex-wrap items-center gap-3">
+              {recorded.get(activeSegment)?.audio && recorder.phase !== "recording" && (
+                <button
+                  type="button"
+                  disabled={deletingTake || recorder.phase === "uploading"}
+                  onClick={handleDiscardTake}
+                  className="flex items-center gap-1.5 rounded-xl border border-red-200 bg-red-50 px-3.5 py-2.5 text-xs font-semibold text-red-700 hover:bg-red-100 disabled:opacity-40 transition shadow-xs"
+                >
+                  {deletingTake ? "Descartando…" : "🗑️ Descartar Gravação"}
+                </button>
+              )}
+
               {recorder.lastSavedAudioUrl &&
                 recorder.phase !== "recording" && (
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-neutral-500 font-medium">
-                      Ouvir take:
+                      Ouvir:
                     </span>
                     <audio
                       controls
                       src={recorder.lastSavedAudioUrl}
-                      className="h-8 max-w-[200px]"
+                      className="h-8 max-w-[180px]"
                     />
                   </div>
                 )}
@@ -449,7 +484,7 @@ export default function StudioRecordingPage() {
                   onClick={() => setActiveSegment(nextSegment.id)}
                   className="rounded-xl border border-neutral-300 bg-white px-4 py-2.5 text-xs font-semibold text-neutral-800 shadow-sm hover:bg-neutral-50 disabled:opacity-40"
                 >
-                  Próximo Segmento ({nextSegment.id}) →
+                  Próximo ({nextSegment.id}) →
                 </button>
               )}
             </div>
