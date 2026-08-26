@@ -128,6 +128,8 @@ export function smoothStates(
 export interface BlendshapesFile {
   version: 1;
   approx_fps: number;
+  /** Model category names for the positional scores (S3-04 decodes them). */
+  names?: string[];
   samples: [number, ...number[]][];
   state_changes: [number, SpriteState][];
 }
@@ -138,7 +140,8 @@ function round3(v: number): number {
 
 export function serializeBlendshapes(
   samples: BlendshapeSample[],
-  th: StateThresholds = DEFAULT_THRESHOLDS
+  th: StateThresholds = DEFAULT_THRESHOLDS,
+  names?: string[]
 ): BlendshapesFile {
   const rounded = samples.map(
     (s) => [Math.round(s.t), ...s.bs.map(round3)] as [number, ...number[]]
@@ -166,6 +169,7 @@ export function serializeBlendshapes(
   return {
     version: 1,
     approx_fps: approxFps,
+    ...(names && names.length > 0 ? { names } : {}),
     samples: rounded,
     state_changes: smoothed.map((s) => [s.t, s.state] as [number, SpriteState]),
   };

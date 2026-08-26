@@ -9,9 +9,15 @@ export interface FaceLandmarkerState {
   stop: () => void;
 }
 
+export interface BlendshapeBatchItem {
+  t: number;
+  bs: number[];
+  names?: string[];
+}
+
 type WorkerOut =
   | { type: "ready"; delegate: "webgpu" | "cpu" }
-  | { type: "samples"; batch: { t: number; bs: number[] }[] }
+  | { type: "samples"; batch: BlendshapeBatchItem[] }
   | { type: "stats"; fps: number }
   | { type: "error"; message: string };
 
@@ -23,7 +29,7 @@ type WorkerOut =
  */
 export function useFaceLandmarker(
   videoRef: React.RefObject<HTMLVideoElement | null>,
-  onSamples?: (batch: { t: number; bs: number[] }[]) => void,
+  onSamples?: (batch: BlendshapeBatchItem[]) => void,
   enabled = true
 ): FaceLandmarkerState {
   const workerRef = useRef<Worker | null>(null);

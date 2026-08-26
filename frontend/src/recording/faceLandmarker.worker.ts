@@ -60,7 +60,7 @@ async function init(): Promise<"webgpu" | "cpu"> {
 
 let lastTimestamp = -1;
 let t0: number | null = null;
-let batch: { t: number; bs: number[] }[] = [];
+let batch: { t: number; bs: number[]; names?: string[] }[] = [];
 let inferred = 0;
 let lastStatsAt = 0;
 
@@ -114,8 +114,12 @@ self.onmessage = (ev: MessageEvent) => {
         const categories = result.faceBlendshapes?.[0]?.categories;
         if (categories) {
           const bs = new Array<number>(categories.length);
-          for (let i = 0; i < categories.length; i++) bs[i] = categories[i].score;
-          batch.push({ t, bs });
+          const names = new Array<string>(categories.length);
+          for (let i = 0; i < categories.length; i++) {
+            bs[i] = categories[i].score;
+            names[i] = categories[i].categoryName ?? "";
+          }
+          batch.push({ t, bs, names });
 
           const now = performance.now();
           if (now - lastStatsAt >= STATS_INTERVAL_MS) {

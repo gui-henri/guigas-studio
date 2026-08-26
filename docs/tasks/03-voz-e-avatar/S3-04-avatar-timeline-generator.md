@@ -5,7 +5,7 @@ sprint: 3
 prioridade: P0
 depende_de: ["S3-02", "S3-03"]
 estimativa_h: 2
-status: todo
+status: done
 ---
 
 # S3-04 — Gerador `avatar.timeline.json`
@@ -56,11 +56,11 @@ transição `voice_processing → scenes_pending` (gatilho canônico do ROADMAP)
 
 ## Critérios de aceite
 
-- [ ] Timeline por segmento válida por round-trip protojson antes de persistir
-- [ ] Paridade Go↔TS do mapeamento de estados provada por fixtures compartilhadas
-- [ ] `scenes_pending` dispara exatamente uma vez, com todos os segmentos prontos
-- [ ] Falha parcial ⇒ vídeo `blocked` com motivo estruturado (não falha silenciosa)
-- [ ] Golden tests cobrindo merge, silêncio→X e idempotência
+- [x] Timeline por segmento válida por round-trip protojson antes de persistir
+- [x] Paridade Go↔TS do mapeamento de estados provada por fixtures compartilhadas (state_parity.json consumido pelos dois suites)
+- [x] `scenes_pending` dispara exatamente uma vez, com todos os segmentos prontos (teste taggeado)
+- [x] Falha parcial ⇒ vídeo `blocked` com motivo estruturado no histórico
+- [x] Testes cobrindo merge, silêncio→X (leading/mid/trailing), golden shape, idempotência e falha parcial
 
 ## Verificação
 
@@ -71,7 +71,14 @@ cd backend && buf lint ../proto && go test ./internal/avatar/... -v
 
 ## Notas
 
-- `protojson` serializa camelCase por padrão: esse É o formato em disco/consumido pelo
+- **Escolha registrada**: o arquivo `.blendshapes.json` ganhou campo `names[]` (nomes de
+  categoria do modelo, capturados pelo worker da S2-02). Decodificação posicional em Go
+  sem os nomes reais exigiria adivinhar a ordem do MediaPipe — o contrato explícito elimina
+  o risco; arquivos antigos sem `names` são rejeitados com instrução de regravar.
+- protojson omite escalares zero (presença implícita do proto3) e não garante espaçamento
+  estável — golden test compara árvore JSON parseada, não string.
+- Este serviço orquestra e mescla; não recomputa visemes nem timings — cada fonte tem
+  dono (S3-02/S3-03). Depurar o pipeline fica ordens de magnitude mais fácil assim.- `protojson` serializa camelCase por padrão: esse É o formato em disco/consumido pelo
   Remotion; fixe as opções explicitamente para evitar surpresa entre Go/TS.
 - Este serviço orquestra e mescla; não recomputa visemes nem timings — cada fonte tem
   dono (S3-02/S3-03). Depurar o pipeline fica ordens de magnitude mais fácil assim.

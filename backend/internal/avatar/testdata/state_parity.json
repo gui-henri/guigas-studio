@@ -1,0 +1,20 @@
+{
+  "comment": "Shared Go<->TS parity fixture for the blendshape->state mapping (S3-04). Both suites must produce identical states for these named vectors.",
+  "thresholds": {
+    "talkJawOpen": 0.25,
+    "smile": 0.35,
+    "surpriseBrow": 0.45,
+    "thoughtfulBrowDown": 0.3,
+    "gazeDown": 0.3
+  },
+  "cases": [
+    { "name": "neutral", "values": {}, "expected": "idle" },
+    { "name": "jaw_open", "values": { "jawOpen": 0.8 }, "expected": "talking" },
+    { "name": "smile_with_jaw", "values": { "mouthSmileLeft": 0.7, "mouthSmileRight": 0.6, "jawOpen": 0.3 }, "expected": "happy" },
+    { "name": "brows_up", "values": { "browInnerUp": 0.9, "jawOpen": 0.1 }, "expected": "surprised" },
+    { "name": "brows_down", "values": { "browDownLeft": 0.7, "browDownRight": 0.6 }, "expected": "thoughtful" },
+    { "name": "gaze_down", "values": { "eyeLookDownLeft": 0.8, "eyeLookDownRight": 0.8 }, "expected": "thoughtful" },
+    { "name": "precedence_surprise_wins", "values": { "browInnerUp": 0.9, "jawOpen": 0.8, "mouthSmileLeft": 0.7 }, "expected": "surprised" },
+    { "name": "precedence_happy_over_talk", "values": { "jawOpen": 0.8, "mouthSmileLeft": 0.5 }, "expected": "happy" }
+  ]
+}

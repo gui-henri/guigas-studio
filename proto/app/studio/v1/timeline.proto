@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package app.studio.v1;
+
+option go_package = "github.com/gui-henri/guigas-studio/backend/gen/app/studio/v1;studiov1";
+
+// One mouth shape cue (Rhubarb vocabulary A–H plus X=silence).
+message TimelineMouthCue {
+  string shape = 1;
+  int64 start_ms = 2;
+  int64 end_ms = 3;
+}
+
+// One body/expression state window (delta-encoded, not per frame).
+message TimelineBodyState {
+  string state = 1; // idle | talking | happy | thoughtful | surprised
+  int64 start_ms = 2;
+  int64 end_ms = 3;
+}
+
+// One narration word timing projected by the alignment (S3-02).
+message TimelineWordTiming {
+  string word = 1;
+  int64 start_ms = 2;
+  int64 end_ms = 3;
+}
+
+// AvatarTimeline is the per-segment render metadata written to
+// timelines/<segment-id>.timeline.json (S3-04).
+message AvatarTimeline {
+  int32 version = 1;
+  string segment_id = 2;
+  int64 duration_ms = 3;
+  repeated TimelineMouthCue mouth_cues = 4;
+  repeated TimelineBodyState body_states = 5;
+  repeated TimelineWordTiming word_timings = 6;
+}
