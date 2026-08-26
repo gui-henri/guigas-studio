@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { useQuery } from "@connectrpc/connect-query";
 import { VideoStatus } from "../gen/app/studio/v1/video_pb";
@@ -45,7 +45,49 @@ export default function StudioRecordingPage() {
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const [cameraReady, setCameraReady] = useState(false);
+  const [cameraError, setCameraError] = useState<string | null>(null);
+
   const recorder = useSegmentRecorder(slug, activeSegment ?? "", videoRef, streamRef);
+
+  useEffect(() => {
+    let cancelled = false;
+    navigator.mediaDevices
+      ?.getUserMedia({
+        video: { width: { ideal: 640 }, height: { ideal: 480 }, frameRate: { ideal: 30 } },
+        audio: false,
+      })
+      .then((stream) => {
+        if (cancelled) {
+          stream.getTracks().forEach((t) => t.stop());
+          return;
+        }
+        streamRef.current = stream;
+        setCameraReady(true);
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          void videoRef.current.play().catch(() => {});
+        }
+      })
+      .catch((err) => {
+        console.warn("Failed to get webcam stream:", err);
+        setCameraError("Webcam não detectada ou permissão negada.");
+        setCameraReady(false);
+      });
+
+    return () => {
+      cancelled = true;
+      streamRef.current?.getTracks().forEach((t) => t.stop());
+      streamRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (activeSegment && videoRef.current && streamRef.current) {
+      videoRef.current.srcObject = streamRef.current;
+      void videoRef.current.play().catch(() => {});
+    }
+  }, [activeSegment]);
 
   const script = videoQuery.data?.script;
   const segments = script?.segments ?? [];
@@ -150,6 +192,12 @@ export default function StudioRecordingPage() {
         })}
       </ul>
 
+      {cameraError && (
+        <div className="rounded border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
+          ⚠️ {cameraError}
+        </div>
+      )}
+
       {activeSegment && (
         <section className="space-y-4 rounded-lg border border-ink/10 bg-white/70 p-5">
           <div className="flex items-center justify-between">
@@ -166,7 +214,19 @@ export default function StudioRecordingPage() {
 
           <div className="flex items-start gap-4">
             <LiveAvatar stateRef={recorder.stateRef} scale={240} />
-            <video ref={videoRef} muted playsInline className="w-40 rounded border border-ink/10" />
+            <div className="flex flex-col gap-1.5">
+              <video
+                ref={videoRef}
+                muted
+                playsInline
+                autoPlay
+                className="w-48 rounded-lg border border-ink/15 bg-black/5 aspect-video object-cover"
+              />
+              <div className="text-[11px] text-ink/60 flex items-center justify-between">
+                <span>{cameraReady ? "🟢 Câmera ativa" : "🟡 Sem vídeo"}</span>
+                {recorder.fps > 0 && <span>{recorder.fps} fps ({recorder.delegate})</span>}
+              </div>
+            </div>
           </div>
 
           <Teleprompter
