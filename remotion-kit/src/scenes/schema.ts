@@ -48,10 +48,14 @@ export const terminalRunPropsSchema = z
   })
   .strict();
 
+export type FlowNodeInput = z.infer<typeof flowDiagramNodeSchema>;
+export type FlowEdgeInput = z.infer<typeof flowDiagramEdgeSchema>;
+
 export const flowDiagramNodeSchema = z
   .object({
     id: z.string().min(1),
     label: z.string().min(1),
+    col: z.number().int().nonnegative().default(0),
   })
   .strict();
 
@@ -68,6 +72,33 @@ export const flowDiagramPropsSchema = z
     edges: z.array(flowDiagramEdgeSchema).default([]),
   })
   .strict();
+
+/**
+ * Cross-field rule kept outside the Zod object because discriminatedUnion
+ * members must be plain objects (JSON Schema generation depends on it).
+ * Returns issues for edges referencing unknown node ids.
+ */
+export function flowEdgeIssues(
+  nodes: ReadonlyArray<{ id: string }>,
+  edges: ReadonlyArray<{ from: string; to: string }>
+): SceneParseIssue[] {
+  const ids = new Set(nodes.map((n) => n.id));
+  const issues: SceneParseIssue[] = [];
+  edges.forEach((edge, i) => {
+    for (const [field, ref] of [
+      ["from", edge.from],
+      ["to", edge.to],
+    ] as const) {
+      if (!ids.has(ref)) {
+        issues.push({
+          path: `edges[${i}].${field}`,
+          message: `references unknown node "${ref}" — see docs/guides/scene-catalog.md`,
+        });
+      }
+    }
+  });
+  return issues;
+}
 
 export const bigNumberPropsSchema = z
   .object({
@@ -106,7 +137,10 @@ export const calloutPropsSchema = z
   })
   .strict();
 
-function envelope<P extends z.ZodRawShape>(type: string, props: z.ZodObject<P>) {
+function envelope<T extends SceneType, P extends z.ZodRawShape>(
+  type: T,
+  props: z.ZodObject<P>
+) {
   return z
     .object({
       type: z.literal(type),
@@ -230,8 +264,15 @@ function formatIssues(error: z.ZodError): SceneParseIssue[] {
  */
 export function parseScene(raw: unknown): ParseSceneResult {
   const result = sceneSchema.safeParse(raw);
-  if (result.success) {
-    return { ok: true, scene: result.data };
+  if (!result.success) {
+    return { ok: false, issues: formatIssues(result.error) };
   }
-  return { ok: false, issues: formatIssues(result.error) };
+  const scene = result.data;
+  if (scene.type === "flow_diagram") {
+    const edgeIssues = flowEdgeIssues(scene.props.nodes, scene.props.edges);
+    if (edgeIssues.length > 0) {
+      return { ok: false, issues: edgeIssues };
+    }
+  }
+  return { ok: true, scene };
 }

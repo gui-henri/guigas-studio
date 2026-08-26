@@ -2,13 +2,15 @@
   "type": "flow_diagram",
   "props": {
     "nodes": [
-      { "id": "post", "label": "Post" },
-      { "id": "script", "label": "Roteiro" },
-      { "id": "video", "label": "Vídeo" }
+      { "id": "post", "label": "Post", "col": 0 },
+      { "id": "script", "label": "Roteiro", "col": 1 },
+      { "id": "audio", "label": "Áudio", "col": 2 },
+      { "id": "video", "label": "Vídeo", "col": 3 }
     ],
     "edges": [
       { "from": "post", "to": "script" },
-      { "from": "script", "to": "video" }
+      { "from": "script", "to": "audio" },
+      { "from": "audio", "to": "video" }
     ]
   }
 }

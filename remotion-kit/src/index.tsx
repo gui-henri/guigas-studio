@@ -91,6 +91,9 @@ export { CodeTyping } from "./scenes/code-typing/CodeTyping";
 export { DiffView } from "./scenes/diff-view/DiffView";
 export { TerminalRun } from "./scenes/terminal-run/TerminalRun";
 export { Callout } from "./scenes/callout/Callout";
+export { FlowDiagram } from "./scenes/flow-diagram/FlowDiagram";
+export { BigNumber } from "./scenes/big-number/BigNumber";
+export { Timeline } from "./scenes/timeline/Timeline";
 export {
   parseScene,
   sceneSchema,
@@ -106,5 +109,7 @@ export {
   type TimelineScene,
   type CalloutScene,
   type TerminalLine,
+  type FlowNodeInput,
+  type FlowEdgeInput,
 } from "./scenes/schema";
 export { theme } from "./theme";

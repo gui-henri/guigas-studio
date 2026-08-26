@@ -89,16 +89,18 @@ Diagrama de fluxo com nós e arestas animados na ordem declarada.
 
 | Prop | Tipo | Default | Descrição |
 | --- | --- | --- | --- |
-| `nodes` | `{id, label}[]` | — (obrigatória, ≥1) | Nós; `id` único referenciado pelas edges |
-| `edges` | `{from, to}[]` | `[]` | Arestas dirigidas entre ids |
+| `nodes` | `{id, label, col?}[]` | — (obrigatória, ≥1) | Nós em grade de colunas fixas (`col` default 0) |
+| `edges` | `{from, to}[]` | `[]` | Arestas dirigidas entre ids existentes |
+
+Aresta referenciando id inexistente = erro apontando este catálogo.
 
 ```json
 {
   "type": "flow_diagram",
   "props": {
     "nodes": [
-      { "id": "a", "label": "Post" },
-      { "id": "b", "label": "Vídeo" }
+      { "id": "a", "label": "Post", "col": 0 },
+      { "id": "b", "label": "Vídeo", "col": 1 }
     ],
     "edges": [{ "from": "a", "to": "b" }]
   }

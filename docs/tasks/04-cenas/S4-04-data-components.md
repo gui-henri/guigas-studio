@@ -5,7 +5,7 @@ sprint: 4
 prioridade: P1
 depende_de: [S4-01]
 estimativa_h: 2
-status: todo
+status: done
 ---
 
 # S4-04 — Componentes FlowDiagram, BigNumber e Timeline
@@ -49,11 +49,11 @@ render final.
 
 ## Critérios de aceite
 
-- [ ] Layout do FlowDiagram é função pura declarada nos props (sem medição de DOM/refs)
-- [ ] Aresta órfã (id inexistente) falha na validação com mensagem apontando o catálogo
-- [ ] Count-up e stagger são determinísticos por frame (scrub correto no Player)
-- [ ] Funções puras testadas; fixtures validam contra `sceneSchema` (D-18)
-- [ ] Nenhum hex literal fora de `theme.ts`
+- [x] Layout do FlowDiagram é função pura declarada nos props (layoutColumns testada: grade por col, colunas esparsas centradas)
+- [x] Aresta órfã (id inexistente) falha na validação com mensagem apontando o catálogo
+- [x] Count-up e stagger são determinísticos por frame (interpolate/staggerFrames puros; formatador Intl no nível do módulo)
+- [x] Funções puras testadas (10 casos novos); fixtures validam contra `sceneSchema` (D-18)
+- [x] Nenhum hex literal fora de `theme.ts`
 
 ## Verificação
 
@@ -64,6 +64,13 @@ npm run test -w remotion-kit -- src/scenes/flow-diagram src/scenes/big-number sr
 
 ## Notas
 
+## Notas
+
+- Schema ampliado no mesmo commit: `nodes[].col` (int ≥0, default 0) para a grade fixa;
+  validação de aresta órfã implementada como pós-checagem em parseScene
+  (`flowEdgeIssues`) porque discriminatedUnion exige ZodObject puro — JSON Schema não
+  expressa cross-ref; o observador Go (S4-07) replicará a checagem.
+- `splitNumericPrefix` deixa BigNumber contar só a parte numérica ("10x", "$1,234.56/mo").
 - Opção mais simples registrada: grade por colunas explícita no prop `nodes[].col`.
   Auto-layout por dependências é backlog (kit estendido, SPEC §8 #5).
 - Formatação numérica com `Intl.NumberFormat("en-US")` criado uma vez (módulo) — criar
