@@ -16,6 +16,7 @@ type Querier interface {
 	// inside the UPDATE subquery is what makes concurrent claims safe (D-02).
 	ClaimJob(ctx context.Context, claimedBy pgtype.Text) (Job, error)
 	CompleteJob(ctx context.Context, arg CompleteJobParams) (Job, error)
+	CountReleaseChecklistOpen(ctx context.Context, videoID uuid.UUID) (int64, error)
 	CountRssItems(ctx context.Context) (int64, error)
 	CountTakesForVideo(ctx context.Context, videoSlug string) (int64, error)
 	CreateUserIfNotExists(ctx context.Context, arg CreateUserIfNotExistsParams) (int64, error)
@@ -38,6 +39,7 @@ type Querier interface {
 	InsertStatusChange(ctx context.Context, arg InsertStatusChangeParams) error
 	ListJobsByVideo(ctx context.Context, videoID uuid.UUID) ([]Job, error)
 	ListParsesByVideo(ctx context.Context, videoID uuid.UUID) ([]VideoArtifactParse, error)
+	ListReleaseChecklist(ctx context.Context, videoID uuid.UUID) ([]ReleaseChecklist, error)
 	ListRenderArtifacts(ctx context.Context, videoID uuid.UUID) ([]RenderArtifact, error)
 	ListStatusHistoryByVideo(ctx context.Context, videoID uuid.UUID) ([]VideoStatusHistory, error)
 	ListTakesByVideo(ctx context.Context, videoSlug string) ([]Take, error)
@@ -48,7 +50,9 @@ type Querier interface {
 	// Release a claim when the follow-up transition fails (S5-02 note: never
 	// leave a claimed job without an owner).
 	ResetJobToPending(ctx context.Context, id uuid.UUID) error
+	SeedReleaseChecklistItem(ctx context.Context, arg SeedReleaseChecklistItemParams) error
 	SetOriginalScript(ctx context.Context, arg SetOriginalScriptParams) (int64, error)
+	SetReleaseChecklistDone(ctx context.Context, arg SetReleaseChecklistDoneParams) (ReleaseChecklist, error)
 	SetRssItemVideo(ctx context.Context, arg SetRssItemVideoParams) error
 	UpdateJobProgress(ctx context.Context, arg UpdateJobProgressParams) (Job, error)
 	UpdateVideoStatus(ctx context.Context, arg UpdateVideoStatusParams) error

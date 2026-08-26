@@ -18,6 +18,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -703,4 +704,135 @@ func TestJobServiceFinalizeArtifactsTransition(t *testing.T) {
 	if v2.Status == "final_review" {
 		t.Fatal("tampered artifact must NOT reach final_review")
 	}
+}
+
+// ---- S5-09: release builder ----
+
+func TestReleaseBuilderBuildsCanonicalLayout(t *testing.T) {
+	ctx := context.Background()
+	pool, queries := setupJobsDB(t, ctx)
+	videoID := insertJobVideo(t, ctx, queries, "release-build")
+	walkToScenesReview(t, ctx, queries, videoID)
+	if err := queries.UpdateVideoStatus(ctx, sqlc.UpdateVideoStatusParams{ID: videoID, Status: "queued"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := queries.UpdateVideoStatus(ctx, sqlc.UpdateVideoStatusParams{ID: videoID, Status: "rendering"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := queries.UpdateVideoStatus(ctx, sqlc.UpdateVideoStatusParams{ID: videoID, Status: "final_review"}); err != nil {
+		t.Fatal(err)
+	}
+
+	dataDir := t.TempDir()
+	root := filepath.Join(dataDir, "videos", "release-build")
+	for _, d := range []string{"renders", "timelines"} {
+		if err := os.MkdirAll(filepath.Join(root, d), 0o755); err != nil {
+			t.Fatal(err)
+		}
+	}
+	longBytes := []byte("FAKE-MP4")
+	if err := os.WriteFile(filepath.Join(root, "renders", "long.mp4"), longBytes, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "renders", "short-1.mp4"), []byte("SHORT1"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	scriptJSON := `{
+  "post": "post-fixo",
+  "target": {"durationMin": 8},
+  "social": {
+    "x_thread": ["tweet um", "tweet dois"],
+    "linkedin": "texto linkedin",
+    "instagram_caption": "legenda insta"
+  },
+  "segments": [
+    {"id": "hook", "narration_pt": "Gancho [SHORT#1]."},
+    {"id": "body", "narration_pt": "Corpo."}
+  ]
+}`
+	if err := os.WriteFile(filepath.Join(root, "script.json"), []byte(scriptJSON), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	os.WriteFile(filepath.Join(root, "timelines", "hook.subtitles.en.json"),
+		[]byte(`{"version":1,"segment_id":"hook","cues":[{"start_ms":0,"end_ms":1500,"text":"Hook line"}]}`), 0o644)
+
+	// Fake ffmpeg on PATH: writes a fixed JPEG regardless of args.
+	fakeBin := t.TempDir()
+	ffmpeg := filepath.Join(fakeBin, "ffmpeg")
+	if err := os.WriteFile(ffmpeg, []byte("#!/bin/sh\nprintf 'JPEGDATA' > \"$8\"\n"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("PATH", fakeBin+":"+os.Getenv("PATH"))
+
+	// Workspace git needs the binaries ignored like the real template.
+	gitignore := "# Binary artifacts never enter the workspace git (D-11)\naudio/\nrenders/\n*.wav\n*.mp4\n*.mkv\n*.webm\n.validation-latest.json\n"
+	os.WriteFile(filepath.Join(root, ".gitignore"), []byte(gitignore), 0o644)
+
+	builder := services.NewReleaseBuilder(queries, dataDir)
+	generated, err := builder.Build(ctx, videoID)
+	if err != nil {
+		t.Fatalf("build: %v", err)
+	}
+
+	mustExist := []string{
+		"releases/youtube/video.mp4",
+		"releases/youtube/thumbnail.jpg",
+		"releases/youtube/metadata.json",
+		"releases/youtube/video.srt",
+		"releases/shorts/short-1/video.mp4",
+		"releases/shorts/short-1/video.srt",
+		"releases/shorts/short-1/copy.json",
+		"releases/x/thread.md",
+		"releases/linkedin/post.md",
+		"releases/instagram/caption.txt",
+	}
+	for _, rel := range mustExist {
+		if _, err := os.Stat(filepath.Join(root, filepath.FromSlash(rel))); err != nil {
+			t.Errorf("missing %s", rel)
+		}
+	}
+	if len(generated) < len(mustExist) {
+		t.Fatalf("generated paths incomplete: %v", generated)
+	}
+
+	metaRaw, _ := os.ReadFile(filepath.Join(root, "releases", "youtube", "metadata.json"))
+	if !strings.Contains(string(metaRaw), "https://example.com/release-build") {
+		t.Fatalf("metadata lacks source post link: %s", metaRaw)
+	}
+
+	srt, _ := os.ReadFile(filepath.Join(root, "releases", "youtube", "video.srt"))
+	if !strings.Contains(string(srt), "00:00:01,500") || !strings.Contains(string(srt), "Hook line") {
+		t.Fatalf("long srt wrong: %s", srt)
+	}
+
+	thread, _ := os.ReadFile(filepath.Join(root, "releases", "x", "thread.md"))
+	if !strings.Contains(string(thread), "2/2\ntweet dois") {
+		t.Fatalf("thread format wrong: %q", thread)
+	}
+
+	// Checklist seeded for platforms + shorts.
+	items, _ := queries.ListReleaseChecklist(ctx, videoID)
+	platforms := map[string]bool{}
+	for _, it := range items {
+		platforms[it.Platform] = true
+	}
+	for _, want := range []string{"youtube", "x", "linkedin", "instagram", "short-1"} {
+		if !platforms[want] {
+			t.Fatalf("checklist missing platform %s: %v", want, platforms)
+		}
+	}
+
+	// Idempotency: second run succeeds.
+	if _, err := builder.Build(ctx, videoID); err != nil {
+		t.Fatalf("second build: %v", err)
+	}
+
+	// Git history carries the release commit (text artifacts only).
+	cmd := exec.Command("git", "-C", root, "log", "--oneline")
+	out, logErr := cmd.CombinedOutput()
+	if logErr != nil || !strings.Contains(string(out), "release(release-build)") {
+		t.Fatalf("workspace git missing release commit: %s (%v)", out, logErr)
+	}
+
+	_ = pool
 }

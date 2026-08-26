@@ -5,7 +5,7 @@ sprint: 5
 prioridade: P0
 depende_de: [S5-07]
 estimativa_h: 2
-status: todo
+status: done
 ---
 
 # S5-09 — Release builder
@@ -54,11 +54,11 @@ commitados no git do workspace pelo server (T-07). Estado permanece `final_revie
 
 ## Critérios de aceite
 
-- [ ] Aprovar o corte gera TODOS os diretórios/arquivos do layout canônico
-- [ ] Cada MP4 tem seu `.srt` EN ao lado; thumbnail.jpg é um frame real do hook
-- [ ] metadata.json contém link clicável para o post de origem
-- [ ] Textos/SRT/metadata commitados no git do workspace; binários ignorados (T-07/D-11)
-- [ ] Builder idempotente; falha registra `blocked` com motivo e é retomável pela UI
+- [x] Aprovar o corte gera TODO o layout canônico (youtube/ + shorts/short-N/ + x/linkedin/instagram — integração cobre os 10 arquivos)
+- [x] Cada MP4 tem .srt EN ao lado (conversor puro testado); thumbnail.jpg extraído via ffmpeg -ss do hook (fake binary nos testes; ffmpeg entra na imagem da api via compose build)
+- [x] metadata.json contém source_post com a URL do post original (do watcher S0-16)
+- [x] Textos/SRT/metadata commitados no git do workspace (git log contém release(<slug>)); binários fora pelo .gitignore
+- [x] Builder idempotente (2ª execução ok); falha → vídeo blocked com motivo estruturado no histórico e retomável (builder re-executável)
 
 ## Verificação
 
@@ -73,6 +73,14 @@ cd /data/videos/<slug> && git log --oneline -1
 
 ## Notas
 
+## Notas
+
+- ApproveFinalCut virou RPC real: grava aprovação, executa o builder e devolve
+  generated_paths; falha do builder bloqueia o vídeo com motivo (nunca silencioso).
+- Migration 0011 semeia o checklist por plataforma (youtube/x/linkedin/instagram +
+  short-N) consumido pela S5-11.
+- SRT: conversor puro CuesToSRT sobre o contrato de cues da S3-05; long usa todas as
+  cues, cada short filtra pelos segmentos da marca.
 - Ainda não existe API de auto-publish (SPEC §8 backlog): o builder só prepara pacotes
   prontos para upload manual — escopo consciente.
 - Extrair thumbnail na VPS com ffmpeg custa ~1 frame; alternativa renderStill no runner

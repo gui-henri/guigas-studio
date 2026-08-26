@@ -532,8 +532,8 @@ func (s *VideoService) RequestRerender(
 	return connect.NewResponse(&studiov1.RequestRerenderResponse{Video: videoToProto(&updated)}), nil
 }
 
-// ApproveFinalCut records the human approval of the cut; release packaging is
-// S5-09/S5-11 — this stub exists so the UI flow is complete end to end.
+// ApproveFinalCut records approval and builds releases/<slug>/ (S5-09):
+// youtube/ + shorts/ + social texts + SRT, committed in the workspace git.
 func (s *VideoService) ApproveFinalCut(
 	ctx context.Context,
 	req *connect.Request[studiov1.ApproveFinalCutRequest],
@@ -560,7 +560,35 @@ func (s *VideoService) ApproveFinalCut(
 	}); err != nil {
 		return nil, connect.NewError(connect.CodeInternal, errors.New("failed to record approval"))
 	}
-	return connect.NewResponse(&studiov1.ApproveFinalCutResponse{Video: videoToProto(&video)}), nil
+
+	generated, buildErr := NewReleaseBuilder(s.queries, s.dataDir).Build(ctx, video.ID)
+	if buildErr != nil {
+		// Structured block: retake via UI after fixing the cause (re-runnable).
+		if terr := s.queries.UpdateVideoStatus(ctx, sqlc.UpdateVideoStatusParams{
+			ID: video.ID, Status: string(videostate.StateBlocked),
+		}); terr != nil {
+			slog.Error("release failure: could not block video", "error", terr)
+		}
+		if herr := s.queries.InsertStatusChange(ctx, sqlc.InsertStatusChangeParams{
+			VideoID: video.ID, Status: string(videostate.StateBlocked),
+			Reason: fmt.Sprintf("release build failed: %v", buildErr), Actor: "system",
+		}); herr != nil {
+			slog.Warn("history insert failed", "error", herr)
+		}
+		s.publishStatusChanged(video.ID.String(), video.Slug,
+			string(videostate.StateFinalReview), string(videostate.StateBlocked))
+		return nil, connect.NewError(connect.CodeFailedPrecondition,
+			fmt.Errorf("release build failed: %v", buildErr))
+	}
+
+	updated, gErr := s.queries.GetVideo(ctx, video.ID)
+	if gErr != nil {
+		return nil, connect.NewError(connect.CodeInternal, errors.New("failed to reload video"))
+	}
+	slog.Info("release built", "video_id", video.ID.String(), "paths", len(generated))
+	return connect.NewResponse(&studiov1.ApproveFinalCutResponse{
+		Video: videoToProto(&updated), GeneratedPaths: generated,
+	}), nil
 }
 
 // videoForReview loads a video by id; nil (with error already handled) when absent.

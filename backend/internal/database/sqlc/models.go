@@ -31,6 +31,16 @@ type Job struct {
 	ProgressStage   string             `json:"progress_stage"`
 }
 
+type ReleaseChecklist struct {
+	ID        uuid.UUID          `json:"id"`
+	VideoID   uuid.UUID          `json:"video_id"`
+	Platform  string             `json:"platform"`
+	Item      string             `json:"item"`
+	Done      bool               `json:"done"`
+	DoneAt    pgtype.Timestamptz `json:"done_at"`
+	CreatedAt time.Time          `json:"created_at"`
+}
+
 type RenderArtifact struct {
 	ID        uuid.UUID `json:"id"`
 	VideoID   uuid.UUID `json:"video_id"`

@@ -26,6 +26,7 @@ renders/
 *.mkv
 *.webm
 .validation-latest.json
+releases/youtube/thumbnail.jpg
 `)
 )
 
