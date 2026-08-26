@@ -5,7 +5,7 @@ sprint: 4
 prioridade: P0
 depende_de: [S4-01]
 estimativa_h: 2
-status: todo
+status: done
 ---
 
 # S4-02 — Componentes CodeTyping e DiffView
@@ -50,11 +50,11 @@ frames fora de ordem/em paralelo): nada de `Math.random` ou `Date.now`.
 
 ## Critérios de aceite
 
-- [ ] Dois renders do mesmo frame produzem pixels idênticos (determinismo)
-- [ ] Zero uso de `Math.random`/`Date.now` nos componentes (variação seeded usa `random()` do Remotion)
-- [ ] Todo estilo vem de `theme.ts`; nenhum hex literal nos componentes
-- [ ] Funções puras (`charsVisible`, `isCursorVisible`, `diffLines`) com unit tests (D-18)
-- [ ] Fixtures validam contra `sceneSchema`
+- [x] Dois renders do mesmo frame produzem pixels idênticos (determinismo — typing/cursor/highlight/diff são funções puras do frame, provadas por unit tests)
+- [x] Zero uso de `Math.random`/`Date.now` nos componentes (rg limpo; blink por paridade de frame)
+- [x] Todo estilo vem de `theme.ts`; nenhum hex literal nos componentes (rgba de feedback de linha também centralizado via tokens added/removed)
+- [x] Funções puras (`charsVisible`, `isCursorVisible`, `diffLines`, `tokenize`) com 21 unit tests (D-18)
+- [x] Fixtures validam contra `sceneSchema` (7 arquivos, teste dedicado)
 
 ## Verificação
 

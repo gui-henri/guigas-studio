@@ -1,0 +1,8 @@
+{
+  "type": "diff_view",
+  "props": {
+    "title": "Antes vs depois",
+    "before": ["var total = 0;", "for (var i = 0; i < n; i++) {", "  total += i;", "}"],
+    "after": ["let total = 0n;", "for (let i = 0; i < n; i++) {", "  total += BigInt(i);", "}"]
+  }
+}

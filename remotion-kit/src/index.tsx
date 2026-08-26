@@ -87,3 +87,21 @@ export type { SpriteMeta, AvatarSpriteProps } from "./AvatarSprite";
 export type { TimelineView, MouthCue } from "./selectors";
 
 export { SmokeRender } from "./SmokeRender";
+export { CodeTyping } from "./scenes/code-typing/CodeTyping";
+export { DiffView } from "./scenes/diff-view/DiffView";
+export {
+  parseScene,
+  sceneSchema,
+  type Scene,
+  type SceneType,
+  type ParseSceneResult,
+  type SceneParseIssue,
+  type CodeTypingScene,
+  type DiffViewScene,
+  type TerminalRunScene,
+  type FlowDiagramScene,
+  type BigNumberScene,
+  type TimelineScene,
+  type CalloutScene,
+} from "./scenes/schema";
+export { theme } from "./theme";

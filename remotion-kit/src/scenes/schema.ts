@@ -100,6 +100,14 @@ function envelope<P extends z.ZodRawShape>(type: string, props: z.ZodObject<P>) 
     .strict();
 }
 
+export const codeTypingSceneSchema = envelope("code_typing", codeTypingPropsSchema);
+export const diffViewSceneSchema = envelope("diff_view", diffViewPropsSchema);
+export const terminalRunSceneSchema = envelope("terminal_run", terminalRunPropsSchema);
+export const flowDiagramSceneSchema = envelope("flow_diagram", flowDiagramPropsSchema);
+export const bigNumberSceneSchema = envelope("big_number", bigNumberPropsSchema);
+export const timelineSceneSchema = envelope("timeline", timelinePropsSchema);
+export const calloutSceneSchema = envelope("callout", calloutPropsSchema);
+
 const SCENE_TYPES = [
   "code_typing",
   "diff_view",
@@ -113,22 +121,23 @@ const SCENE_TYPES = [
 export type SceneType = (typeof SCENE_TYPES)[number];
 
 export const sceneSchema = z.discriminatedUnion("type", [
-  envelope("code_typing", codeTypingPropsSchema),
-  envelope("diff_view", diffViewPropsSchema),
-  envelope("terminal_run", terminalRunPropsSchema),
-  envelope("flow_diagram", flowDiagramPropsSchema),
-  envelope("big_number", bigNumberPropsSchema),
-  envelope("timeline", timelinePropsSchema),
-  envelope("callout", calloutPropsSchema),
+  codeTypingSceneSchema,
+  diffViewSceneSchema,
+  terminalRunSceneSchema,
+  flowDiagramSceneSchema,
+  bigNumberSceneSchema,
+  timelineSceneSchema,
+  calloutSceneSchema,
 ]);
 
-export type CodeTypingScene = z.infer<typeof codeTypingPropsSchema>;
-export type DiffViewScene = z.infer<typeof diffViewPropsSchema>;
-export type TerminalRunScene = z.infer<typeof terminalRunPropsSchema>;
-export type FlowDiagramScene = z.infer<typeof flowDiagramPropsSchema>;
-export type BigNumberScene = z.infer<typeof bigNumberPropsSchema>;
-export type TimelineScene = z.infer<typeof timelinePropsSchema>;
-export type CalloutScene = z.infer<typeof calloutPropsSchema>;
+// Component-facing scene types are the full envelopes ({type, props}).
+export type CodeTypingScene = z.infer<typeof codeTypingSceneSchema>;
+export type DiffViewScene = z.infer<typeof diffViewSceneSchema>;
+export type TerminalRunScene = z.infer<typeof terminalRunSceneSchema>;
+export type FlowDiagramScene = z.infer<typeof flowDiagramSceneSchema>;
+export type BigNumberScene = z.infer<typeof bigNumberSceneSchema>;
+export type TimelineScene = z.infer<typeof timelineSceneSchema>;
+export type CalloutScene = z.infer<typeof calloutSceneSchema>;
 
 /** A parsed scene: closed union of `{ type, props }` (proto SceneRef parity). */
 export type Scene = z.infer<typeof sceneSchema>;

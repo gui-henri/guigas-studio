@@ -1,0 +1,14 @@
+{
+  "type": "flow_diagram",
+  "props": {
+    "nodes": [
+      { "id": "post", "label": "Post" },
+      { "id": "script", "label": "Roteiro" },
+      { "id": "video", "label": "Vídeo" }
+    ],
+    "edges": [
+      { "from": "post", "to": "script" },
+      { "from": "script", "to": "video" }
+    ]
+  }
+}

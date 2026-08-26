@@ -1,0 +1,6 @@
+{
+  "type": "terminal_run",
+  "props": {
+    "lines": ["$ npm run check", "buf lint ✓", "go test ./... ✓", "vitest ✓"]
+  }
+}

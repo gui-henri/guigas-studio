@@ -1,0 +1,10 @@
+{
+  "type": "timeline",
+  "props": {
+    "milestones": [
+      { "label": "v0", "detail": "repo" },
+      { "label": "v1", "detail": "1 vídeo real" },
+      { "label": "v2", "detail": "cadência semanal" }
+    ]
+  }
+}
