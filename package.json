@@ -20,5 +20,8 @@
     "check": "npm run lint && npm run build && buf lint && npm run backend:check",
     "smoke:render": "npm run smoke:render -w remotion-kit",
     "smoke:verify": "npm run smoke:verify -w remotion-kit"
+  },
+  "optionalDependencies": {
+    "lightningcss-win32-x64-msvc": "^1.33.0"
   }
 }

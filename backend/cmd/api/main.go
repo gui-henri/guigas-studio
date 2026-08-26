@@ -83,8 +83,46 @@ func newHandler(cfg config.Config, db *database.DB, appHub *events.Hub) http.Han
 	mux.Handle(studiov1connect.NewHealthServiceHandler(services.NewHealthService(), connect.WithInterceptors(interceptors...)))
 	mux.Handle(studiov1connect.NewAuthServiceHandler(services.NewAuthService(db.Pool, cfg.Auth.JWTSecret), connect.WithInterceptors(interceptors...)))
 	mux.Handle(studiov1connect.NewVideoServiceHandler(services.NewVideoService(db.Queries, cfg.DataDir, hub, db.Pool), connect.WithInterceptors(interceptors...)))
+	mux.Handle(studiov1connect.NewJobServiceHandler(services.NewJobService(db.Queries, db.Pool, cfg.DataDir, hub), connect.WithInterceptors(interceptors...)))
+
+	staticDir := os.Getenv("STATIC_DIR")
+	if staticDir == "" {
+		if _, err := os.Stat("frontend/dist"); err == nil {
+			staticDir = "frontend/dist"
+		}
+	}
+	if staticDir != "" {
+		if _, err := os.Stat(staticDir); err == nil {
+			mux.Handle("/", spaHandler(staticDir))
+		}
+	}
 
 	return h2c.NewHandler(mux, &http2.Server{})
+}
+
+func spaHandler(staticDir string) http.Handler {
+	fs := http.Dir(staticDir)
+	fileServer := http.FileServer(fs)
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		cleanPath := filepath.Clean(r.URL.Path)
+		if cleanPath == "/" {
+			http.ServeFile(w, r, filepath.Join(staticDir, "index.html"))
+			return
+		}
+
+		f, err := fs.Open(cleanPath)
+		if err == nil {
+			defer f.Close()
+			stat, err := f.Stat()
+			if err == nil && !stat.IsDir() {
+				fileServer.ServeHTTP(w, r)
+				return
+			}
+		}
+
+		http.ServeFile(w, r, filepath.Join(staticDir, "index.html"))
+	})
 }
 
 func main() {

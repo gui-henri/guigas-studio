@@ -122,6 +122,7 @@ export function makeRenderLongStage(deps: RenderLongDeps = {}) {
       composition,
       serveUrl,
       codec: "h264",
+      audioCodec: "aac",
       outputLocation: output,
       inputProps: inputProps as unknown as Record<string, unknown>,
       onProgress: ({ progress: renderProgress }) => {

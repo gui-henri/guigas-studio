@@ -121,6 +121,7 @@ async function renderShort(
     composition,
     serveUrl: args.serveUrl,
     codec: "h264",
+    audioCodec: "aac",
     outputLocation: args.output,
     inputProps: inputProps as unknown as Record<string, unknown>,
     onProgress: ({ progress: renderProgress }) => {
