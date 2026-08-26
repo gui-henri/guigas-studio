@@ -187,6 +187,20 @@ export default function ScriptReviewPage() {
         >
           {presentStatus(video.status).label}
         </span>
+        <nav className="ml-auto flex gap-2 text-sm">
+          <Link
+            to={`/videos/${video.id}/voz`}
+            className="rounded-md border border-line px-3 py-1.5 hover:border-accent hover:text-accent"
+          >
+            Voz
+          </Link>
+          <Link
+            to={`/videos/${video.id}/scenes`}
+            className="rounded-md border border-line px-3 py-1.5 hover:border-accent hover:text-accent"
+          >
+            Cenas
+          </Link>
+        </nav>
         {script.target && (
           <span className="text-xs text-ink/50">alvo: {script.target.durationMin} min</span>
         )}

@@ -82,6 +82,8 @@ export type { PlayerHostProps } from "./PlayerHost";
 export type { StudioVideoProps } from "./props";
 export { AvatarPreviewPlayer } from "./AvatarPreviewPlayer";
 export type { AvatarPreviewPlayerProps } from "./AvatarPreviewPlayer";
+export { SegmentPreviewPlayer } from "./SegmentPreviewPlayer";
+export type { SegmentPreviewPlayerProps } from "./SegmentPreviewPlayer";
 export { AvatarSprite } from "./AvatarSprite";
 export type { SpriteMeta, AvatarSpriteProps } from "./AvatarSprite";
 export type { TimelineView, MouthCue } from "./selectors";

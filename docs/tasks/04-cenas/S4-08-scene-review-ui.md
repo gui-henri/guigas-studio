@@ -5,7 +5,7 @@ sprint: 4
 prioridade: P0
 depende_de: [S4-05, S1-05]
 estimativa_h: 2
-status: todo
+status: done
 ---
 
 # S4-08 — UI de review cena a cena
@@ -53,11 +53,11 @@ montando a `<SegmentComposition>` da S4-05 — mesma composição do render fina
 
 ## Critérios de aceite
 
-- [ ] Cada card reproduz avatar + cena + áudio do segmento no PlayerHost
-- [ ] Decisões sobrevivem a reload; reprovação sem comentário é bloqueada
-- [ ] "Aprovar tudo" inacessível abaixo de 100%; nenhuma transição de estado disparada daqui
-- [ ] Comentário de card reprovado vira texto copiável em 1 clique
-- [ ] `reviewProgress` coberto por unit tests (D-18)
+- [x] Cada card reproduz avatar + cena + áudio do segmento (SegmentPreviewPlayer monta a MESMA SegmentComposition do render; lazy via IntersectionObserver)
+- [x] Decisões sobrevivem a reload (localStorage slug+updatedAt); reprovação sem comentário é bloqueada
+- [x] "Aprovar tudo" inacessível abaixo de 100% e fora de scenes_review; nenhuma transição disparada (prepareRender é placeholder p/ S5-01)
+- [x] Comentário de card reprovado vira texto copiável em 1 clique (copiar prompt → buildFixPrompt)
+- [x] `reviewProgress` coberto por unit tests + testes de componente da página (4 casos UI, D-18)
 
 ## Verificação
 
@@ -69,6 +69,13 @@ npm run dev -w frontend   # revisar manualmente um vídeo fixture em /videos/<sl
 
 ## Notas
 
+## Notas
+
+- SSE: `scenesValidated` entrou na lista de invalidação do useStudioEvents —
+  re-validações atualizam os cards in place.
+- Corrigido nesta sprint: VoicePreviewPage (S3-08) estava órfã — rotas /videos/:id/voz
+  e /videos/:id/scenes registradas com abas Voz/Cenas no cabeçalho do roteiro.
+- Decisão de versão do rascunho: updatedAt do vídeo (não há script.version no proto).
 - Persistência local é simplificação consciente: a decisão durável da sprint é a
   aprovação total; se depois disso um card for reprovado, `prepareRender` volta a
   inválido automaticamente (revalidar pré-condições no clique, não só no render).

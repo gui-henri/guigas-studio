@@ -25,6 +25,7 @@ export function useStudioEvents(): void {
         if (
           which === "videoStatusChanged" ||
           which === "scriptValidated" ||
+          which === "scenesValidated" ||
           which === "watcherPostFound"
         ) {
           // Connect-RPC query keys embed the service name; predicate-based

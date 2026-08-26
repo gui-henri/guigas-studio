@@ -14,6 +14,8 @@ import TeleprompterDevPage from "./pages/TeleprompterDevPage";
 import RecorderDevPage from "./pages/RecorderDevPage";
 import PlayerDevPage from "./pages/PlayerDevPage";
 import StudioRecordingPage from "./pages/StudioRecordingPage";
+import VoicePreviewPage from "./pages/VoicePreviewPage";
+import ScenesReviewPage from "./pages/ScenesReviewPage";
 
 export default function App() {
   useStudioEvents();
@@ -53,6 +55,26 @@ export default function App() {
           <RequireAuth>
             <AppShell>
               <ScriptReviewPage />
+            </AppShell>
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/videos/:id/voz"
+        element={
+          <RequireAuth>
+            <AppShell>
+              <VoicePreviewPage />
+            </AppShell>
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/videos/:id/scenes"
+        element={
+          <RequireAuth>
+            <AppShell>
+              <ScenesReviewPage />
             </AppShell>
           </RequireAuth>
         }
