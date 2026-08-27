@@ -13,6 +13,7 @@ import Teleprompter from "../features/studio/Teleprompter";
 import { useSegmentRecorder } from "../features/studio/useSegmentRecorder";
 import { presentStatus, statusGroupClasses } from "../lib/videoStatus";
 import { deleteTake } from "../lib/uploadClient";
+import { TOKEN_STORAGE_KEY } from "../lib/transport";
 
 const isRecordable = (s: VideoStatus | undefined): s is VideoStatus =>
   s === VideoStatus.SCRIPT_APPROVED || s === VideoStatus.RECORDING;
@@ -420,9 +421,12 @@ export default function StudioRecordingPage() {
           {/* Barra de Controles Principais */}
           {(() => {
             const hasAudioRecorded = !!(activeSegment && recorded.get(activeSegment)?.audio);
+            const token = typeof localStorage !== "undefined" ? localStorage.getItem(TOKEN_STORAGE_KEY) : null;
             const activeAudioUrl =
               recorder.lastSavedAudioUrl ||
-              (hasAudioRecorded ? `/api/v1/videos/${slug}/files/audio/${activeSegment}.wav` : null);
+              (hasAudioRecorded
+                ? `/api/v1/videos/${slug}/files/audio/${activeSegment}.wav${token ? `?token=${encodeURIComponent(token)}` : ""}`
+                : null);
 
             return (
               <div className="flex flex-col gap-4 border-t border-neutral-100 pt-5 lg:flex-row lg:items-center lg:justify-between">

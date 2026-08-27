@@ -51,7 +51,26 @@ async function loadModelBuffer(url: string): Promise<ArrayBuffer> {
 let landmarker: FaceLandmarker | null = null;
 let currentDelegate: "GPU" | "CPU" = "GPU";
 
+async function ensureModuleFactory(): Promise<void> {
+  if (typeof (globalThis as unknown as { ModuleFactory?: unknown }).ModuleFactory !== "undefined") return;
+  try {
+    const wasmJsUrl = `${WASM_BASE}/vision_wasm_internal.js`;
+    const resp = await fetch(wasmJsUrl);
+    if (resp.ok) {
+      const code = await resp.text();
+      const fn = new Function(
+        code +
+          "\n;if (typeof ModuleFactory !== 'undefined') { (globalThis as any).ModuleFactory = ModuleFactory; (self as any).ModuleFactory = ModuleFactory; }"
+      );
+      fn();
+    }
+  } catch (err) {
+    console.warn("Failed to pre-bind ModuleFactory:", err);
+  }
+}
+
 async function makeLandmarker(delegate: "GPU" | "CPU"): Promise<FaceLandmarker> {
+  await ensureModuleFactory();
   const fileset = await FilesetResolver.forVisionTasks(WASM_BASE);
   const modelBuffer = await loadModelBuffer(MODEL_URL);
   return FaceLandmarker.createFromOptions(fileset, {
