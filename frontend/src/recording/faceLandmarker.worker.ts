@@ -52,7 +52,8 @@ let landmarker: FaceLandmarker | null = null;
 let currentDelegate: "GPU" | "CPU" = "GPU";
 
 async function ensureModuleFactory(): Promise<void> {
-  if (typeof (globalThis as unknown as { ModuleFactory?: unknown }).ModuleFactory !== "undefined") return;
+  const g = globalThis as unknown as { ModuleFactory?: unknown };
+  if (typeof g.ModuleFactory !== "undefined") return;
   try {
     const wasmJsUrl = `${WASM_BASE}/vision_wasm_internal.js`;
     const resp = await fetch(wasmJsUrl);
@@ -60,7 +61,7 @@ async function ensureModuleFactory(): Promise<void> {
       const code = await resp.text();
       const fn = new Function(
         code +
-          "\n;if (typeof ModuleFactory !== 'undefined') { (globalThis as any).ModuleFactory = ModuleFactory; (self as any).ModuleFactory = ModuleFactory; }"
+          "\n;if (typeof ModuleFactory !== 'undefined') { globalThis.ModuleFactory = ModuleFactory; self.ModuleFactory = ModuleFactory; }"
       );
       fn();
     }
