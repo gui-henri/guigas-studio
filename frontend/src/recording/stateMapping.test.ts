@@ -3,7 +3,9 @@ import {
   BLENDSHAPE_NAMES,
   bsArrayToRecord,
   DEFAULT_THRESHOLDS,
+  mapBlendshapesToMouth,
   mapBlendshapesToState,
+  mapSampleToMouth,
   mapSampleToState,
   serializeBlendshapes,
   smoothStates,
@@ -89,6 +91,32 @@ describe("mapBlendshapesToState", () => {
 
   it("is deterministic for identical inputs", () => {
     expect(mapSampleToState(SMILE)).toBe(mapSampleToState(SMILE));
+  });
+});
+
+describe("mapBlendshapesToMouth", () => {
+  it("maps closed mouth to rest", () => {
+    expect(mapBlendshapesToMouth({})).toBe("rest");
+    expect(mapBlendshapesToMouth(bsArrayToRecord(NEUTRAL))).toBe("rest");
+  });
+
+  it("maps jaw opening to open_a", () => {
+    expect(mapBlendshapesToMouth({ jawOpen: 0.3 })).toBe("open_a");
+  });
+
+  it("maps rounded lips / pucker / funnel to rounded_o", () => {
+    expect(mapBlendshapesToMouth({ mouthPucker: 0.4 })).toBe("rounded_o");
+    expect(mapBlendshapesToMouth({ mouthFunnel: 0.35 })).toBe("rounded_o");
+  });
+
+  it("maps wide smile or stretch to wide_e", () => {
+    expect(mapBlendshapesToMouth({ mouthStretchLeft: 0.3 })).toBe("wide_e");
+    expect(mapBlendshapesToMouth({ mouthSmileLeft: 0.4, mouthSmileRight: 0.4 })).toBe("wide_e");
+  });
+
+  it("maps positional sample array to mouth shape via mapSampleToMouth", () => {
+    expect(mapSampleToMouth(JAW_OPEN)).toBe("open_a");
+    expect(mapSampleToMouth(NEUTRAL)).toBe("rest");
   });
 });
 

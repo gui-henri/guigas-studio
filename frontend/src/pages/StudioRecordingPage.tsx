@@ -313,7 +313,11 @@ export default function StudioRecordingPage() {
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
             {/* Live Avatar */}
             <div className="flex flex-col items-center">
-              <LiveAvatar stateRef={recorder.stateRef} scale={200} />
+              <LiveAvatar
+                stateRef={recorder.stateRef}
+                mouthRef={recorder.mouthRef}
+                scale={200}
+              />
               <span className="mt-1 text-[11px] font-mono text-neutral-500">
                 Live Avatar (30 fps)
               </span>

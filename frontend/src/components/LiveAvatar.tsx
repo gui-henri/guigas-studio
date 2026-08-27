@@ -6,13 +6,15 @@ import {
   rowForState,
   type SpriteSheet,
 } from "../recording/spriteSheet";
-import type { SpriteState } from "../recording/stateMapping";
+import type { MouthShape, SpriteState } from "../recording/stateMapping";
 
 export interface LiveAvatarProps {
   /** Latest detected state; read via ref inside the rAF loop (no re-renders). */
   stateRef: RefObject<SpriteState>;
+  /** Optional latest detected mouth shape; drives live articulation. */
+  mouthRef?: RefObject<MouthShape>;
   mirror?: boolean;
-  scale?: number; // css px, clamped 240–720
+  scale?: number; // css px, clamped 96–720
   demo?: boolean; // cycle all 5 states every 800ms (dev without webcam)
 }
 
@@ -24,13 +26,20 @@ const DEMO_CYCLE: SpriteState[] = [
   "surprised",
 ];
 
+const MOUTH_COL_MAP: Record<string, number> = {
+  rest: 0,
+  open_a: 1,
+  rounded_o: 2,
+  wide_e: 3,
+};
+
 /**
- * Canvas preview of the placeholder sprite that swaps states live during
- * recording. Mouth frame is fixed at index 0 — visemes belong to the final
- * render only (SPEC §4.3). Not a Remotion component.
+ * Canvas preview of the sprite sheet that mirrors both body state and
+ * real-time mouth articulation (visemes/shapes) live during recording.
  */
 export default function LiveAvatar({
   stateRef,
+  mouthRef,
   mirror = true,
   scale = 320,
   demo = false,
@@ -83,8 +92,13 @@ export default function LiveAvatar({
       const activeState: string = demo
         ? DEMO_CYCLE[demoIdx]
         : (stateRef.current ?? "idle");
+      const activeMouth: string = demo
+        ? ["rest", "open_a", "rounded_o", "wide_e"][demoIdx % 4]
+        : (mouthRef?.current ?? "rest");
+
       const row = rowForState(sheet, activeState);
-      const cellKey = `${activeState}/${row}/0/${mirror}/${canvas.width}`;
+      const col = MOUTH_COL_MAP[activeMouth] ?? 0;
+      const cellKey = `${activeState}/${row}/${col}/${mirror}/${canvas.width}`;
       if (cellKey === lastCellRef.current) return; // nothing changed this frame
       lastCellRef.current = cellKey;
 
@@ -95,11 +109,10 @@ export default function LiveAvatar({
         ctx.translate(canvas.width, 0);
         ctx.scale(-1, 1);
       }
-      // Mouth column fixed at 0 ("rest").
       const cell = sheet.cellWidth;
       ctx.drawImage(
         sheet.img,
-        0,
+        col * cell,
         row * cell,
         cell,
         cell,
@@ -117,7 +130,7 @@ export default function LiveAvatar({
       cancelAnimationFrame(raf);
       if (demoTimer !== null) clearInterval(demoTimer);
     };
-  }, [demo, mirror, scale, stateRef]);
+  }, [demo, mirror, mouthRef, scale, stateRef]);
 
   return (
     <canvas

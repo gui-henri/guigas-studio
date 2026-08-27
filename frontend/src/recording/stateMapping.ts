@@ -7,6 +7,7 @@
 // recording narration.
 
 export type SpriteState = 'idle' | 'talking' | 'happy' | 'thoughtful' | 'surprised';
+export type MouthShape = 'rest' | 'open_a' | 'rounded_o' | 'wide_e';
 
 export interface StateThresholds {
   talkJawOpen: number;
@@ -18,12 +19,12 @@ export interface StateThresholds {
 }
 
 export const DEFAULT_THRESHOLDS: StateThresholds = {
-  talkJawOpen: 0.25,
-  smile: 0.35,
-  surpriseBrow: 0.45,
-  thoughtfulBrowDown: 0.3,
-  gazeDown: 0.3,
-  minHoldMs: 150,
+  talkJawOpen: 0.15,
+  smile: 0.25,
+  surpriseBrow: 0.25,
+  thoughtfulBrowDown: 0.22,
+  gazeDown: 0.25,
+  minHoldMs: 120,
 };
 
 export interface BlendshapeSample {
@@ -80,25 +81,39 @@ export function mapBlendshapesToState(
   bs: Record<string, number>,
   th: StateThresholds = DEFAULT_THRESHOLDS
 ): SpriteState {
-  if (
-    (bs.browInnerUp ?? 0) >= th.surpriseBrow ||
-    maxOf(bs.browOuterUpLeft ?? 0, bs.browOuterUpRight ?? 0) >= th.surpriseBrow
-  ) {
+  const innerBrowUp = bs.browInnerUp ?? 0;
+  const outerBrowUp = maxOf(bs.browOuterUpLeft ?? 0, bs.browOuterUpRight ?? 0);
+  const eyeWide = maxOf(bs.eyeWideLeft ?? 0, bs.eyeWideRight ?? 0);
+  if (innerBrowUp >= th.surpriseBrow || outerBrowUp >= th.surpriseBrow || eyeWide >= 0.30) {
     return 'surprised';
   }
-  if (maxOf(bs.mouthSmileLeft ?? 0, bs.mouthSmileRight ?? 0) >= th.smile) return 'happy';
-  if (
-    maxOf(bs.browDownLeft ?? 0, bs.browDownRight ?? 0) >= th.thoughtfulBrowDown ||
-    maxOf(bs.eyeLookDownLeft ?? 0, bs.eyeLookDownRight ?? 0) >= th.gazeDown
-  ) {
+
+  const smile = maxOf(bs.mouthSmileLeft ?? 0, bs.mouthSmileRight ?? 0);
+  const cheekSquint = maxOf(bs.cheekSquintLeft ?? 0, bs.cheekSquintRight ?? 0);
+  if (smile >= th.smile || (smile >= 0.18 && cheekSquint >= 0.20)) {
+    return 'happy';
+  }
+
+  const browDown = maxOf(bs.browDownLeft ?? 0, bs.browDownRight ?? 0);
+  const gazeDown = maxOf(bs.eyeLookDownLeft ?? 0, bs.eyeLookDownRight ?? 0);
+  const frown = maxOf(bs.mouthFrownLeft ?? 0, bs.mouthFrownRight ?? 0);
+  if (browDown >= th.thoughtfulBrowDown || gazeDown >= th.gazeDown || frown >= 0.22) {
     return 'thoughtful';
   }
+
+  const jawOpen = bs.jawOpen ?? 0;
+  const mouthLowerDown = maxOf(bs.mouthLowerDownLeft ?? 0, bs.mouthLowerDownRight ?? 0);
+  const funnel = bs.mouthFunnel ?? 0;
+  const pucker = bs.mouthPucker ?? 0;
   if (
-    (bs.jawOpen ?? 0) >= th.talkJawOpen ||
-    maxOf(bs.mouthFunnel ?? 0, bs.mouthPucker ?? 0) >= th.talkJawOpen
+    jawOpen >= th.talkJawOpen ||
+    mouthLowerDown >= 0.18 ||
+    funnel >= 0.18 ||
+    pucker >= 0.18
   ) {
     return 'talking';
   }
+
   return 'idle';
 }
 
@@ -108,6 +123,41 @@ export function mapSampleToState(
   names?: string[]
 ): SpriteState {
   return mapBlendshapesToState(bsArrayToRecord(bs, names), th);
+}
+
+/** Determines the dynamic mouth shape column for real-time live preview. */
+export function mapBlendshapesToMouth(bs: Record<string, number>): MouthShape {
+  const jawOpen = bs.jawOpen ?? 0;
+  const mouthLowerDown = maxOf(bs.mouthLowerDownLeft ?? 0, bs.mouthLowerDownRight ?? 0);
+  const pucker = bs.mouthPucker ?? 0;
+  const funnel = bs.mouthFunnel ?? 0;
+  const stretch = maxOf(bs.mouthStretchLeft ?? 0, bs.mouthStretchRight ?? 0);
+  const smile = maxOf(bs.mouthSmileLeft ?? 0, bs.mouthSmileRight ?? 0);
+  const dimple = maxOf(bs.mouthDimpleLeft ?? 0, bs.mouthDimpleRight ?? 0);
+
+  // Rounded / O shapes (pucker, funnel)
+  if (pucker >= 0.18 || funnel >= 0.20) {
+    return 'rounded_o';
+  }
+
+  // Wide / E shapes (smile, stretch, dimple)
+  if (stretch >= 0.18 || (smile >= 0.22 && jawOpen < 0.25) || dimple >= 0.22) {
+    return 'wide_e';
+  }
+
+  // Open / A shapes (jaw open, lower lip down)
+  if (jawOpen >= 0.14 || mouthLowerDown >= 0.18) {
+    return 'open_a';
+  }
+
+  return 'rest';
+}
+
+export function mapSampleToMouth(
+  bs: number[],
+  names?: string[]
+): MouthShape {
+  return mapBlendshapesToMouth(bsArrayToRecord(bs, names));
 }
 
 /**

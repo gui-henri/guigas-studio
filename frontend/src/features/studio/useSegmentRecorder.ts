@@ -3,9 +3,11 @@ import { useQueryClient } from "@tanstack/react-query";
 
 import { startMicCapture } from "../../audio/micCapture";
 import {
+  mapSampleToMouth,
   mapSampleToState,
   serializeBlendshapes,
   type BlendshapeSample,
+  type MouthShape,
   type SpriteState,
 } from "../../recording/stateMapping";
 import { useFaceLandmarker } from "../../recording/useFaceLandmarker";
@@ -52,7 +54,10 @@ export function useSegmentRecorder(
   segmentId: string,
   videoRef: React.RefObject<HTMLVideoElement | null>,
   streamRef: React.RefObject<MediaStream | null>
-): SegmentRecorderState & { stateRef: React.MutableRefObject<SpriteState> } {
+): SegmentRecorderState & {
+  stateRef: React.MutableRefObject<SpriteState>;
+  mouthRef: React.MutableRefObject<MouthShape>;
+} {
   const [phase, setPhase] = useState<RecorderPhase>("idle");
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -67,6 +72,7 @@ export function useSegmentRecorder(
   const abortRef = useRef(false);
   const awaitingFlush = useRef<(() => void) | null>(null);
   const stateRef = useRef<SpriteState>("idle");
+  const mouthRef = useRef<MouthShape>("rest");
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startedAtRef = useRef(0);
   const queryClient = useQueryClient();
@@ -86,8 +92,10 @@ export function useSegmentRecorder(
     (live) => {
       if (live.faceDetected && live.bs.length > 0) {
         stateRef.current = mapSampleToState(live.bs, undefined, live.names);
+        mouthRef.current = mapSampleToMouth(live.bs, live.names);
       } else {
         stateRef.current = "idle";
+        mouthRef.current = "rest";
       }
     }
   );
@@ -265,5 +273,6 @@ export function useSegmentRecorder(
     stop: doStop,
     retryUploads,
     stateRef,
+    mouthRef,
   };
 }

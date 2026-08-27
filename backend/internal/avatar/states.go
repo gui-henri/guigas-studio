@@ -29,11 +29,11 @@ type Thresholds struct {
 // DefaultThresholds is the single source shared by both implementations
 // (parity proven by the shared fixtures in testdata/state_parity.json).
 var DefaultThresholds = Thresholds{
-	TalkJawOpen:        0.25,
-	Smile:              0.35,
-	SurpriseBrow:       0.45,
-	ThoughtfulBrowDown: 0.3,
-	GazeDown:           0.3,
+	TalkJawOpen:        0.15,
+	Smile:              0.25,
+	SurpriseBrow:       0.25,
+	ThoughtfulBrowDown: 0.22,
+	GazeDown:           0.25,
 }
 
 // MapBlendshapesToState applies the documented precedence:
@@ -42,17 +42,25 @@ func MapBlendshapesToState(bs map[string]float64, th Thresholds) (SpriteState, e
 	if bs == nil {
 		return "", fmt.Errorf("nil blendshape record")
 	}
-	if v(bs["browInnerUp"]) >= th.SurpriseBrow {
+	if v(bs["browInnerUp"]) >= th.SurpriseBrow ||
+		maxOf(v(bs["browOuterUpLeft"]), v(bs["browOuterUpRight"])) >= th.SurpriseBrow ||
+		maxOf(v(bs["eyeWideLeft"]), v(bs["eyeWideRight"])) >= 0.30 {
 		return StateSurprised, nil
 	}
-	if maxOf(v(bs["mouthSmileLeft"]), v(bs["mouthSmileRight"])) >= th.Smile {
+	smile := maxOf(v(bs["mouthSmileLeft"]), v(bs["mouthSmileRight"]))
+	cheekSquint := maxOf(v(bs["cheekSquintLeft"]), v(bs["cheekSquintRight"]))
+	if smile >= th.Smile || (smile >= 0.18 && cheekSquint >= 0.20) {
 		return StateHappy, nil
 	}
 	if maxOf(v(bs["browDownLeft"]), v(bs["browDownRight"])) >= th.ThoughtfulBrowDown ||
-		maxOf(v(bs["eyeLookDownLeft"]), v(bs["eyeLookDownRight"])) >= th.GazeDown {
+		maxOf(v(bs["eyeLookDownLeft"]), v(bs["eyeLookDownRight"])) >= th.GazeDown ||
+		maxOf(v(bs["mouthFrownLeft"]), v(bs["mouthFrownRight"])) >= 0.22 {
 		return StateThoughtful, nil
 	}
-	if v(bs["jawOpen"]) >= th.TalkJawOpen {
+	if v(bs["jawOpen"]) >= th.TalkJawOpen ||
+		maxOf(v(bs["mouthLowerDownLeft"]), v(bs["mouthLowerDownRight"])) >= 0.18 ||
+		v(bs["mouthFunnel"]) >= 0.18 ||
+		v(bs["mouthPucker"]) >= 0.18 {
 		return StateTalking, nil
 	}
 	return StateIdle, nil
