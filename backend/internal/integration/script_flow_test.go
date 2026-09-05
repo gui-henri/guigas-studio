@@ -164,7 +164,7 @@ func TestScriptFlowEndToEnd(t *testing.T) {
 		_, _ = w.Write([]byte(feedBody))
 	}))
 	baseWatcher := watcher.New(db.Queries, watcher.Config{URL: feed.URL, Interval: time.Minute, DataDir: dataDir}, logger)
-	if err := baseWatcher.Poll(ctx); err != nil {
+	if _, err := baseWatcher.Poll(ctx); err != nil {
 		t.Fatalf("baseline poll: %v", err)
 	}
 
@@ -174,7 +174,7 @@ func TestScriptFlowEndToEnd(t *testing.T) {
 		_, _ = w.Write([]byte(feed2))
 	}))
 	grownWatcher := watcher.New(db.Queries, watcher.Config{URL: feed2Srv.URL, Interval: time.Minute, DataDir: dataDir}, logger)
-	if err := grownWatcher.Poll(ctx); err != nil {
+	if _, err := grownWatcher.Poll(ctx); err != nil {
 		t.Fatalf("poll new item: %v", err)
 	}
 

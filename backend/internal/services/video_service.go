@@ -17,6 +17,7 @@ import (
 	"github.com/google/uuid"
 
 	studiov1 "github.com/gui-henri/guigas-studio/backend/gen/app/studio/v1"
+	studiov1connect "github.com/gui-henri/guigas-studio/backend/gen/app/studio/v1/studiov1connect"
 	"github.com/gui-henri/guigas-studio/backend/internal/artifacts"
 	"github.com/gui-henri/guigas-studio/backend/internal/auth"
 	"github.com/gui-henri/guigas-studio/backend/internal/gemini"
@@ -111,7 +112,6 @@ func (s *VideoService) TriggerRssPoll(
 		NewPostsCount: int32(len(created)),
 		CreatedVideos: protoVideos,
 	}), nil
-}
 }
 
 // publishStatusChanged emits video.status_changed to global + per-video topics.
