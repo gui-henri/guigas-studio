@@ -2,6 +2,15 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { useQuery } from "@connectrpc/connect-query";
 import { useQueryClient } from "@tanstack/react-query";
+import {
+  ArrowRight,
+  Headphones,
+  Mic,
+  Radio,
+  Square,
+  Trash2,
+  Volume2,
+} from "lucide-react";
 import { VideoStatus } from "../gen/app/studio/v1/video_pb";
 
 import {
@@ -20,6 +29,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { Alert, AlertDescription } from "../components/ui/alert";
 import { Skeleton } from "../components/ui/skeleton";
 import Modal from "../components/Modal";
+import VideoPipelineNav from "../components/VideoPipelineNav";
 import { cn } from "@/lib/utils";
 
 const isRecordable = (s: VideoStatus | undefined): s is VideoStatus =>
@@ -29,6 +39,7 @@ export default function StudioRecordingPage() {
   const { slug = "" } = useParams();
   const [activeSegment, setActiveSegment] = useState<string | null>(null);
   const [confirmRedo, setConfirmRedo] = useState<string | null>(null);
+  const [confirmDiscard, setConfirmDiscard] = useState<string | null>(null);
 
   const videoQuery = useQuery(getVideo, { id: slug });
   const videoId = videoQuery.data?.video?.id ?? "";
@@ -107,24 +118,23 @@ export default function StudioRecordingPage() {
   const queryClient = useQueryClient();
   const [deletingTake, setDeletingTake] = useState(false);
 
-  const handleDiscardTake = async () => {
+  const handleDiscardTake = () => {
     if (!activeSegment) return;
-    if (
-      !window.confirm(
-        `Deseja realmente descartar a gravação do segmento "${activeSegment}"?`
-      )
-    )
-      return;
+    setConfirmDiscard(activeSegment);
+  };
+
+  const executeDiscardTake = async () => {
+    if (!confirmDiscard) return;
     setDeletingTake(true);
     try {
-      await deleteTake(slug, activeSegment);
+      await deleteTake(slug, confirmDiscard);
       await takesQuery.refetch();
       await queryClient.invalidateQueries({
         predicate: (q) => String(q.queryKey[0]).includes("VideoService"),
       });
-      setConfirmRedo(null);
+      setConfirmDiscard(null);
     } catch (err: unknown) {
-      alert(`Falha ao descartar: ${String((err as Error).message ?? err)}`);
+      console.error("Falha ao descartar:", err);
     } finally {
       setDeletingTake(false);
     }
@@ -181,22 +191,27 @@ export default function StudioRecordingPage() {
 
   return (
     <div className="space-y-6">
-      <header className="flex flex-wrap items-center gap-3">
-        <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">
-          ← Fila
-        </Link>
-        <h1 className="font-display text-2xl font-semibold">{slug}</h1>
-        <Badge variant="secondary">{presentStatus(status).label}</Badge>
-        <span className="font-mono text-xs text-muted-foreground">
-          {doneCount}/{segments.length} gravados
-        </span>
-        <Link
-          to={`/videos/${videoId || slug}`}
-          className="ml-auto text-xs text-muted-foreground hover:text-foreground underline"
-        >
-          Ver roteiro / status
-        </Link>
-      </header>
+      <VideoPipelineNav
+        videoId={videoId}
+        videoSlug={slug}
+        status={status}
+        currentStage="estudio"
+        extraMeta={
+          <span className="font-mono text-xs text-muted-foreground">
+            {doneCount}/{segments.length} gravados
+          </span>
+        }
+        actions={
+          allDone ? (
+            <Link to={`/videos/${videoId || slug}/voz`}>
+              <Button variant="accent" size="sm" className="gap-1.5 shadow-xs">
+                <span>Avançar para Voz</span>
+                <span>→</span>
+              </Button>
+            </Link>
+          ) : undefined
+        }
+      />
 
       {/* Grid de Segmentos */}
       <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
@@ -247,12 +262,12 @@ export default function StudioRecordingPage() {
 
       {/* Banner de Conclusão */}
       {allDone && !activeSegment && (
-        <Card className="flex items-center justify-between border-emerald-300 bg-emerald-50 p-5">
+        <Card className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-accent/30 bg-accent/5 p-5">
           <div>
-            <h3 className="font-display text-base font-semibold text-emerald-950">
+            <h3 className="font-display text-base font-semibold text-foreground">
               🎉 Todos os {segments.length} segmentos foram gravados!
             </h3>
-            <p className="mt-0.5 text-xs text-emerald-800">
+            <p className="mt-0.5 text-xs text-muted-foreground">
               Os áudios sincronizados com as expressões faciais estão prontos no servidor.
             </p>
           </div>
@@ -260,7 +275,7 @@ export default function StudioRecordingPage() {
             asChild
             variant="accent"
             size="sm"
-            className="bg-emerald-700 text-white hover:bg-emerald-800"
+            className="shrink-0"
           >
             <Link to={`/videos/${videoId || slug}/voz`}>
               Avançar para Voz & Sublegendas →
@@ -270,7 +285,7 @@ export default function StudioRecordingPage() {
       )}
 
       {cameraError && (
-        <Alert className="border-amber-300 bg-amber-50 text-amber-900">
+        <Alert variant="destructive">
           <AlertDescription>⚠️ {cameraError}</AlertDescription>
         </Alert>
       )}
@@ -346,26 +361,26 @@ export default function StudioRecordingPage() {
               </div>
 
               {/* VU Meter & Microfone */}
-              <Card className="flex flex-1 flex-col gap-2 bg-muted p-4">
+              <Card className="flex flex-1 flex-col gap-2.5 border-border bg-card p-4 shadow-xs">
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1.5 font-medium">
-                    🎙️ Nível do Microfone
+                  <span className="flex items-center gap-1.5 font-medium text-foreground">
+                    <Volume2 className="h-3.5 w-3.5 text-accent" /> Nível do Microfone
                   </span>
                   <span className="font-mono text-[11px]">
                     {Math.round(recorder.audioLevel * 100)}%
                   </span>
                 </div>
-                <div className="h-3 w-full overflow-hidden rounded-full bg-muted">
+                <div className="h-2.5 w-full overflow-hidden rounded-full bg-muted border border-border/80 shadow-inner">
                   <div
                     className="h-full rounded-full transition-all duration-75"
                     style={{
                       width: `${Math.round(recorder.audioLevel * 100)}%`,
                       backgroundColor:
                         recorder.audioLevel > 0.85
-                          ? "#ef4444"
+                          ? "var(--color-destructive)"
                           : recorder.audioLevel > 0.6
-                            ? "#22c55e"
-                            : "#94a3b8",
+                            ? "#16a34a"
+                            : "var(--color-accent)",
                     }}
                   />
                 </div>
@@ -373,16 +388,16 @@ export default function StudioRecordingPage() {
                 {/* Status da Gravação */}
                 <div className="mt-2 flex flex-wrap items-center gap-3 text-xs">
                   {recorder.phase === "recording" && (
-                    <div className="flex items-center gap-2 font-semibold text-red-700">
-                      <span className="h-2.5 w-2.5 animate-ping rounded-full bg-red-600" />
+                    <div className="flex items-center gap-2 font-semibold text-destructive">
+                      <span className="h-2.5 w-2.5 animate-ping rounded-full bg-destructive" />
                       REC {(recorder.elapsedMs / 1000).toFixed(1)}s ·{" "}
                       {recorder.samplesCount} frames
                     </div>
                   )}
                   {recorder.phase === "uploading" && (
-                    <div className="font-medium text-blue-700">
+                    <div className="font-medium text-accent">
                       Enviando take para VPS (
-                      {Math.round(recorder.progress * 100)}%)...
+                      {Math.round(recorder.progress * 100)}%)…
                     </div>
                   )}
                   {recorder.phase === "done" && (
@@ -437,6 +452,8 @@ export default function StudioRecordingPage() {
                       variant={
                         recorder.phase === "recording" ? "destructive" : "accent"
                       }
+                      size="default"
+                      className="gap-2 shadow-xs"
                       disabled={
                         !cameraReady ||
                         recorder.phase === "encoding" ||
@@ -445,13 +462,25 @@ export default function StudioRecordingPage() {
                       onClick={toggleRecording}
                     >
                       {recorder.phase === "recording" ? (
-                        <>⏹️ Parar e Salvar Take (Espaço)</>
+                        <>
+                          <Square className="h-4 w-4 fill-current text-white" />
+                          <span>Parar e Salvar Take</span>
+                          <kbd className="ml-1 rounded bg-black/25 px-1.5 py-0.5 text-[10px] font-mono text-white">
+                            Espaço
+                          </kbd>
+                        </>
                       ) : recorder.phase === "encoding" ? (
                         <>Codificando take…</>
                       ) : recorder.phase === "uploading" ? (
                         <>Enviando ({Math.round(recorder.progress * 100)}%)…</>
                       ) : (
-                        <>🔴 Gravar Segmento (Espaço)</>
+                        <>
+                          <Radio className="h-4 w-4 animate-pulse" />
+                          <span>Gravar Segmento</span>
+                          <kbd className="ml-1 rounded bg-black/20 px-1.5 py-0.5 text-[10px] font-mono">
+                            Espaço
+                          </kbd>
+                        </>
                       )}
                     </Button>
                   </div>
@@ -459,9 +488,10 @@ export default function StudioRecordingPage() {
                   {/* Replay do Take Gravado, Descartar & Próximo Segmento */}
                   <div className="flex flex-1 flex-wrap items-center justify-start gap-3 sm:gap-4 lg:justify-end">
                     {activeAudioUrl && recorder.phase !== "recording" && (
-                      <Card className="flex max-w-[440px] min-w-[280px] flex-1 items-center gap-2.5 bg-muted px-3 py-1.5">
-                        <span className="text-xs font-medium whitespace-nowrap text-muted-foreground">
-                          🎧 Ouvir take:
+                      <Card className="flex max-w-[440px] min-w-[280px] flex-1 items-center gap-2.5 bg-card border-border px-3.5 py-1.5 shadow-xs">
+                        <span className="flex items-center gap-1.5 text-xs font-medium whitespace-nowrap text-muted-foreground">
+                          <Headphones className="h-3.5 w-3.5 text-accent" />
+                          <span>Ouvir take:</span>
                         </span>
                         <audio
                           controls
@@ -474,11 +504,13 @@ export default function StudioRecordingPage() {
                     {hasAudioRecorded && recorder.phase !== "recording" && (
                       <Button
                         type="button"
-                        variant="destructive"
+                        variant="outline"
+                        className="gap-1.5 text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/30"
                         disabled={deletingTake || recorder.phase === "uploading"}
                         onClick={handleDiscardTake}
                       >
-                        {deletingTake ? "Descartando…" : "🗑️ Descartar Gravação"}
+                        <Trash2 className="h-3.5 w-3.5" />
+                        <span>{deletingTake ? "Descartando…" : "Descartar Take"}</span>
                       </Button>
                     )}
 
@@ -486,10 +518,12 @@ export default function StudioRecordingPage() {
                       <Button
                         type="button"
                         variant="outline"
+                        className="gap-1.5"
                         disabled={recorder.phase === "recording"}
                         onClick={() => setActiveSegment(nextSegment.id)}
                       >
-                        Próximo ({nextSegment.id}) →
+                        <span>Próximo ({nextSegment.id})</span>
+                        <ArrowRight className="h-3.5 w-3.5" />
                       </Button>
                     )}
                   </div>
@@ -529,6 +563,38 @@ export default function StudioRecordingPage() {
               }}
             >
               Sim, Regravar
+            </Button>
+          </div>
+        </Modal>
+      )}
+
+      {/* Modal de Confirmação para Descartar Take */}
+      {confirmDiscard && (
+        <Modal
+          title={`Descartar gravação de “${confirmDiscard}”?`}
+          onClose={() => setConfirmDiscard(null)}
+        >
+          <p className="text-sm text-muted-foreground">
+            O áudio e as blendshapes gravadas para este segmento serão excluídos
+            permanentemente do servidor.
+          </p>
+          <div className="mt-5 flex justify-end gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setConfirmDiscard(null)}
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              disabled={deletingTake}
+              onClick={executeDiscardTake}
+            >
+              {deletingTake ? "Descartando…" : "Sim, descartar take"}
             </Button>
           </div>
         </Modal>

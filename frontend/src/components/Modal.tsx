@@ -7,29 +7,26 @@ import {
   DialogHeader,
   DialogTitle,
 } from "./ui/dialog";
-import { Button } from "./ui/button";
 
 export default function Modal({
   title,
   children,
   onClose,
+  footer,
 }: {
   title: string;
   children: ReactNode;
   onClose: () => void;
+  footer?: ReactNode;
 }) {
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
-      <DialogContent aria-label={title}>
+      <DialogContent aria-label={title} className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
         <div>{children}</div>
-        <DialogFooter>
-          <Button type="button" variant="outline" size="sm" onClick={onClose}>
-            Fechar
-          </Button>
-        </DialogFooter>
+        {footer ? <DialogFooter>{footer}</DialogFooter> : null}
       </DialogContent>
     </Dialog>
   );

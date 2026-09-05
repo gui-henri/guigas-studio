@@ -4,6 +4,7 @@ import { useQuery } from "@connectrpc/connect-query";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { VideoStatus } from "../gen/app/studio/v1/video_pb";
+import { presentStatus } from "../lib/videoStatus";
 
 import {
   approveScenes,
@@ -34,6 +35,7 @@ import { Card, CardContent, CardHeader } from "../components/ui/card";
 import { Alert, AlertDescription } from "../components/ui/alert";
 import { Skeleton } from "../components/ui/skeleton";
 import { Textarea } from "../components/ui/textarea";
+import VideoPipelineNav from "../components/VideoPipelineNav";
 import { cn } from "@/lib/utils";
 
 const SPRITE_META = spriteMetaJson as SpriteMeta;
@@ -300,39 +302,44 @@ export default function ScenesReviewPage() {
   }
 
   return (
-    <div className="space-y-5" data-testid="scenes-review-page">
-      <header className="flex flex-wrap items-center gap-3">
-        <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">
-          ← Fila
-        </Link>
-        <h1 className="font-display text-2xl font-semibold">Cenas · {slug}</h1>
-        <Badge
-          variant="accent"
-          data-testid="review-progress"
-          className="ml-auto"
-        >
-          {progress.approved}/{progress.total} aprovadas
-        </Badge>
-        <Button
-          type="button"
-          onClick={prepareRender}
-          disabled={!progress.isComplete || !reviewing || prepared}
-          data-testid="approve-all"
-          title={
-            !reviewing
-              ? "Fora do estado scenes_review (somente leitura)"
-              : progress.isComplete
-                ? "Prepara o render (enqueue na S5-01)"
-                : "Aprove todas as cenas primeiro"
-          }
-        >
-          {approveScenesMutation.isPending
-            ? "preparando…"
-            : prepared
-              ? "render preparado ✓"
-              : "Aprovar tudo"}
-        </Button>
-      </header>
+    <div className="space-y-6" data-testid="scenes-review-page">
+      <VideoPipelineNav
+        videoId={id}
+        videoSlug={slug}
+        status={status}
+        currentStage="cenas"
+        extraMeta={
+          <Badge
+            variant="accent"
+            data-testid="review-progress"
+          >
+            {progress.approved}/{progress.total} aprovadas
+          </Badge>
+        }
+        actions={
+          <Button
+            type="button"
+            variant="accent"
+            size="sm"
+            onClick={prepareRender}
+            disabled={!progress.isComplete || !reviewing || prepared}
+            data-testid="approve-all"
+            title={
+              !reviewing
+                ? "Fora do estado scenes_review (somente leitura)"
+                : progress.isComplete
+                  ? "Prepara o render (enqueue na S5-01)"
+                  : "Aprove todas as cenas primeiro"
+            }
+          >
+            {approveScenesMutation.isPending
+              ? "preparando…"
+              : prepared
+                ? "render preparado ✓"
+                : "Aprovar tudo & renderizar"}
+          </Button>
+        }
+      />
 
       {prepareError ? (
         <Alert variant="destructive">
@@ -343,7 +350,11 @@ export default function ScenesReviewPage() {
       {!reviewing ? (
         <Alert>
           <AlertDescription>
-            Status atual: <strong>{status}</strong> — ações de review desabilitadas.
+            Status atual:{" "}
+            <strong>
+              {status !== undefined ? presentStatus(status).label : "—"}
+            </strong>{" "}
+            — ações de revisão de cenas só ficam disponíveis no estágio de revisão de cenas.
           </AlertDescription>
         </Alert>
       ) : null}

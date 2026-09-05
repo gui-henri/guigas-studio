@@ -13,6 +13,7 @@ import SegmentCard, {
 } from "../components/script/SegmentCard";
 import ScriptDiff from "../components/script/ScriptDiff";
 import Modal from "../components/Modal";
+import VideoPipelineNav from "../components/VideoPipelineNav";
 import { useRpcMutation } from "../lib/rpc";
 import { presentStatus } from "../lib/videoStatus";
 import { Badge } from "../components/ui/badge";
@@ -241,63 +242,62 @@ export default function ScriptReviewPage() {
   }
 
   return (
-    <div className="space-y-5">
-      <header className="flex flex-wrap items-center gap-3">
-        <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">
-          ← Fila
-        </Link>
-        <h1 className="font-display text-2xl font-semibold">{video.slug}</h1>
-        <Badge variant="secondary">
-          {presentStatus(video.status).label}
-        </Badge>
-        <nav className="ml-auto flex items-center gap-2 text-sm">
-          {(video.status === VideoStatus.RECORDING ||
-            video.status === VideoStatus.SCRIPT_APPROVED) && (
-            <Link to={`/videos/${video.slug}/studio`}>
-              <Button variant="default" size="sm">Estúdio 🎙️</Button>
-            </Link>
-          )}
-          <Link to={`/videos/${video.id}/voz`}>
-            <Button variant="outline" size="sm">Voz</Button>
-          </Link>
-          <Link to={`/videos/${video.id}/final`}>
-            <Button variant="outline" size="sm">Corte</Button>
-          </Link>
-        </nav>
-        {script.target && (
-          <span className="text-xs text-muted-foreground">alvo: {script.target.durationMin} min</span>
-        )}
-        <span className="text-xs text-muted-foreground">
-          {shortCount} short{shortCount === 1 ? "" : "s"}
-        </span>
-
-        {!editing && video.status === VideoStatus.SCRIPT_REVIEW && (
-          <div className="ml-auto flex gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={generating}
-              title="Regenera o roteiro com a IA (sobrescreve o atual)"
-              onClick={() => {
-                resetGeneration();
-                doGenerate({ videoId: id });
-              }}
-            >
-              {generating ? "Gerando…" : "Regenerar com IA"}
-            </Button>
-            <Button type="button" variant="outline" size="sm" onClick={startEditing}>
-              Editar
-            </Button>
-            <Button type="button" variant="destructive" size="sm" onClick={() => setModal("reject")}>
-              Rejeitar
-            </Button>
-            <Button type="button" variant="accent" size="sm" onClick={() => setModal("approve")}>
-              Aprovar
-            </Button>
+    <div className="space-y-6">
+      <VideoPipelineNav
+        videoId={id}
+        videoSlug={video.slug}
+        status={video.status}
+        currentStage="roteiro"
+        extraMeta={
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            {script.target && <span>alvo: {script.target.durationMin} min</span>}
+            <span>•</span>
+            <span>
+              {shortCount} short{shortCount === 1 ? "" : "s"}
+            </span>
           </div>
-        )}
-      </header>
+        }
+        actions={
+          <div className="flex items-center gap-2 flex-wrap">
+            {(video.status === VideoStatus.RECORDING ||
+              video.status === VideoStatus.SCRIPT_APPROVED) && (
+              <Link to={`/videos/${video.slug}/studio`}>
+                <Button variant="accent" size="sm" className="gap-1.5 shadow-xs">
+                  <span>Ir para Estúdio</span>
+                  <span>🎙️</span>
+                </Button>
+              </Link>
+            )}
+
+            {!editing && video.status === VideoStatus.SCRIPT_REVIEW && (
+              <>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={generating}
+                  title="Regenera o roteiro com a IA (sobrescreve o atual)"
+                  onClick={() => {
+                    resetGeneration();
+                    doGenerate({ videoId: id });
+                  }}
+                >
+                  {generating ? "Gerando…" : "Regenerar com IA"}
+                </Button>
+                <Button type="button" variant="outline" size="sm" onClick={startEditing}>
+                  Editar
+                </Button>
+                <Button type="button" variant="destructive" size="sm" onClick={() => setModal("reject")}>
+                  Rejeitar
+                </Button>
+                <Button type="button" variant="accent" size="sm" onClick={() => setModal("approve")}>
+                  Aprovar
+                </Button>
+              </>
+            )}
+          </div>
+        }
+      />
 
       {generationErrors.length > 0 && (
         <Alert variant="destructive">
@@ -312,23 +312,19 @@ export default function ScriptReviewPage() {
         </Alert>
       )}
 
-      {(video.status === VideoStatus.RECORDING ||
-        video.status === VideoStatus.SCRIPT_APPROVED) && (
-        <Alert>
-          <AlertDescription>
-            <span className="font-medium">Roteiro aprovado! O estúdio de gravação está pronto. </span>
-            <span className="text-xs">Conecte seu microfone e câmera para gravar os takes e blendshapes. </span>
-            <Link to={`/videos/${video.slug}/studio`} className="ml-2 inline-block">
-              <Button variant="accent" size="sm">Abrir Estúdio de Gravação →</Button>
-            </Link>
-          </AlertDescription>
-        </Alert>
-      )}
-
       {toast && (
-        <Alert>
-          <AlertDescription>{toast}</AlertDescription>
-        </Alert>
+        <div className="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-2.5 text-sm shadow-xs">
+          <span>{toast}</span>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => setToast(null)}
+            className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
+          >
+            ✕
+          </Button>
+        </div>
       )}
 
       {editing && (
@@ -355,34 +351,48 @@ export default function ScriptReviewPage() {
         </form>
       )}
 
-      <div className="flex flex-col-reverse gap-5 lg:flex-row">
-        <nav className="lg:w-52 lg:shrink-0" aria-label="Segmentos">
-          <ul className="flex gap-1 overflow-x-auto lg:flex-col">
+      <div className="flex flex-col gap-6 lg:flex-row">
+        <aside
+          className="lg:w-56 lg:shrink-0 lg:sticky lg:top-6 lg:self-start space-y-2 rounded-xl border border-border bg-card p-3.5 shadow-xs"
+          aria-label="Índice de segmentos"
+        >
+          <div className="flex items-center justify-between px-1 pb-1">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/70">
+              Segmentos ({draftSegments.length})
+            </span>
+          </div>
+          <ul className="flex gap-1 overflow-x-auto lg:flex-col pb-1 lg:pb-0">
             {draftSegments.map((seg) => (
               <li key={seg.id}>
                 <a
                   href={`#segment-${seg.id}`}
-                  className="block rounded px-3 py-2 text-xs hover:bg-muted text-muted-foreground"
+                  className="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs text-muted-foreground hover:bg-muted hover:text-foreground transition-colors whitespace-nowrap"
                 >
-                  {changedIds.has(seg.id) && <span title="alterado">● </span>}
-                  <span className="font-mono">{seg.id}</span>
-                  <span className="ml-1 hidden text-muted-foreground sm:inline">{beatLabel(seg.beat)}</span>
-                  <span className="ml-1 hidden text-muted-foreground/70 md:inline">{emotionLabel(seg.emotion)}</span>
+                  {changedIds.has(seg.id) && (
+                    <span className="text-accent" title="alterado">
+                      ●{" "}
+                    </span>
+                  )}
+                  <span className="font-mono font-medium">{seg.id}</span>
+                  <span className="ml-auto hidden text-[11px] text-muted-foreground/80 sm:inline">
+                    {beatLabel(seg.beat)}
+                  </span>
                 </a>
               </li>
             ))}
           </ul>
-        </nav>
+        </aside>
 
-        <div className="min-w-0 flex-1 space-y-3">
-          <label className="flex items-center gap-2 text-sm text-muted-foreground">
+        <div className="min-w-0 flex-1 space-y-4">
+          <label className="flex items-center gap-2.5 text-xs text-muted-foreground cursor-pointer select-none">
             <input
               type="checkbox"
               checked={showDiff}
+              className="h-4 w-4 rounded border-border accent-accent cursor-pointer transition-colors focus:ring-accent"
               onChange={(e) => setShowDiff(e.target.checked)}
               disabled={editing}
             />
-            Mostrar diff vs. original do agente
+            <span>Mostrar diff vs. original gerado pelo agente</span>
           </label>
 
           {showDiff && !editing && original && (

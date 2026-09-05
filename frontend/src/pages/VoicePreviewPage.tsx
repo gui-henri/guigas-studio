@@ -10,8 +10,11 @@ import spriteMetaJson from "@guigas/remotion-kit/assets/sprite.json";
 import sheetUrl from "@guigas/remotion-kit/assets/sprite-placeholder.png";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
+import { Card } from "../components/ui/card";
 import { Alert, AlertDescription } from "../components/ui/alert";
 import { Skeleton } from "../components/ui/skeleton";
+import VideoPipelineNav from "../components/VideoPipelineNav";
+import { Mic } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const SPRITE_META = spriteMetaJson as SpriteMeta;
@@ -47,13 +50,21 @@ export default function VoicePreviewPage() {
   }
 
   return (
-    <div className="space-y-5">
-      <header className="flex items-center gap-3">
-        <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">
-          ← Fila
-        </Link>
-        <h1 className="font-display text-2xl font-semibold">Voz · {slug}</h1>
-      </header>
+    <div className="space-y-6">
+      <VideoPipelineNav
+        videoId={id}
+        videoSlug={slug}
+        status={videoQuery.data?.video?.status}
+        currentStage="voz"
+        actions={
+          <Link to={`/videos/${id}/scenes`}>
+            <Button variant="outline" size="sm" className="gap-1.5 shadow-xs">
+              <span>Avançar para Cenas</span>
+              <span>→</span>
+            </Button>
+          </Link>
+        }
+      />
 
       <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-4">
         {segments.map((seg) => {
@@ -78,16 +89,28 @@ export default function VoicePreviewPage() {
       </ul>
 
       {!activeId && (
-        <Alert>
-          <AlertDescription>
+        <Card className="border-dashed p-8 text-center bg-card">
+          <Mic className="mx-auto h-8 w-8 text-muted-foreground/60 mb-3" />
+          <h3 className="font-display text-base font-semibold text-foreground">
+            Aguardando gravações de áudio
+          </h3>
+          <p className="mt-1 text-xs text-muted-foreground max-w-md mx-auto">
             Nenhum segmento com take + timeline ainda. Esta lista atualiza sozinha conforme o
             pipeline de voz termina cada um.
-          </AlertDescription>
-        </Alert>
+          </p>
+          <div className="mt-4">
+            <Link to={`/videos/${slug || id}/studio`}>
+              <Button variant="accent" size="sm" className="gap-1.5 shadow-xs">
+                <span>Abrir Estúdio para Gravar</span>
+                <span>🎙️</span>
+              </Button>
+            </Link>
+          </div>
+        </Card>
       )}
 
       {activeId && assets.loading && (
-        <Skeleton className="h-64" aria-busy />
+        <Skeleton className="h-64 rounded-xl" aria-busy />
       )}
       {activeId && !assets.loading && (!timeline || !assets.wavUrl) && (
         <Alert>
@@ -97,13 +120,17 @@ export default function VoicePreviewPage() {
         </Alert>
       )}
       {activeId && timeline && assets.wavUrl && (
-        <AvatarPreviewPlayer
-          timeline={timeline}
-          wavUrl={assets.wavUrl}
-          spriteSheetUrl={SHEET_URL}
-          spriteMeta={SPRITE_META}
-          maxWidth={640}
-        />
+        <Card className="p-4 sm:p-6 bg-card border-border flex flex-col items-center justify-center shadow-xs">
+          <div className="w-full max-w-[640px]">
+            <AvatarPreviewPlayer
+              timeline={timeline}
+              wavUrl={assets.wavUrl}
+              spriteSheetUrl={SHEET_URL}
+              spriteMeta={SPRITE_META}
+              maxWidth={640}
+            />
+          </div>
+        </Card>
       )}
     </div>
   );

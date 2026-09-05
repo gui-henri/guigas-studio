@@ -12,6 +12,7 @@ import {
 } from "../gen/app/studio/v1/video-VideoService_connectquery";
 import { TOKEN_STORAGE_KEY } from "../lib/transport";
 import { VideoStatus } from "../gen/app/studio/v1/video_pb";
+import { presentStatus } from "../lib/videoStatus";
 import {
   durationDeviation,
   formatDuration,
@@ -24,6 +25,7 @@ import { Alert, AlertDescription } from "../components/ui/alert";
 import { Skeleton } from "../components/ui/skeleton";
 import { Textarea } from "../components/ui/textarea";
 import Modal from "../components/Modal";
+import VideoPipelineNav from "../components/VideoPipelineNav";
 
 interface RenderInfo {
   path: string;
@@ -92,48 +94,64 @@ export default function FinalReviewPage() {
   }
 
   return (
-    <div className="space-y-5" data-testid="final-review-page">
-      <header className="flex flex-wrap items-center gap-3">
-        <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">
-          ← Fila
-        </Link>
-        <h1 className="font-display text-2xl font-semibold">Corte final · {slug}</h1>
-        {deviation ? (
-          <Badge
-            data-testid="target-badge"
-            variant={deviation.tone === "ok" ? "default" : deviation.tone === "warn" ? "accent" : "destructive"}
-            title={deviation.detail}
-          >
-            {deviation.label}: {deviation.detail}
-          </Badge>
-        ) : null}
-        <div className="ml-auto flex gap-2">
-          {status === VideoStatus.FINAL_REVIEW ? (
-            <>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setModal("rerender")}
-                disabled={rerender.isPending}
-              >
-                Pedir re-render
-              </Button>
-              <Button
-                type="button"
-                variant="accent"
-                onClick={() => setModal("approve")}
-                disabled={approve.isPending}
-              >
-                {approve.isPending ? "gerando release…" : "Aprovar corte"}
-              </Button>
-            </>
-          ) : (
-            <span className="self-center text-xs text-muted-foreground">
-              status atual: {status} — ações disponíveis só em final_review
-            </span>
-          )}
-        </div>
-      </header>
+    <div className="space-y-6" data-testid="final-review-page">
+      <VideoPipelineNav
+        videoId={id}
+        videoSlug={slug}
+        status={status}
+        currentStage="final"
+        extraMeta={
+          deviation ? (
+            <Badge
+              data-testid="target-badge"
+              variant={
+                deviation.tone === "ok"
+                  ? "default"
+                  : deviation.tone === "warn"
+                    ? "accent"
+                    : "destructive"
+              }
+              title={deviation.detail}
+            >
+              {deviation.label}: {deviation.detail}
+            </Badge>
+          ) : null
+        }
+        actions={
+          <div className="flex items-center gap-2 flex-wrap">
+            {status === VideoStatus.FINAL_REVIEW ? (
+              <>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setModal("rerender")}
+                  disabled={rerender.isPending}
+                >
+                  Pedir re-render
+                </Button>
+                <Button
+                  type="button"
+                  variant="accent"
+                  size="sm"
+                  onClick={() => setModal("approve")}
+                  disabled={approve.isPending}
+                >
+                  {approve.isPending ? "gerando release…" : "Aprovar corte"}
+                </Button>
+              </>
+            ) : (
+              <span className="self-center text-xs text-muted-foreground">
+                Status atual:{" "}
+                <strong>
+                  {status !== undefined ? presentStatus(status).label : "—"}
+                </strong>{" "}
+                — ações disponíveis na etapa de revisão final
+              </span>
+            )}
+          </div>
+        }
+      />
 
       {approve.isSuccess ? (
         <Alert>
@@ -194,6 +212,7 @@ export default function FinalReviewPage() {
                 <input
                   type="checkbox"
                   checked={item.published}
+                  className="h-4 w-4 rounded border-border accent-accent cursor-pointer transition-colors focus:ring-accent"
                   onChange={(e) =>
                     publishMutation.mutate({
                       videoId: id,

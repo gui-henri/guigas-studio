@@ -43,11 +43,18 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted p-6">
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle className="text-xl">Guigas Studio</CardTitle>
-          <CardDescription>Entre para acessar o dashboard</CardDescription>
+    <div className="flex min-h-screen items-center justify-center bg-background p-6">
+      <Card className="w-full max-w-sm border-border shadow-md">
+        <CardHeader className="text-center pb-3">
+          <div className="mx-auto mb-2 flex items-center justify-center gap-1.5">
+            <span className="font-display text-2xl font-bold tracking-tight text-foreground">
+              Guigas Studio
+            </span>
+            <span className="rounded bg-accent/15 px-1.5 py-0.5 text-[10px] font-mono font-medium text-accent">
+              v2
+            </span>
+          </div>
+          <CardDescription>Acesse o pipeline de produção</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
