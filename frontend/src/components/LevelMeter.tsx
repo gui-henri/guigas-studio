@@ -26,7 +26,7 @@ export default function LevelMeter({
   }, [registerLevel]);
 
   return (
-    <div className="relative h-3 w-full overflow-hidden rounded border border-ink/20 bg-ink/5">
+    <div className="relative h-3 w-full overflow-hidden rounded border border-input bg-muted">
       <div
         ref={barRef}
         className="h-full bg-emerald-600 transition-[width] duration-75"

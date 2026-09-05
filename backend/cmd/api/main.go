@@ -17,15 +17,19 @@ import (
 
 	"connectrpc.com/connect"
 
+	"github.com/google/uuid"
 	studiov1connect "github.com/gui-henri/guigas-studio/backend/gen/app/studio/v1/studiov1connect"
 	"github.com/gui-henri/guigas-studio/backend/internal/artifacts"
 	"github.com/gui-henri/guigas-studio/backend/internal/auth"
 	"github.com/gui-henri/guigas-studio/backend/internal/config"
 	"github.com/gui-henri/guigas-studio/backend/internal/database"
 	"github.com/gui-henri/guigas-studio/backend/internal/events"
+	"github.com/gui-henri/guigas-studio/backend/internal/gemini"
 	"github.com/gui-henri/guigas-studio/backend/internal/middleware"
+	"github.com/gui-henri/guigas-studio/backend/internal/scriptgen"
 	"github.com/gui-henri/guigas-studio/backend/internal/services"
 	recording "github.com/gui-henri/guigas-studio/backend/internal/services/recording"
+	"github.com/gui-henri/guigas-studio/backend/internal/storage"
 	"github.com/gui-henri/guigas-studio/backend/internal/timeline"
 	"github.com/gui-henri/guigas-studio/backend/internal/upload"
 	"github.com/gui-henri/guigas-studio/backend/internal/watcher"
@@ -34,9 +38,27 @@ import (
 func newHandler(cfg config.Config, db *database.DB, appHub *events.Hub) http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
+		body := map[string]string{"status": "ok"}
+		code := http.StatusOK
+		if db == nil || db.Pool == nil {
+			body["status"] = "degraded"
+			body["postgres"] = "unconfigured"
+			code = http.StatusServiceUnavailable
+		} else {
+			pingCtx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
+			defer cancel()
+			if err := db.Pool.Ping(pingCtx); err != nil {
+				slog.Warn("healthz.postgres_unreachable", slog.Any("error", err))
+				body["status"] = "degraded"
+				body["postgres"] = "error"
+				code = http.StatusServiceUnavailable
+			} else {
+				body["postgres"] = "ok"
+			}
+		}
 		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		_ = json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
+		w.WriteHeader(code)
+		_ = json.NewEncoder(w).Encode(body)
 	})
 
 	interceptors := []connect.Interceptor{
@@ -82,7 +104,11 @@ func newHandler(cfg config.Config, db *database.DB, appHub *events.Hub) http.Han
 	}))
 	mux.Handle(studiov1connect.NewHealthServiceHandler(services.NewHealthService(), connect.WithInterceptors(interceptors...)))
 	mux.Handle(studiov1connect.NewAuthServiceHandler(services.NewAuthService(db.Pool, cfg.Auth.JWTSecret), connect.WithInterceptors(interceptors...)))
-	mux.Handle(studiov1connect.NewVideoServiceHandler(services.NewVideoService(db.Queries, cfg.DataDir, hub, db.Pool), connect.WithInterceptors(interceptors...)))
+	videoSvc := services.NewVideoService(db.Queries, cfg.DataDir, hub, db.Pool)
+	if gc, gerr := gemini.NewFromEnvScript(); gerr == nil {
+		videoSvc.WithScriptGenerator(gc)
+	}
+	mux.Handle(studiov1connect.NewVideoServiceHandler(videoSvc, connect.WithInterceptors(interceptors...)))
 
 	return h2c.NewHandler(mux, &http2.Server{})
 }
@@ -129,10 +155,45 @@ func main() {
 
 	appHub := events.NewHub()
 
+	store, err := storage.NewFromConfig(ctx, cfg)
+	if err != nil {
+		logger.Error("storage misconfigured", "error", err)
+		os.Exit(1)
+	}
+	if cfg.S3.Enabled {
+		logger.Info("storage.mode", slog.String("backend", "s3"), slog.String("bucket", cfg.S3.Bucket), slog.String("endpoint", cfg.S3.Endpoint))
+	} else {
+		logger.Info("storage.mode", slog.String("backend", "local"), slog.String("dir", cfg.DataDir))
+	}
+	_ = store // handler migration to presigned Storage lands next; disk stays source of truth meanwhile
+
+	// Automatic script generation (Gemini, structured JSON). Disabled when
+	// GEMINI_API_KEY is empty — the manual flow (context pack + UI) stays.
+	geminiClient, gerr := gemini.NewFromEnvScript()
+	if gerr != nil {
+		logger.Warn("scriptgen.disabled", slog.String("reason", "GEMINI_API_KEY is empty"))
+		geminiClient = nil
+	}
+	var onScaffolded func(ctx context.Context, videoID uuid.UUID, slug, title string)
+	if geminiClient != nil {
+		gc := geminiClient
+		dataDir := cfg.DataDir
+		onScaffolded = func(hookCtx context.Context, _ uuid.UUID, slug, title string) {
+			if hookCtx.Err() != nil {
+				return
+			}
+			schema := gemini.ScriptResponseSchema()
+			if err := scriptgen.GenerateForSlug(hookCtx, gc, scriptgen.ValidateFunc(), dataDir, slug, title, schema, scriptgen.MaxAttemptsFromEnv(3)); err != nil {
+				logger.Error("scriptgen.failed", slog.String("slug", slug), slog.Any("error", err))
+			}
+		}
+	}
+
 	rssWatcher := watcher.New(db.Queries, watcher.Config{
-		URL:      os.Getenv("RSS_URL"),
-		Interval: interval,
-		DataDir:  cfg.DataDir,
+		URL:          os.Getenv("RSS_URL"),
+		Interval:     interval,
+		DataDir:      cfg.DataDir,
+		OnScaffolded: onScaffolded,
 	}, logger)
 	go rssWatcher.Run(ctx)
 

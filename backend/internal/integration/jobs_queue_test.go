@@ -452,7 +452,7 @@ func TestJobServiceClaimTransitionsAndSSE(t *testing.T) {
 	for !sawProgress {
 		select {
 		case evt := <-sub:
-			if p := evt.GetJobProgress(); p != nil && p.GetPercent() == 40 && p.GetStage() == "render-long" {
+			if p := evt.Event.GetJobProgress(); p != nil && p.GetPercent() == 40 && p.GetStage() == "render-long" {
 				sawProgress = true
 			}
 		case <-deadline:

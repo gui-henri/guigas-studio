@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 
 import { useFaceLandmarker } from "../recording/useFaceLandmarker";
+import { Alert, AlertDescription } from "../components/ui/alert";
+import { Badge } from "../components/ui/badge";
+import { Button } from "../components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 
 /** Dev-only smoke page: webcam + live blendshape FPS HUD (S2-02). */
 export default function LandmarkerDevPage() {
@@ -42,27 +46,36 @@ export default function LandmarkerDevPage() {
   }, [running]);
 
   return (
-    <div className="mx-auto max-w-xl p-8">
-      <h1 className="font-serif text-2xl font-semibold">Face Landmarker — dev HUD</h1>
-      <p className="mt-1 text-sm text-ink/60">
-        delegate: {landmarker.delegate ?? "inicializando…"} · fps: {landmarker.fps} ·
-        lotes recebidos: {batchCount}
-      </p>
-      {(landmarker.error || cameraError) && (
-        <p className="mt-2 rounded border border-red-300 bg-red-50 p-2 text-sm text-red-800">
-          {cameraError ?? landmarker.error}
-        </p>
-      )}
-      <div className="mt-4 overflow-hidden rounded-lg border border-ink/10">
-        <video ref={videoRef} muted playsInline className="w-full" />
-      </div>
-      <button
-        type="button"
-        onClick={() => setRunning((r) => !r)}
-        className="mt-4 rounded bg-accent px-4 py-2 text-sm text-paper hover:opacity-90"
-      >
-        {running ? "Parar" : "Iniciar câmera"}
-      </button>
+    <div className="mx-auto max-w-xl space-y-4 p-8">
+      <Card>
+        <CardHeader>
+          <CardTitle>Face Landmarker — dev HUD</CardTitle>
+          <p className="mt-1 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+            <span>
+              delegate: <Badge variant="secondary">{landmarker.delegate ?? "inicializando…"}</Badge>
+            </span>
+            <span>
+              fps: <Badge variant="secondary">{landmarker.fps}</Badge>
+            </span>
+            <span>
+              lotes recebidos: <Badge variant="secondary">{batchCount}</Badge>
+            </span>
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {(landmarker.error || cameraError) && (
+            <Alert variant="destructive">
+              <AlertDescription>{cameraError ?? landmarker.error}</AlertDescription>
+            </Alert>
+          )}
+          <div className="overflow-hidden rounded-lg border border-border">
+            <video ref={videoRef} muted playsInline className="w-full" />
+          </div>
+          <Button type="button" variant="accent" onClick={() => setRunning((r) => !r)}>
+            {running ? "Parar" : "Iniciar câmera"}
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   );
 }

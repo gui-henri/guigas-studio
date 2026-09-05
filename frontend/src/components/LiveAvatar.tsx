@@ -130,7 +130,7 @@ export default function LiveAvatar({
     <canvas
       ref={canvasRef}
       aria-label="Avatar ao vivo"
-      className="rounded-lg border border-ink/10"
+      className="rounded-lg border border-border"
     />
   );
 }

@@ -41,6 +41,41 @@ func TestHubSubscribePublishCancel(t *testing.T) {
 	}
 }
 
+func TestHubSubscribeSinceReplaysBacklog(t *testing.T) {
+	hub := NewHub()
+	hub.Publish(TopicGlobal, newEvent(1))
+	hub.Publish(TopicGlobal, newEvent(2))
+	hub.Publish(TopicForVideo("other"), newEvent(3))
+
+	_, cancel, backlog := hub.SubscribeSince([]string{TopicGlobal}, 0)
+	defer cancel()
+	if len(backlog) != 2 {
+		t.Fatalf("backlog = %d deliveries, want 2 (topic-scoped)", len(backlog))
+	}
+	if backlog[0].Seq == 0 || backlog[1].Seq != backlog[0].Seq+1 {
+		t.Errorf("backlog seqs not monotonic: %d, %d", backlog[0].Seq, backlog[1].Seq)
+	}
+
+	// Resume after the first: only newer deliveries replay, live continues.
+	_, cancel2, backlog2 := hub.SubscribeSince([]string{TopicGlobal}, backlog[0].Seq)
+	defer cancel2()
+	if len(backlog2) != 1 || backlog2[0].Seq != backlog[1].Seq {
+		t.Fatalf("resume backlog = %+v, want only seq %d", backlog2, backlog[1].Seq)
+	}
+}
+
+func TestHubHistoryBoundedPerTopic(t *testing.T) {
+	hub := NewHub()
+	for i := 0; i < historyCapPerTopic+10; i++ {
+		hub.Publish(TopicGlobal, newEvent(i))
+	}
+	_, cancel, backlog := hub.SubscribeSince([]string{TopicGlobal}, 0)
+	defer cancel()
+	if len(backlog) != historyCapPerTopic {
+		t.Errorf("backlog = %d, want cap %d", len(backlog), historyCapPerTopic)
+	}
+}
+
 func TestHubSlowConsumerDropsInsteadOfBlocking(t *testing.T) {
 	hub := NewHub()
 	ch, cancel := hub.Subscribe(TopicGlobal)

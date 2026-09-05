@@ -1,0 +1,74 @@
+{
+  "$comment": "Gemini-safe mirror of ../artifacts/schemas/studio_script.schema.json for responseSchema (GenerateScript). No $ref/$defs/additionalProperties/pattern/const — flattened subset. Server revalidates with ValidateScript anyway; keep both in sync.",
+  "type": "object",
+  "required": ["post", "language", "target", "segments"],
+  "properties": {
+    "post": {"type": "string"},
+    "language": {
+      "type": "object",
+      "required": ["spoken", "subtitles"],
+      "properties": {
+        "spoken": {"type": "string", "enum": ["pt-BR"]},
+        "subtitles": {"type": "string", "enum": ["en"]}
+      }
+    },
+    "target": {
+      "type": "object",
+      "required": ["durationMin"],
+      "properties": {
+        "durationMin": {"type": "integer", "minimum": 4, "maximum": 30}
+      }
+    },
+    "related": {"type": "array", "items": {"type": "string"}},
+    "segments": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "beat", "emotion", "narration_pt"],
+        "properties": {
+          "id": {"type": "string"},
+          "beat": {"type": "string", "enum": ["BEAT_HOOK", "BEAT_SETUP", "BEAT_EXAMPLE", "BEAT_PAYOFF", "BEAT_CTA"]},
+          "emotion": {"type": "string", "enum": ["EMOTION_IDLE", "EMOTION_SPEAKING", "EMOTION_HAPPY", "EMOTION_THOUGHTFUL", "EMOTION_SURPRISED"]},
+          "narration_pt": {"type": "string"},
+          "scene": {
+            "type": "object",
+            "nullable": true,
+            "required": ["type"],
+            "properties": {
+              "type": {"type": "string"},
+              "props": {"type": "object"}
+            }
+          },
+          "short": {
+            "type": "object",
+            "nullable": true,
+            "required": ["id", "hook", "cta"],
+            "properties": {
+              "id": {"type": "integer", "minimum": 1},
+              "hook": {"type": "string"},
+              "cta": {"type": "string"}
+            }
+          }
+        }
+      }
+    },
+    "social": {
+      "type": "object",
+      "properties": {
+        "x_thread": {"type": "array", "items": {"type": "string"}},
+        "linkedin": {"type": "string"},
+        "instagram_caption": {"type": "string"}
+      }
+    },
+    "soundtrack": {
+      "type": "object",
+      "nullable": true,
+      "required": ["track"],
+      "properties": {
+        "track": {"type": "string"},
+        "volume": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    }
+  }
+}

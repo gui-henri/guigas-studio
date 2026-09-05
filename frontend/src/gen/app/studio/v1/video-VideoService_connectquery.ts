@@ -25,6 +25,11 @@ export const createVideo = VideoService.method.createVideo;
 export const updateScript = VideoService.method.updateScript;
 
 /**
+ * @generated from rpc app.studio.v1.VideoService.GenerateScript
+ */
+export const generateScript = VideoService.method.generateScript;
+
+/**
  * @generated from rpc app.studio.v1.VideoService.ApproveScript
  */
 export const approveScript = VideoService.method.approveScript;

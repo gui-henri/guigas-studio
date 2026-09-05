@@ -17,12 +17,13 @@ import (
 	"github.com/google/uuid"
 
 	studiov1 "github.com/gui-henri/guigas-studio/backend/gen/app/studio/v1"
-	studiov1connect "github.com/gui-henri/guigas-studio/backend/gen/app/studio/v1/studiov1connect"
 	"github.com/gui-henri/guigas-studio/backend/internal/artifacts"
 	"github.com/gui-henri/guigas-studio/backend/internal/auth"
+	"github.com/gui-henri/guigas-studio/backend/internal/gemini"
 	sqlc "github.com/gui-henri/guigas-studio/backend/internal/database/sqlc"
 	"github.com/gui-henri/guigas-studio/backend/internal/domain/videostate"
 	"github.com/gui-henri/guigas-studio/backend/internal/events"
+	"github.com/gui-henri/guigas-studio/backend/internal/scriptgen"
 	"github.com/gui-henri/guigas-studio/backend/internal/workspace"
 )
 
@@ -59,11 +60,14 @@ type VideoService struct {
 	dataDir string
 	hub     *events.Hub // optional; nil disables SSE publishing
 	jobs    *JobsQueue
+	// scriptGen drives manual GenerateScript calls; nil disables the RPC
+	// (server has no GEMINI_API_KEY). Satisfied by *gemini.Client.
+	scriptGen scriptgen.ScriptClient
 }
 
 // NewVideoService returns the Connect handler for VideoService. The pool may
 // be nil in tests that never hit transactional paths (ApproveScenes).
-func NewVideoService(queries *sqlc.Queries, dataDir string, hub *events.Hub, pool *pgxpool.Pool) studiov1connect.VideoServiceHandler {
+func NewVideoService(queries *sqlc.Queries, dataDir string, hub *events.Hub, pool *pgxpool.Pool) *VideoService {
 	return &VideoService{
 		queries: queries,
 		pool:    pool,
@@ -71,6 +75,12 @@ func NewVideoService(queries *sqlc.Queries, dataDir string, hub *events.Hub, poo
 		hub:     hub,
 		jobs:    NewJobsQueue(queries),
 	}
+}
+
+// WithScriptGenerator enables the GenerateScript RPC; returns s for chaining.
+func (s *VideoService) WithScriptGenerator(g scriptgen.ScriptClient) *VideoService {
+	s.scriptGen = g
+	return s
 }
 
 // publishStatusChanged emits video.status_changed to global + per-video topics.
@@ -339,6 +349,56 @@ func (s *VideoService) RejectScript(
 		return nil, connect.NewError(connect.CodeInternal, errors.New("failed to reload video"))
 	}
 	return connect.NewResponse(&studiov1.RejectScriptResponse{Video: videoToProto(&updated)}), nil
+}
+
+// GenerateScript runs automatic script generation on demand (manual button in
+// the UI, same pipeline as the watcher hook). Allowed in script_pending
+// (first generation) and script_review (regeneration before approval).
+// The response carries Errors instead of an RPC error when generation fails,
+// so the UI can render them inline (UpdateScript convention).
+func (s *VideoService) GenerateScript(
+	ctx context.Context,
+	req *connect.Request[studiov1.GenerateScriptRequest],
+) (*connect.Response[studiov1.GenerateScriptResponse], error) {
+	video, release := s.videoForReview(ctx, req.Msg.GetVideoId())
+	defer release()
+	if video == nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("invalid video id"))
+	}
+	st := videostate.State(video.Status)
+	if st != videostate.StateScriptPending && st != videostate.StateScriptReview {
+		return nil, connect.NewError(connect.CodeFailedPrecondition,
+			errors.New("scripts can only be generated while in script_pending or script_review"))
+	}
+	if s.scriptGen == nil {
+		return connect.NewResponse(&studiov1.GenerateScriptResponse{
+			Errors: []string{"automatic generation is disabled: server has no GEMINI_API_KEY"},
+		}), nil
+	}
+
+	if err := scriptgen.GenerateForSlug(ctx, s.scriptGen, scriptgen.ValidateFunc(),
+		s.dataDir, video.Slug, video.Title,
+		gemini.ScriptResponseSchema(), scriptgen.MaxAttemptsFromEnv(3)); err != nil {
+		slog.Error("generate script failed", "slug", video.Slug, "error", err)
+		return connect.NewResponse(&studiov1.GenerateScriptResponse{
+			Errors: []string{err.Error()},
+		}), nil
+	}
+
+	raw, err := os.ReadFile(filepath.Join(s.workspaceRoot(video.Slug), artifacts.ScriptFileName))
+	if err != nil {
+		slog.Error("generate script re-read failed", "slug", video.Slug, "error", err)
+		return nil, connect.NewError(connect.CodeInternal, errors.New("script was generated but cannot be read back"))
+	}
+	parsed, vErrors := artifacts.ValidateScript(raw)
+	if len(vErrors) > 0 {
+		msgs := make([]string, 0, len(vErrors))
+		for _, e := range vErrors {
+			msgs = append(msgs, e.Error())
+		}
+		return connect.NewResponse(&studiov1.GenerateScriptResponse{Errors: msgs}), nil
+	}
+	return connect.NewResponse(&studiov1.GenerateScriptResponse{Script: parsed}), nil
 }
 
 // transitionAndRecord applies videostate.Transition, persists status and appends history.

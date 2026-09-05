@@ -1,5 +1,11 @@
 import { Beat, Emotion } from "../../gen/app/studio/v1/script_pb";
 import type { Segment } from "../../gen/app/studio/v1/script_pb";
+import { Badge } from "../ui/badge";
+import { Card, CardContent, CardHeader } from "../ui/card";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { Textarea } from "../ui/textarea";
+import { cn } from "@/lib/utils";
 
 const beatLabels: Partial<Record<Beat, string>> = {
   [Beat.HOOK]: "Hook",
@@ -63,31 +69,29 @@ export default function SegmentCard({
   const readOnly = !editing || !onChange;
 
   return (
-    <article
+    <Card
       id={`segment-${segment.id}`}
-      className={`rounded-lg border bg-white p-5 shadow-sm scroll-mt-20 ${
-        changed ? "border-accent" : "border-ink/10"
-      }`}
+      className={cn("scroll-mt-20", changed && "border-ring")}
     >
-      <header className="flex flex-wrap items-center gap-2">
-        <span className="font-mono text-xs text-ink/50">{segment.id}</span>
+      <CardHeader className="flex-row flex-wrap items-center gap-2 space-y-0">
+        <span className="font-mono text-xs text-muted-foreground">{segment.id}</span>
         {readOnly ? (
           <>
-            <span className="rounded-full border border-sky-200 bg-sky-50 px-2 py-0.5 text-xs text-sky-800">
+            <Badge variant="default">
               {beatLabel(segment.beat)}
-            </span>
-            <span className="rounded-full border border-teal-200 bg-teal-50 px-2 py-0.5 text-xs text-teal-800">
+            </Badge>
+            <Badge variant="secondary">
               {emotionLabel(segment.emotion)}
-            </span>
+            </Badge>
             {segment.scene && (
-              <span className="rounded-full border border-violet-200 bg-violet-50 px-2 py-0.5 text-xs text-violet-800">
+              <Badge variant="outline">
                 cena: {segment.scene.type}
-              </span>
+              </Badge>
             )}
             {segment.short && (
-              <span className="rounded-full border border-accent/40 bg-accent/10 px-2 py-0.5 text-xs text-accent">
+              <Badge variant="accent">
                 [SHORT#{segment.short.id}] {segment.short.hook} → {segment.short.cta}
-              </span>
+              </Badge>
             )}
           </>
         ) : (
@@ -98,7 +102,7 @@ export default function SegmentCard({
               onChange={(e) =>
                 onChange({ ...segment, beat: Number(e.target.value) as Beat })
               }
-              className="rounded border border-ink/20 px-2 py-1 text-xs"
+              className="h-8 rounded-md border border-input bg-card px-2 py-1 text-xs shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               {BEAT_OPTIONS.map((b) => (
                 <option key={b} value={b}>
@@ -112,7 +116,7 @@ export default function SegmentCard({
               onChange={(e) =>
                 onChange({ ...segment, emotion: Number(e.target.value) as Emotion })
               }
-              className="rounded border border-ink/20 px-2 py-1 text-xs"
+              className="h-8 rounded-md border border-input bg-card px-2 py-1 text-xs shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               {EMOTION_OPTIONS.map((em) => (
                 <option key={em} value={em}>
@@ -122,29 +126,30 @@ export default function SegmentCard({
             </select>
           </>
         )}
-      </header>
+      </CardHeader>
 
+      <CardContent>
       {readOnly ? (
-        <p className="mt-3 font-serif text-lg leading-relaxed">{segment.narrationPt}</p>
+        <p className="font-display text-lg leading-relaxed">{segment.narrationPt}</p>
       ) : (
-        <div className="mt-3 space-y-3">
+        <div className="space-y-3">
           <div>
-            <textarea
+            <Textarea
               aria-label={`Narração de ${segment.id}`}
               value={segment.narrationPt}
               rows={4}
               onChange={(e) => onChange?.({ ...segment, narrationPt: e.target.value })}
-              className="w-full rounded border border-ink/20 p-3 font-serif text-base leading-relaxed focus:border-ink focus:outline-none"
+              className="font-display text-base leading-relaxed"
             />
             {errors?.narration && (
-              <p className="mt-1 text-xs text-red-700">{errors.narration}</p>
+              <p className="mt-1 text-xs text-destructive">{errors.narration}</p>
             )}
           </div>
           {segment.short && (
-            <div className="grid gap-2 rounded border border-accent/30 bg-accent/5 p-3 sm:grid-cols-2">
-              <label className="text-xs text-accent">
+            <div className="grid gap-2 rounded-md border border-ring/30 bg-muted p-3 sm:grid-cols-2">
+              <Label className="text-xs text-accent">
                 Short hook
-                <input
+                <Input
                   value={segment.short.hook}
                   onChange={(e) =>
                     onChange?.({
@@ -152,15 +157,15 @@ export default function SegmentCard({
                       short: { ...segment.short!, hook: e.target.value },
                     })
                   }
-                  className="mt-1 w-full rounded border border-accent/30 px-2 py-1 text-sm text-ink"
+                  className="mt-1 text-sm"
                 />
                 {errors?.shortHook && (
-                  <span className="mt-1 block text-red-700">{errors.shortHook}</span>
+                  <span className="mt-1 block text-destructive">{errors.shortHook}</span>
                 )}
-              </label>
-              <label className="text-xs text-accent">
+              </Label>
+              <Label className="text-xs text-accent">
                 CTA do short
-                <input
+                <Input
                   value={segment.short.cta}
                   onChange={(e) =>
                     onChange?.({
@@ -168,16 +173,17 @@ export default function SegmentCard({
                       short: { ...segment.short!, cta: e.target.value },
                     })
                   }
-                  className="mt-1 w-full rounded border border-accent/30 px-2 py-1 text-sm text-ink"
+                  className="mt-1 text-sm"
                 />
                 {errors?.shortCta && (
-                  <span className="mt-1 block text-red-700">{errors.shortCta}</span>
+                  <span className="mt-1 block text-destructive">{errors.shortCta}</span>
                 )}
-              </label>
+              </Label>
             </div>
           )}
         </div>
       )}
-    </article>
+      </CardContent>
+    </Card>
   );
 }

@@ -33,6 +33,12 @@ type Config struct {
 	Model  string
 	// Timeout bounds a single HTTP request.
 	Timeout time.Duration
+	// ScriptModel overrides Model for structured script generation
+	// (GEMINI_SCRIPT_MODEL). Empty falls back to Model.
+	ScriptModel string
+	// ScriptTimeout bounds a script generation request
+	// (GEMINI_SCRIPT_TIMEOUT, seconds). Zero falls back to Timeout.
+	ScriptTimeout time.Duration
 	// BackoffBase is the initial retry delay; doubles each attempt.
 	// Exposed for deterministic tests (default 500ms).
 	BackoffBase time.Duration

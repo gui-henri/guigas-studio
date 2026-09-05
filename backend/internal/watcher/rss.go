@@ -25,6 +25,9 @@ type Config struct {
 	URL      string        // RSS_URL
 	Interval time.Duration // RSS_POLL_INTERVAL (default 30m)
 	DataDir  string        // DATA_DIR — workspace root (/data/videos/<slug>)
+	// OnScaffolded fires (async, detached ctx) after a video reaches
+	// script_pending. Used by automatic script generation; nil disables.
+	OnScaffolded func(ctx context.Context, videoID uuid.UUID, slug, title string)
 }
 
 // Watcher polls the blog feed and creates `new` videos for unseen posts.
@@ -204,6 +207,10 @@ func (w *Watcher) scaffoldWorkspace(ctx context.Context, videoID uuid.UUID, slug
 		slog.String("slug", slug),
 		slog.String("status", string(videostate.StateScriptPending)),
 	)
+	if w.cfg.OnScaffolded != nil {
+		hook := w.cfg.OnScaffolded
+		go hook(context.WithoutCancel(ctx), videoID, slug, title)
+	}
 }
 
 // Run loops until ctx is cancelled; a bad feed never kills the watcher.

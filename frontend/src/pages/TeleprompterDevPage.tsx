@@ -1,6 +1,8 @@
 import { useState } from "react";
 
 import Teleprompter from "../features/studio/Teleprompter";
+import { Badge } from "../components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 
 const SEGMENTS = [
   { id: "hook", narration: "Este é o gancho: em quinze segundos você vai entender por que tudo que você sabia sobre X mudou." },
@@ -14,20 +16,30 @@ export default function TeleprompterDevPage() {
   const seg = SEGMENTS[idx];
 
   return (
-    <div className="mx-auto max-w-2xl p-8">
-      <Teleprompter
-        segmentId={seg.id}
-        narration={seg.narration}
-        onPrev={idx > 0 ? () => setIdx(idx - 1) : undefined}
-        onNext={idx < SEGMENTS.length - 1 ? () => setIdx(idx + 1) : undefined}
-        renderExtra={<p className="text-xs text-ink/40">(slot do avatar vivo na S2-07)</p>}
-        onTakeReady={(take) =>
-          console.log("take pronto:", take.durationMs, "ms")
-        }
-      />
-      <p className="mt-6 text-xs text-ink/50">
-        segmento {idx + 1}/{SEGMENTS.length} · takes ficam locais (nada sobe aqui)
-      </p>
+    <div className="mx-auto max-w-2xl space-y-4 p-8">
+      <Card>
+        <CardHeader>
+          <CardTitle>Teleprompter — dev</CardTitle>
+          <p className="flex items-center gap-2 text-sm text-muted-foreground">
+            segmento <Badge variant="secondary">{idx + 1}/{SEGMENTS.length}</Badge> · {seg.id}
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Teleprompter
+            segmentId={seg.id}
+            narration={seg.narration}
+            onPrev={idx > 0 ? () => setIdx(idx - 1) : undefined}
+            onNext={idx < SEGMENTS.length - 1 ? () => setIdx(idx + 1) : undefined}
+            renderExtra={<p className="text-xs text-muted-foreground">(slot do avatar vivo na S2-07)</p>}
+            onTakeReady={(take) =>
+              console.log("take pronto:", take.durationMs, "ms")
+            }
+          />
+          <p className="text-xs text-muted-foreground">
+            segmento {idx + 1}/{SEGMENTS.length} · takes ficam locais (nada sobe aqui)
+          </p>
+        </CardContent>
+      </Card>
     </div>
   );
 }

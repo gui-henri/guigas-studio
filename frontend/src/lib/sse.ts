@@ -15,18 +15,22 @@ export interface StudioEventsOptions {
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /**
- * Fetch-based SSE reader with Authorization header support (D-03) and
- * exponential backoff + jitter reconnection. Aborts cleanly via signal.
+ * Fetch-based SSE reader with Authorization header support (D-03),
+ * exponential backoff + jitter reconnection, and Last-Event-ID resume:
+ * the server tags every frame with `id:` and replays the bounded backlog
+ * on reconnect, so no events are lost across drops. Aborts cleanly via signal.
  */
 export async function streamStudioEvents(opts: StudioEventsOptions): Promise<void> {
   const { topic = "global", token, onEvent, onStatus, signal } = opts;
   let backoffMs = 500;
+  let lastEventId: string | null = null;
 
   for (;;) {
     if (signal?.aborted) return;
     try {
       onStatus?.("connecting");
-      const resp = await fetch(`/api/events?topic=${encodeURIComponent(topic)}`, {
+      const resume = lastEventId !== null ? `&last_event_id=${encodeURIComponent(lastEventId)}` : "";
+      const resp = await fetch(`/api/events?topic=${encodeURIComponent(topic)}${resume}`, {
         headers: { Authorization: `Bearer ${token}` },
         signal,
       });
@@ -47,10 +51,11 @@ export async function streamStudioEvents(opts: StudioEventsOptions): Promise<voi
         while ((sep = buffer.indexOf("\n\n")) >= 0) {
           const frame = buffer.slice(0, sep);
           buffer = buffer.slice(sep + 2);
-          const dataLine = frame
-            .split("\n")
-            .find((l) => l.startsWith("data: "));
+          const lines = frame.split("\n");
+          const idLine = lines.find((l) => l.startsWith("id: "));
+          const dataLine = lines.find((l) => l.startsWith("data: "));
           if (!dataLine) continue; // heartbeat / comment frames
+          if (idLine) lastEventId = idLine.slice(4).trim() || lastEventId;
           try {
             onEvent(fromJson(eventsSchema, JSON.parse(dataLine.slice(6))) as StudioEventType);
           } catch {

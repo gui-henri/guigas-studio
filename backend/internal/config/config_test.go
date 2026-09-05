@@ -8,6 +8,7 @@ func TestLoadDefaults(t *testing.T) {
 	t.Setenv("PORT", "")
 	t.Setenv("DATA_DIR", "")
 	t.Setenv("LOG_LEVEL", "")
+	t.Setenv("JWT_SECRET", "test-secret")
 
 	cfg, err := Load()
 	if err != nil {
@@ -28,6 +29,7 @@ func TestLoadOverrides(t *testing.T) {
 	t.Setenv("PORT", "9090")
 	t.Setenv("DATA_DIR", "/srv/data")
 	t.Setenv("LOG_LEVEL", "DEBUG")
+	t.Setenv("JWT_SECRET", "test-secret")
 
 	cfg, err := Load()
 	if err != nil {
@@ -51,8 +53,20 @@ func TestLoadInvalidLogLevel(t *testing.T) {
 	t.Setenv("PORT", "")
 	t.Setenv("DATA_DIR", "")
 	t.Setenv("LOG_LEVEL", "verbose")
+	t.Setenv("JWT_SECRET", "test-secret")
 
 	if _, err := Load(); err == nil {
 		t.Fatal("expected error for invalid LOG_LEVEL, got nil")
+	}
+}
+
+func TestLoadEmptyJWTSecret(t *testing.T) {
+	t.Setenv("PORT", "")
+	t.Setenv("DATA_DIR", "")
+	t.Setenv("LOG_LEVEL", "")
+	t.Setenv("JWT_SECRET", "")
+
+	if _, err := Load(); err == nil {
+		t.Fatal("expected error for empty JWT_SECRET, got nil")
 	}
 }

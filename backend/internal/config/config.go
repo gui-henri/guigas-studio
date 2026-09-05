@@ -17,6 +17,20 @@ type Config struct {
 	LogLevel string
 	Postgres PostgresConfig
 	Auth     AuthConfig
+	S3       S3Config
+}
+
+// S3Config groups S3-compatible object storage settings (R2 prod,
+// MinIO local). Disabled by default; binaries stay on DATA_DIR disk.
+type S3Config struct {
+	Enabled        bool
+	Endpoint       string
+	Region         string
+	Bucket         string
+	AccessKey      string
+	SecretKey      string
+	PublicURL      string
+	ForcePathStyle bool
 }
 
 // AuthConfig groups the single-account credentials and JWT secret (D-04/T-06).
@@ -39,7 +53,9 @@ type PostgresConfig struct {
 
 // Load reads configuration from the environment with defaults:
 // PORT=8080, DATA_DIR=/data, LOG_LEVEL=info. It returns an error when
-// LOG_LEVEL is not one of debug, info, warn, error.
+// LOG_LEVEL is not one of debug, info, warn, error, or when JWT_SECRET is
+// empty (fail closed: never boot an internet-exposed dashboard with unsigned
+// sessions — generate with `openssl rand -base64 48`).
 func Load() (Config, error) {
 	cfg := Config{
 		Port:     envOr("PORT", "8080"),
@@ -59,12 +75,25 @@ func Load() (Config, error) {
 			JWTSecret:          os.Getenv("JWT_SECRET"),
 			RunnerToken:        os.Getenv("RUNNER_TOKEN"),
 		},
+		S3: S3Config{
+			Enabled:        os.Getenv("S3_ENABLED") == "true",
+			Endpoint:       os.Getenv("S3_ENDPOINT"),
+			Region:         envOr("S3_REGION", "auto"),
+			Bucket:         os.Getenv("S3_BUCKET"),
+			AccessKey:      os.Getenv("S3_ACCESS_KEY"),
+			SecretKey:      os.Getenv("S3_SECRET_KEY"),
+			PublicURL:      os.Getenv("S3_PUBLIC_URL"),
+			ForcePathStyle: os.Getenv("S3_FORCE_PATH_STYLE") == "true",
+		},
 	}
 
 	switch cfg.LogLevel {
 	case "debug", "info", "warn", "error":
 	default:
 		return Config{}, fmt.Errorf("invalid LOG_LEVEL %q: must be one of debug, info, warn, error", cfg.LogLevel)
+	}
+	if cfg.Auth.JWTSecret == "" {
+		return Config{}, fmt.Errorf("JWT_SECRET is empty: refusing to start without session signing secret")
 	}
 	return cfg, nil
 }

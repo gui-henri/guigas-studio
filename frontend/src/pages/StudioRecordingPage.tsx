@@ -10,7 +10,14 @@ import {
 import LiveAvatar from "../components/LiveAvatar";
 import Teleprompter from "../features/studio/Teleprompter";
 import { useSegmentRecorder } from "../features/studio/useSegmentRecorder";
-import { presentStatus, statusGroupClasses } from "../lib/videoStatus";
+import { presentStatus } from "../lib/videoStatus";
+import { Badge } from "../components/ui/badge";
+import { Button } from "../components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Alert, AlertDescription } from "../components/ui/alert";
+import { Skeleton } from "../components/ui/skeleton";
+import Modal from "../components/Modal";
+import { cn } from "@/lib/utils";
 
 const isRecordable = (s: VideoStatus | undefined): boolean =>
   s === VideoStatus.SCRIPT_APPROVED || s === VideoStatus.RECORDING;
@@ -62,13 +69,15 @@ export default function StudioRecordingPage() {
   }, [takesQuery.data]);
 
   if (videoQuery.isLoading) {
-    return <div className="h-24 animate-pulse rounded bg-neutral-200/70" aria-busy />;
+    return <Skeleton className="h-24" aria-busy />;
   }
   if (videoQuery.error) {
     return (
-      <p className="rounded border border-red-200 bg-red-50 p-4 text-sm text-red-800">
-        Falha ao carregar vídeo: {videoQuery.error.message}
-      </p>
+      <Alert variant="destructive">
+        <AlertDescription>
+          Falha ao carregar vídeo: {videoQuery.error.message}
+        </AlertDescription>
+      </Alert>
     );
   }
 
@@ -80,33 +89,31 @@ export default function StudioRecordingPage() {
 
   const doneCount = [...recorded.values()].filter((v) => v.audio).length;
   if (!status) {
-    return <p className="text-sm text-neutral-500">Vídeo não encontrado.</p>;
+    return <p className="text-sm text-muted-foreground">Vídeo não encontrado.</p>;
   }
 
   return (
     <div className="space-y-5">
       <header className="flex flex-wrap items-center gap-3">
-        <Link to="/" className="text-sm text-ink/60 hover:text-ink">
+        <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">
           ← Fila
         </Link>
-        <h1 className="font-serif text-2xl font-semibold">{slug}</h1>
-        <span
-          className={`rounded-full border px-2 py-0.5 text-xs ${
-            statusGroupClasses[presentStatus(status).group]
-          }`}
-        >
+        <h1 className="font-display text-2xl font-semibold">{slug}</h1>
+        <Badge variant="secondary">
           {presentStatus(status).label}
-        </span>
-        <span className="text-xs text-ink/50">
+        </Badge>
+        <span className="text-xs text-muted-foreground">
           {doneCount}/{segments.length} segmentos gravados
         </span>
       </header>
 
       {status !== VideoStatus.RECORDING && (
-        <p className="rounded border border-ink/15 bg-white/60 p-3 text-xs text-ink/60">
-          O vídeo entra em <span className="font-mono">recording</span> no primeiro take
-          enviado — não há botão manual por design.
-        </p>
+        <Alert>
+          <AlertDescription>
+            O vídeo entra em <span className="font-mono">recording</span> no primeiro take
+            enviado — não há botão manual por design.
+          </AlertDescription>
+        </Alert>
       )}
 
       <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
@@ -116,57 +123,58 @@ export default function StudioRecordingPage() {
           const missingPair = hasAudio && !st?.blendshapes;
           return (
             <li key={seg.id}>
+              <Card
+                className={cn(
+                  "cursor-pointer transition hover:border-ring",
+                  activeSegment === seg.id && "border-ring"
+                )}
+              >
               <button
                 type="button"
                 onClick={() => {
                   if (hasAudio) setConfirmRedo(seg.id);
                   else setActiveSegment(seg.id);
                 }}
-                className={`w-full rounded-lg border p-3 text-left text-sm shadow-sm transition hover:border-neutral-400 ${
-                  activeSegment === seg.id ? "border-accent bg-accent/5" : "border-ink/10 bg-white"
-                }`}
+                className="w-full p-3 text-left text-sm"
               >
-                <span className="font-mono text-xs text-ink/50">{seg.id}</span>
-                <span
-                  className={`ml-2 rounded-full px-2 py-0.5 text-xs ${
-                    hasAudio
-                      ? "border border-emerald-200 bg-emerald-50 text-emerald-800"
-                      : "border border-neutral-300 bg-neutral-100 text-neutral-600"
-                  }`}
-                >
+                <span className="font-mono text-xs text-muted-foreground">{seg.id}</span>
+                <Badge variant={hasAudio ? "default" : "secondary"} className="ml-2">
                   {hasAudio ? "gravado" : "pendente"}
-                </span>
+                </Badge>
                 {missingPair && (
-                  <span className="ml-1 rounded-full border border-amber-400 bg-amber-100 px-2 py-0.5 text-xs text-amber-900">
+                  <Badge variant="accent" className="ml-1">
                     sem blendshapes
-                  </span>
+                  </Badge>
                 )}
-                <p className="mt-1 line-clamp-2 font-serif text-sm text-ink/80">
+                <p className="mt-1 line-clamp-2 font-display text-sm text-muted-foreground">
                   {seg.narrationPt}
                 </p>
               </button>
+              </Card>
             </li>
           );
         })}
       </ul>
 
       {activeSegment && (
-        <section className="space-y-4 rounded-lg border border-ink/10 bg-white/70 p-5">
-          <div className="flex items-center justify-between">
-            <h2 className="font-serif text-lg font-semibold">Gravando: {activeSegment}</h2>
-            <button
+        <Card className="space-y-4 p-5">
+          <CardHeader className="flex-row items-center justify-between space-y-0 p-0">
+            <CardTitle className="text-lg">Gravando: {activeSegment}</CardTitle>
+            <Button
               type="button"
+              variant="ghost"
+              size="sm"
               disabled={busy()}
               onClick={() => setActiveSegment(null)}
-              className="text-xs text-ink/60 hover:text-ink disabled:opacity-40"
             >
               fechar
-            </button>
-          </div>
+            </Button>
+          </CardHeader>
 
+          <CardContent className="space-y-4 p-0">
           <div className="flex items-start gap-4">
             <LiveAvatar stateRef={recorder.stateRef} scale={240} />
-            <video ref={videoRef} muted playsInline className="w-40 rounded border border-ink/10" />
+            <video ref={videoRef} muted playsInline className="w-40 rounded border border-border" />
           </div>
 
           <Teleprompter
@@ -176,68 +184,59 @@ export default function StudioRecordingPage() {
             }
             renderExtra={
               <div className="flex flex-wrap items-center gap-2">
-                <button
+                <Button
                   type="button"
+                  variant={recorder.phase === "recording" ? "destructive" : "accent"}
                   disabled={busy() || !cameraLive()}
                   onClick={() =>
                     recorder.phase === "recording"
                       ? void recorder.stop()
                       : void recorder.start()
                   }
-                  className={`rounded px-4 py-2 text-sm ${
-                    recorder.phase === "recording"
-                      ? "bg-red-700 text-white hover:bg-red-800"
-                      : "bg-accent text-paper hover:opacity-90"
-                  } disabled:opacity-40`}
                 >
                   {phaseButtonLabel(recorder.phase)}
-                </button>
+                </Button>
                 {recorder.phase === "uploading" && (
-                  <span className="text-xs text-ink/60">
+                  <span className="text-xs text-muted-foreground">
                     {Math.round(recorder.progress * 100)}%
                   </span>
                 )}
                 {recorder.error && (
-                  <span className="text-xs text-red-700">{recorder.error}</span>
+                  <span className="text-xs text-destructive">{recorder.error}</span>
                 )}
               </div>
             }
             onTakeReady={() => void takesQuery.refetch()}
           />
-        </section>
+          </CardContent>
+        </Card>
       )}
 
       {confirmRedo && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" role="dialog" aria-modal="true">
-          <div className="w-full max-w-md rounded-lg border border-ink/10 bg-white p-6">
-            <h3 className="font-serif text-lg font-semibold">Regravar “{confirmRedo}”?</h3>
-            <p className="mt-2 text-sm text-ink/70">
-              O take anterior será substituído (último vence). Os demais segmentos não mudam.
-            </p>
-            <div className="mt-5 flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => setConfirmRedo(null)}
-                className="rounded border border-ink/20 px-3 py-1.5 text-xs hover:bg-ink/5"
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveSegment(confirmRedo);
-                  setConfirmRedo(null);
-                }}
-                className="rounded bg-accent px-3 py-1.5 text-xs text-paper hover:opacity-90"
-              >
-                Regravar
-              </button>
-            </div>
+        <Modal title={`Regravar “${confirmRedo}”?`} onClose={() => setConfirmRedo(null)}>
+          <p className="text-sm text-muted-foreground">
+            O take anterior será substituído (último vence). Os demais segmentos não mudam.
+          </p>
+          <div className="mt-5 flex justify-end gap-2">
+            <Button type="button" variant="outline" size="sm" onClick={() => setConfirmRedo(null)}>
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              variant="accent"
+              size="sm"
+              onClick={() => {
+                setActiveSegment(confirmRedo);
+                setConfirmRedo(null);
+              }}
+            >
+              Regravar
+            </Button>
           </div>
-        </div>
+        </Modal>
       )}
 
-      <footer className="border-t border-ink/10 pt-3 text-xs text-ink/50">
+      <footer className="border-t border-border pt-3 text-xs text-muted-foreground">
         Status geral: {presentStatus(status).label}. Próximo passo sugerido:{" "}
         {doneCount < segments.length
           ? `gravar os ${segments.length - doneCount} segmento(s) restante(s)`

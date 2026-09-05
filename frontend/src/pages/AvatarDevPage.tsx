@@ -3,6 +3,11 @@ import { useEffect, useRef, useState } from "react";
 import LiveAvatar from "../components/LiveAvatar";
 import { useFaceLandmarker } from "../recording/useFaceLandmarker";
 import type { SpriteState } from "../recording/stateMapping";
+import { Badge } from "../components/ui/badge";
+import { Button } from "../components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
 
 /** Dev-only page: live avatar driven by the face landmarker or demo cycle. */
 export default function AvatarDevPage() {
@@ -49,44 +54,61 @@ export default function AvatarDevPage() {
 
   return (
     <div className="mx-auto max-w-xl space-y-4 p-8">
-      <h1 className="font-serif text-2xl font-semibold">LiveAvatar — dev</h1>
-      <p className="text-sm text-ink/60">
-        estado atual (demo): <span className="font-mono">{demo ? "ciclando" : detected}</span>
-      </p>
+      <Card>
+        <CardHeader>
+          <CardTitle>LiveAvatar — dev</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            estado atual (demo):{" "}
+            <Badge variant="secondary" className="font-mono">
+              {demo ? "ciclando" : detected}
+            </Badge>
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <LiveAvatar stateRef={stateRef} mirror={mirror} scale={scale} demo={demo} />
 
-      <LiveAvatar stateRef={stateRef} mirror={mirror} scale={scale} demo={demo} />
+          <div className="space-y-3 text-sm">
+            <div className="flex items-center gap-2">
+              <Input
+                id="avatar-mirror"
+                type="checkbox"
+                checked={mirror}
+                onChange={(e) => setMirror(e.target.checked)}
+                className="h-4 w-4"
+              />
+              <Label htmlFor="avatar-mirror">Espelhar</Label>
+            </div>
+            <div className="flex items-center gap-2">
+              <Input
+                id="avatar-demo"
+                type="checkbox"
+                checked={demo}
+                onChange={(e) => setDemo(e.target.checked)}
+                className="h-4 w-4"
+              />
+              <Label htmlFor="avatar-demo">Demo (ciclar 5 estados)</Label>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="avatar-scale">Escala: {scale}px</Label>
+              <Input
+                id="avatar-scale"
+                type="range"
+                min={240}
+                max={720}
+                step={20}
+                value={scale}
+                onChange={(e) => setScale(Number(e.target.value))}
+                className="ml-2 h-auto w-64"
+              />
+            </div>
+            <Button type="button" variant="accent" size="sm" onClick={() => setCameraOn((v) => !v)}>
+              {cameraOn ? "Desligar câmera" : "Ligar câmera"}
+            </Button>
+          </div>
 
-      <div className="space-y-2 text-sm">
-        <label className="flex items-center gap-2">
-          <input type="checkbox" checked={mirror} onChange={(e) => setMirror(e.target.checked)} />
-          Espelhar
-        </label>
-        <label className="flex items-center gap-2">
-          Demo (ciclar 5 estados)
-          <input type="checkbox" checked={demo} onChange={(e) => setDemo(e.target.checked)} />
-        </label>
-        <label className="block">
-          Escala: {scale}px
-          <input
-            type="range"
-            min={240}
-            max={720}
-            step={20}
-            value={scale}
-            onChange={(e) => setScale(Number(e.target.value))}
-            className="ml-2 w-64 align-middle"
-          />
-        </label>
-        <button
-          type="button"
-          onClick={() => setCameraOn((v) => !v)}
-          className="rounded bg-accent px-3 py-1.5 text-xs text-paper hover:opacity-90"
-        >
-          {cameraOn ? "Desligar câmera" : "Ligar câmera"}
-        </button>
-      </div>
-
-      <video ref={videoRef} muted playsInline className="w-48 rounded border border-ink/10" />
+          <video ref={videoRef} muted playsInline className="w-48 rounded border border-border" />
+        </CardContent>
+      </Card>
     </div>
   );
 }

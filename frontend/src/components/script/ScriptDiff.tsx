@@ -1,5 +1,6 @@
 import { diffWords } from "diff";
 import type { StudioScript, Segment } from "../../gen/app/studio/v1/script_pb";
+import { Card, CardContent } from "../ui/card";
 
 function narrationChanged(a: Segment | undefined, b: Segment): boolean {
   if (!a) return true;
@@ -10,7 +11,7 @@ function narrationChanged(a: Segment | undefined, b: Segment): boolean {
 export function NarrationDiff({ original, current }: { original: string; current: string }) {
   const parts = diffWords(original, current);
   return (
-    <p className="font-serif text-base leading-relaxed">
+    <p className="font-display text-base leading-relaxed">
       {parts.map((part, i) =>
         part.added ? (
           <ins key={i} className="bg-emerald-100 text-emerald-900 no-underline">
@@ -48,9 +49,11 @@ export default function ScriptDiff({
 
   if (changedIds.length === 0) {
     return (
-      <p className="rounded-lg border border-ink/10 bg-white/60 p-4 text-sm text-ink/70">
-        Nenhuma diferença entre o roteiro original do agente e a versão atual.
-      </p>
+      <Card>
+        <CardContent className="p-4 text-sm text-muted-foreground">
+          Nenhuma diferença entre o roteiro original do agente e a versão atual.
+        </CardContent>
+      </Card>
     );
   }
 
@@ -59,31 +62,30 @@ export default function ScriptDiff({
       {changedIds.map((seg) => {
         const orig = byId.get(seg.id);
         return (
-          <div
-            key={seg.id}
-            className="grid gap-3 rounded-lg border border-ink/10 bg-white p-4 md:grid-cols-2"
-          >
-            <div>
-              <span className="text-xs font-semibold uppercase tracking-wide text-ink/40">
-                Original (agente)
-              </span>
-              <p className="mt-1 font-serif text-base leading-relaxed text-ink/60">
-                {orig?.narrationPt ?? "— segmento novo —"}
-              </p>
-            </div>
-            <div>
-              <span className="text-xs font-semibold uppercase tracking-wide text-ink/40">
-                Atual
-              </span>
-              <div className="mt-1">
-                {orig ? (
-                  <NarrationDiff original={orig.narrationPt} current={seg.narrationPt} />
-                ) : (
-                  <p className="font-serif text-base leading-relaxed">{seg.narrationPt}</p>
-                )}
+          <Card key={seg.id}>
+            <CardContent className="grid gap-3 p-4 md:grid-cols-2">
+              <div>
+                <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Original (agente)
+                </span>
+                <p className="mt-1 font-display text-base leading-relaxed text-muted-foreground">
+                  {orig?.narrationPt ?? "— segmento novo —"}
+                </p>
               </div>
-            </div>
-          </div>
+              <div>
+                <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Atual
+                </span>
+                <div className="mt-1">
+                  {orig ? (
+                    <NarrationDiff original={orig.narrationPt} current={seg.narrationPt} />
+                  ) : (
+                    <p className="font-display text-base leading-relaxed">{seg.narrationPt}</p>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         );
       })}
     </div>

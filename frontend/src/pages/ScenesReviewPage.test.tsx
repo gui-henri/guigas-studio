@@ -20,6 +20,12 @@ const segmentsFixture = [
 let fakeStatus: number = VideoStatus.SCENES_REVIEW;
 
 vi.mock("@connectrpc/connect-query", () => ({
+  useMutation: vi.fn(() => ({
+    mutate: vi.fn(),
+    isPending: false,
+    isError: false,
+    error: undefined,
+  })),
   useQuery: vi.fn((method: { kind?: string }) => {
     if (method?.kind === "listTakes") {
       return { data: { takes: [] }, isLoading: false };
@@ -42,6 +48,7 @@ vi.mock("@connectrpc/connect-query", () => ({
 }));
 
 vi.mock("../gen/app/studio/v1/video-VideoService_connectquery", () => ({
+  approveScenes: {},
   getVideo: {},
   listTakes: { kind: "listTakes" },
 }));

@@ -3,6 +3,10 @@ import { useCallback, useRef, useState } from "react";
 import LevelMeter from "../components/LevelMeter";
 import { startMicCapture } from "../audio/micCapture";
 import type { MicCapture } from "../audio/micCapture";
+import { Alert, AlertDescription } from "../components/ui/alert";
+import { Badge } from "../components/ui/badge";
+import { Button } from "../components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 
 /** Dev-only page: mic capture with level meter and test WAV download. */
 export default function MicDevPage() {
@@ -45,38 +49,51 @@ export default function MicDevPage() {
 
   return (
     <div className="mx-auto max-w-xl space-y-4 p-8">
-      <h1 className="font-serif text-2xl font-semibold">Captura de voz — dev</h1>
-      <p className="text-sm text-ink/60">
-        WAV 48 kHz mono 16-bit · silêncio &gt; 2 s dispara aviso único.
-      </p>
-      {error && (
-        <p className="rounded border border-red-300 bg-red-50 p-2 text-sm text-red-800">{error}</p>
-      )}
-      {silence && (
-        <p className="rounded border border-amber-300 bg-amber-50 p-2 text-sm text-amber-900">
-          Silêncio detectado por mais de 2 s — microfone aberto?
-        </p>
-      )}
+      <Card>
+        <CardHeader>
+          <CardTitle>Captura de voz — dev</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            WAV 48 kHz mono 16-bit · silêncio &gt; 2 s dispara aviso único.{" "}
+            {recording && <Badge variant="secondary">gravando…</Badge>}
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {error && (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+          {silence && (
+            <Alert>
+              <AlertDescription>
+                Silêncio detectado por mais de 2 s — microfone aberto?
+              </AlertDescription>
+            </Alert>
+          )}
 
-      <LevelMeter registerLevel={registerLevel} />
+          <LevelMeter registerLevel={registerLevel} />
 
-      <button
-        type="button"
-        onClick={() => void toggle()}
-        disabled={!!error && !recording}
-        className="rounded bg-accent px-4 py-2 text-sm text-paper hover:opacity-90 disabled:opacity-40"
-      >
-        {recording ? "Parar e gerar WAV" : "Gravar"}
-      </button>
+          <Button
+            type="button"
+            variant="accent"
+            onClick={() => void toggle()}
+            disabled={!!error && !recording}
+          >
+            {recording ? "Parar e gerar WAV" : "Gravar"}
+          </Button>
 
-      {downloadUrl && duration !== null && (
-        <p className="text-sm">
-          <a href={downloadUrl} download="test.wav" className="text-accent underline">
-            Baixar test.wav
-          </a>{" "}
-          ({duration} ms)
-        </p>
-      )}
+          {downloadUrl && duration !== null && (
+            <p className="text-sm text-muted-foreground">
+              <Button variant="link" asChild className="h-auto p-0">
+                <a href={downloadUrl} download="test.wav">
+                  Baixar test.wav
+                </a>
+              </Button>{" "}
+              ({duration} ms)
+            </p>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

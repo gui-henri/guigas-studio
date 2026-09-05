@@ -5,6 +5,9 @@ import { startMicCapture } from "../../audio/micCapture";
 import type { MicCapture } from "../../audio/micCapture";
 import { useLocalTake } from "./useLocalTake";
 import Waveform from "./Waveform";
+import { Button } from "../../components/ui/button";
+import { Card, CardContent } from "../../components/ui/card";
+import { Alert, AlertDescription } from "../../components/ui/alert";
 
 export interface TeleprompterProps {
   segmentId: string;
@@ -107,47 +110,51 @@ export default function Teleprompter({
   return (
     <div className="space-y-4">
       <div className="flex items-baseline justify-between">
-        <span className="font-mono text-xs text-ink/50">segmento: {segmentId}</span>
+        <span className="font-mono text-xs text-muted-foreground">segmento: {segmentId}</span>
         {take && (
-          <span className="text-xs text-ink/60">
+          <span className="text-xs text-muted-foreground">
             take #{take.takeNumber} · {(take.durationMs / 1000).toFixed(1)}s
           </span>
         )}
       </div>
 
-      <div className="max-h-64 overflow-y-auto rounded-lg border border-ink/10 bg-white p-6">
-        <p className="font-serif text-2xl leading-relaxed">{narration}</p>
-      </div>
+      <Card>
+        <CardContent className="max-h-64 overflow-y-auto p-6">
+          <p className="font-display text-2xl leading-relaxed">{narration}</p>
+        </CardContent>
+      </Card>
 
       {silence && (
-        <p className="rounded border border-amber-300 bg-amber-50 p-2 text-sm text-amber-900">
-          Silêncio detectado há mais de 2 s — o clipe pode estar mudo.
-        </p>
+        <Alert>
+          <AlertDescription>
+            Silêncio detectado há mais de 2 s — o clipe pode estar mudo.
+          </AlertDescription>
+        </Alert>
       )}
       {error && (
-        <p className="rounded border border-red-300 bg-red-50 p-2 text-sm text-red-800">{error}</p>
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
       <div className="flex flex-wrap items-center gap-3">
-        <button
+        <Button
           type="button"
+          variant={recording ? "destructive" : "accent"}
           onClick={toggleRecording}
-          className={`rounded px-4 py-2 text-sm ${
-            recording ? "bg-red-700 text-white hover:bg-red-800" : "bg-accent text-paper hover:opacity-90"
-          }`}
         >
           {recording ? `Parar (${(elapsedMs / 1000).toFixed(1)}s)` : "Gravar"}
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
+          variant="outline"
           disabled={recording || !take}
           onClick={() => reset()}
           title="Refazer (descarta o take atual)"
-          className="rounded border border-ink/20 px-4 py-2 text-sm hover:bg-ink/5 disabled:opacity-40"
         >
           Refazer
-        </button>
-        <span className="text-xs text-ink/40">
+        </Button>
+        <span className="text-xs text-muted-foreground">
           Space grava/para · R refaz · ←/→ navega
         </span>
       </div>

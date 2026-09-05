@@ -2,6 +2,8 @@ import type { ReactNode } from "react";
 import { NavLink } from "react-router-dom";
 
 import { useAuth } from "../context/AuthContext";
+import { Button } from "./ui/button";
+import { cn } from "@/lib/utils";
 
 const navItems = [
   { to: "/", label: "Dashboard", enabled: true },
@@ -15,8 +17,8 @@ export default function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex min-h-screen">
-      <aside className="hidden w-52 shrink-0 flex-col border-r border-neutral-200 bg-white p-4 sm:flex">
-        <span className="font-serif text-lg font-semibold">Guigas Studio</span>
+      <aside className="hidden w-52 shrink-0 flex-col border-r border-border bg-card p-4 sm:flex">
+        <span className="font-display text-lg font-semibold">Guigas Studio</span>
         <nav className="mt-8 flex flex-col gap-1" aria-label="Navegação principal">
           {navItems.map((item) =>
             item.enabled ? (
@@ -25,11 +27,12 @@ export default function AppShell({ children }: { children: ReactNode }) {
                 to={item.to}
                 end
                 className={({ isActive }) =>
-                  `rounded px-3 py-2 text-sm ${
+                  cn(
+                    "rounded px-3 py-2 text-sm",
                     isActive
-                      ? "bg-neutral-900 text-white"
-                      : "text-neutral-700 hover:bg-neutral-100"
-                  }`
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:bg-muted"
+                  )
                 }
               >
                 {item.label}
@@ -38,7 +41,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
               <span
                 key={item.to}
                 title="Disponível em sprint futuro"
-                className="cursor-not-allowed rounded px-3 py-2 text-sm text-neutral-400"
+                className="cursor-not-allowed rounded px-3 py-2 text-sm text-muted-foreground/50"
                 aria-disabled
               >
                 {item.label}
@@ -49,16 +52,12 @@ export default function AppShell({ children }: { children: ReactNode }) {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex items-center justify-between border-b border-neutral-200 bg-white px-6 py-3">
+        <header className="flex items-center justify-between border-b border-border bg-card px-6 py-3">
           <span className="text-sm font-medium sm:hidden">Guigas Studio</span>
           <div />
-          <button
-            type="button"
-            onClick={logout}
-            className="rounded border border-neutral-300 px-3 py-1 text-xs hover:bg-neutral-100"
-          >
+          <Button type="button" variant="outline" size="sm" onClick={logout}>
             Sair
-          </button>
+          </Button>
         </header>
         <main className="min-w-0 flex-1 p-6">{children}</main>
       </div>

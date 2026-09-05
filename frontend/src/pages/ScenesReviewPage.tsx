@@ -28,6 +28,13 @@ import {
   saveDecisions,
   type SceneCardDecision,
 } from "../lib/scenesReview";
+import { Badge } from "../components/ui/badge";
+import { Button } from "../components/ui/button";
+import { Card, CardContent, CardHeader } from "../components/ui/card";
+import { Alert, AlertDescription } from "../components/ui/alert";
+import { Skeleton } from "../components/ui/skeleton";
+import { Textarea } from "../components/ui/textarea";
+import { cn } from "@/lib/utils";
 
 const SPRITE_META = spriteMetaJson as SpriteMeta;
 const SHEET_URL = new URL(sheetUrl, import.meta.url).href;
@@ -102,42 +109,35 @@ function SegmentCard(props: CardProps) {
   }
 
   return (
-    <article
+    <Card
       ref={ref}
       data-testid="scene-card"
       data-segment={segmentId}
-      className={`rounded-xl border bg-surface p-4 shadow-sm ${
-        isRejected ? "border-removed/60" : "border-line"
-      }`}
+      className={cn(isRejected && "border-destructive/60")}
     >
-      <header className="mb-3 flex items-center gap-2">
-        <span className="font-mono text-xs text-ink/60">{segmentId}</span>
+      <CardHeader className="flex-row items-center gap-2 space-y-0">
+        <span className="font-mono text-xs text-muted-foreground">{segmentId}</span>
         {hasAudio === false ? (
-          <span className="rounded-full bg-neutral-200 px-2 py-0.5 text-xs text-ink/70">
+          <Badge variant="secondary">
             sem áudio
-          </span>
+          </Badge>
         ) : null}
         {sceneType ? (
-          <a
-            href={CATALOG_URL}
-            target="_blank"
-            rel="noreferrer"
-            className="rounded-full bg-accent/10 px-2 py-0.5 text-xs font-medium text-accent hover:bg-accent/20"
-            title="Ver catálogo de cenas"
-          >
-            {sceneType}
+          <a href={CATALOG_URL} target="_blank" rel="noreferrer" title="Ver catálogo de cenas">
+            <Badge variant="accent">{sceneType}</Badge>
           </a>
         ) : (
-          <span className="rounded-full bg-neutral-200 px-2 py-0.5 text-xs text-ink/70">
+          <Badge variant="secondary">
             só avatar
-          </span>
+          </Badge>
         )}
-        <span className="ml-auto text-xs text-ink/60">
+        <span className="ml-auto text-xs text-muted-foreground">
           {isApproved ? "✓ aprovado" : isRejected ? "✗ reprovado" : ""}
         </span>
-      </header>
+      </CardHeader>
 
-      <p className="mb-3 line-clamp-2 font-serif text-sm italic text-ink/80">
+      <CardContent>
+      <p className="mb-3 line-clamp-2 font-display text-sm italic text-muted-foreground">
         {narration}
       </p>
 
@@ -153,7 +153,7 @@ function SegmentCard(props: CardProps) {
           />
         ) : (
           <div
-            className="flex h-44 items-center justify-center rounded-lg border border-dashed border-line text-xs text-ink/50"
+            className="flex h-44 items-center justify-center rounded-lg border border-dashed border-border text-xs text-muted-foreground"
             aria-busy={assets.loading}
           >
             {assets.loading ? "carregando artefatos…" : "role para pré-visualizar"}
@@ -164,61 +164,57 @@ function SegmentCard(props: CardProps) {
       {reviewing && !isApproved ? (
         rejecting || isRejected ? (
           <div className="mt-3 space-y-2">
-            <textarea
+            <Textarea
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               placeholder="Comentário obrigatório — o que corrigir?"
               rows={2}
-              className="w-full rounded-md border border-line bg-paper p-2 text-sm focus:border-accent focus:outline-none"
             />
             <div className="flex flex-wrap items-center gap-2">
-              <button
+              <Button
                 type="button"
+                variant="destructive"
+                size="sm"
                 onClick={reject}
                 disabled={comment.trim().length === 0}
-                className="rounded-md bg-removed px-3 py-1.5 text-sm font-medium text-white disabled:opacity-40"
               >
                 Confirmar reprovação
-              </button>
+              </Button>
               {!isRejected ? (
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="sm"
                   onClick={() => setRejecting(false)}
-                  className="text-sm text-ink/60 hover:text-ink"
                 >
                   cancelar
-                </button>
+                </Button>
               ) : null}
-              <button
+              <Button
                 type="button"
+                variant="outline"
+                size="sm"
                 onClick={copyPrompt}
                 data-testid="copy-prompt"
-                className="ml-auto rounded-md border border-line px-3 py-1.5 text-sm hover:border-accent hover:text-accent"
+                className="ml-auto"
               >
                 {copied ? "copiado!" : "copiar prompt"}
-              </button>
+              </Button>
             </div>
           </div>
         ) : (
           <div className="mt-3 flex gap-2">
-            <button
-              type="button"
-              onClick={approve}
-              className="rounded-md bg-added px-3 py-1.5 text-sm font-medium text-white"
-            >
+            <Button type="button" variant="accent" size="sm" onClick={approve}>
               Aprovar
-            </button>
-            <button
-              type="button"
-              onClick={() => setRejecting(true)}
-              className="rounded-md border border-line px-3 py-1.5 text-sm hover:border-removed hover:text-removed"
-            >
+            </Button>
+            <Button type="button" variant="outline" size="sm" onClick={() => setRejecting(true)}>
               Reprovar
-            </button>
+            </Button>
           </div>
         )
       ) : null}
-    </article>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -300,23 +296,24 @@ export default function ScenesReviewPage() {
   }
 
   if (videoQuery.isLoading) {
-    return <div className="h-24 animate-pulse rounded bg-neutral-200/70" aria-busy />;
+    return <Skeleton className="h-24" aria-busy />;
   }
 
   return (
     <div className="space-y-5" data-testid="scenes-review-page">
       <header className="flex flex-wrap items-center gap-3">
-        <Link to="/" className="text-sm text-ink/60 hover:text-ink">
+        <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">
           ← Fila
         </Link>
-        <h1 className="font-serif text-2xl font-semibold">Cenas · {slug}</h1>
-        <div
+        <h1 className="font-display text-2xl font-semibold">Cenas · {slug}</h1>
+        <Badge
+          variant="accent"
           data-testid="review-progress"
-          className="ml-auto rounded-full bg-accent/10 px-3 py-1 text-sm font-medium text-accent"
+          className="ml-auto"
         >
           {progress.approved}/{progress.total} aprovadas
-        </div>
-        <button
+        </Badge>
+        <Button
           type="button"
           onClick={prepareRender}
           disabled={!progress.isComplete || !reviewing || prepared}
@@ -328,26 +325,27 @@ export default function ScenesReviewPage() {
                 ? "Prepara o render (enqueue na S5-01)"
                 : "Aprove todas as cenas primeiro"
           }
-          className="rounded-md bg-ink px-4 py-2 text-sm font-medium text-paper disabled:opacity-40"
         >
           {approveScenesMutation.isPending
             ? "preparando…"
             : prepared
               ? "render preparado ✓"
               : "Aprovar tudo"}
-        </button>
+        </Button>
       </header>
 
       {prepareError ? (
-        <p className="rounded-lg border border-removed/50 bg-surface px-4 py-2 text-sm text-removed">
-          {prepareError}
-        </p>
+        <Alert variant="destructive">
+          <AlertDescription>{prepareError}</AlertDescription>
+        </Alert>
       ) : null}
 
       {!reviewing ? (
-        <p className="rounded-lg border border-line bg-surface px-4 py-2 text-sm text-ink/70">
-          Status atual: <strong>{status}</strong> — ações de review desabilitadas.
-        </p>
+        <Alert>
+          <AlertDescription>
+            Status atual: <strong>{status}</strong> — ações de review desabilitadas.
+          </AlertDescription>
+        </Alert>
       ) : null}
 
       <div className="grid gap-4 md:grid-cols-2">

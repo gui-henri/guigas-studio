@@ -3,6 +3,12 @@ import { useEffect, useRef, useState } from "react";
 import LiveAvatar from "../components/LiveAvatar";
 import Teleprompter from "../features/studio/Teleprompter";
 import { useSegmentRecorder } from "../features/studio/useSegmentRecorder";
+import { Alert, AlertDescription } from "../components/ui/alert";
+import { Badge } from "../components/ui/badge";
+import { Button } from "../components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
 
 const PHASE_LABEL: Record<string, string> = {
   idle: "pronto",
@@ -51,89 +57,95 @@ export default function RecorderDevPage() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-4 p-8">
-      <h1 className="font-serif text-2xl font-semibold">Gravador de segmento — dev</h1>
-      <p className="text-sm text-ink/60">
-        fase: {PHASE_LABEL[recorder.phase] ?? recorder.phase}
-        {recorder.phase === "uploading" && ` (${Math.round(recorder.progress * 100)}%)`} ·
-        landmarker: {recorder.delegate ?? "?"} @ {recorder.fps}fps
-      </p>
-      {(recorder.error || !cameraReady) && (
-        <p className="rounded border border-red-300 bg-red-50 p-2 text-sm text-red-800">
-          {recorder.error ?? "ligue a câmera para gravar"}
-        </p>
-      )}
-      {recorder.localPair && (
-        <button
-          type="button"
-          onClick={() => void recorder.retryUploads()}
-          className="rounded border border-accent px-3 py-1.5 text-xs text-accent hover:bg-accent/10"
-        >
-          Reenviar par local
-        </button>
-      )}
+      <Card>
+        <CardHeader>
+          <CardTitle>Gravador de segmento — dev</CardTitle>
+          <p className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+            <span>
+              fase: <Badge variant="secondary">{PHASE_LABEL[recorder.phase] ?? recorder.phase}</Badge>
+            </span>
+            {recorder.phase === "uploading" && (
+              <Badge variant="secondary">{Math.round(recorder.progress * 100)}%</Badge>
+            )}
+            <span>
+              landmarker: <Badge variant="secondary">{recorder.delegate ?? "?"} @ {recorder.fps}fps</Badge>
+            </span>
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {(recorder.error || !cameraReady) && (
+            <Alert variant="destructive">
+              <AlertDescription>{recorder.error ?? "ligue a câmera para gravar"}</AlertDescription>
+            </Alert>
+          )}
+          {recorder.localPair && (
+            <Button type="button" variant="outline" size="sm" onClick={() => void recorder.retryUploads()}>
+              Reenviar par local
+            </Button>
+          )}
 
-      {!cameraReady ? (
-        <button
-          type="button"
-          onClick={() => setCameraReady(true)}
-          className="rounded bg-accent px-4 py-2 text-sm text-paper hover:opacity-90"
-        >
-          Ligar câmera
-        </button>
-      ) : (
-        <>
-          <div className="flex items-start gap-4">
-            <LiveAvatar stateRef={recorder.stateRef} scale={240} />
-            <video ref={videoRef} muted playsInline className="w-40 rounded border border-ink/10" />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3 text-sm">
-            <label>
-              slug do vídeo
-              <input
-                value={slug}
-                onChange={(e) => setSlug(e.target.value)}
-                disabled={busy}
-                className="mt-1 w-full rounded border border-ink/20 px-2 py-1 font-mono text-xs"
-              />
-            </label>
-            <label>
-              segment_id
-              <input
-                value={segmentId}
-                onChange={(e) => setSegmentId(e.target.value)}
-                disabled={busy}
-                className="mt-1 w-full rounded border border-ink/20 px-2 py-1 font-mono text-xs"
-              />
-            </label>
-          </div>
-
-          <Teleprompter
-            segmentId={segmentId}
-            narration="Leia este texto enquanto o avatar reage. O take sobe automaticamente ao parar."
-            renderExtra={
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  disabled={busy || !cameraReady}
-                  onClick={() => void recorder.start()}
-                  className="rounded bg-accent px-4 py-2 text-sm text-paper hover:opacity-90 disabled:opacity-40"
-                >
-                  Gravar sincronizado
-                </button>
-                <button
-                  type="button"
-                  disabled={!busy}
-                  onClick={() => void recorder.stop()}
-                  className="rounded bg-red-700 px-4 py-2 text-sm text-white hover:bg-red-800 disabled:opacity-40"
-                >
-                  Parar e subir
-                </button>
+          {!cameraReady ? (
+            <Button type="button" variant="accent" onClick={() => setCameraReady(true)}>
+              Ligar câmera
+            </Button>
+          ) : (
+            <>
+              <div className="flex items-start gap-4">
+                <LiveAvatar stateRef={recorder.stateRef} scale={240} />
+                <video ref={videoRef} muted playsInline className="w-40 rounded border border-border" />
               </div>
-            }
-          />
-        </>
-      )}
+
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="space-y-2">
+                  <Label htmlFor="recorder-slug">slug do vídeo</Label>
+                  <Input
+                    id="recorder-slug"
+                    value={slug}
+                    onChange={(e) => setSlug(e.target.value)}
+                    disabled={busy}
+                    className="font-mono text-xs"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="recorder-segment">segment_id</Label>
+                  <Input
+                    id="recorder-segment"
+                    value={segmentId}
+                    onChange={(e) => setSegmentId(e.target.value)}
+                    disabled={busy}
+                    className="font-mono text-xs"
+                  />
+                </div>
+              </div>
+
+              <Teleprompter
+                segmentId={segmentId}
+                narration="Leia este texto enquanto o avatar reage. O take sobe automaticamente ao parar."
+                renderExtra={
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant="accent"
+                      disabled={busy || !cameraReady}
+                      onClick={() => void recorder.start()}
+                    >
+                      Gravar sincronizado
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      disabled={!busy}
+                      onClick={() => void recorder.stop()}
+                    >
+                      Parar e subir
+                    </Button>
+                  </div>
+                }
+              />
+            </>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

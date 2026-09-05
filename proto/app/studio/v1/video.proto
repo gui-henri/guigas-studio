@@ -118,6 +118,17 @@ message RejectScriptResponse {
   Video video = 1;
 }
 
+message GenerateScriptRequest {
+  string video_id = 1;
+}
+
+message GenerateScriptResponse {
+  // Parsed generated script (present when generation + validation succeeded).
+  StudioScript script = 1;
+  // Generation/validation errors; empty on success (same convention as UpdateScript).
+  repeated string errors = 2;
+}
+
 // TakeSummary is one recorded artifact pair entry for a video.
 message TakeSummary {
   string segment_id = 1;
@@ -141,6 +152,7 @@ service VideoService {
   rpc GetVideo(GetVideoRequest) returns (GetVideoResponse);
   rpc CreateVideo(CreateVideoRequest) returns (CreateVideoResponse);
   rpc UpdateScript(UpdateScriptRequest) returns (UpdateScriptResponse);
+  rpc GenerateScript(GenerateScriptRequest) returns (GenerateScriptResponse);
   rpc ApproveScript(ApproveScriptRequest) returns (ApproveScriptResponse);
   rpc RejectScript(RejectScriptRequest) returns (RejectScriptResponse);
   rpc ListTakes(ListTakesRequest) returns (ListTakesResponse);

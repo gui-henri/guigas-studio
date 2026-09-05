@@ -43,6 +43,9 @@ const (
 	// VideoServiceUpdateScriptProcedure is the fully-qualified name of the VideoService's UpdateScript
 	// RPC.
 	VideoServiceUpdateScriptProcedure = "/app.studio.v1.VideoService/UpdateScript"
+	// VideoServiceGenerateScriptProcedure is the fully-qualified name of the VideoService's
+	// GenerateScript RPC.
+	VideoServiceGenerateScriptProcedure = "/app.studio.v1.VideoService/GenerateScript"
 	// VideoServiceApproveScriptProcedure is the fully-qualified name of the VideoService's
 	// ApproveScript RPC.
 	VideoServiceApproveScriptProcedure = "/app.studio.v1.VideoService/ApproveScript"
@@ -74,6 +77,7 @@ type VideoServiceClient interface {
 	GetVideo(context.Context, *connect.Request[v1.GetVideoRequest]) (*connect.Response[v1.GetVideoResponse], error)
 	CreateVideo(context.Context, *connect.Request[v1.CreateVideoRequest]) (*connect.Response[v1.CreateVideoResponse], error)
 	UpdateScript(context.Context, *connect.Request[v1.UpdateScriptRequest]) (*connect.Response[v1.UpdateScriptResponse], error)
+	GenerateScript(context.Context, *connect.Request[v1.GenerateScriptRequest]) (*connect.Response[v1.GenerateScriptResponse], error)
 	ApproveScript(context.Context, *connect.Request[v1.ApproveScriptRequest]) (*connect.Response[v1.ApproveScriptResponse], error)
 	RejectScript(context.Context, *connect.Request[v1.RejectScriptRequest]) (*connect.Response[v1.RejectScriptResponse], error)
 	ListTakes(context.Context, *connect.Request[v1.ListTakesRequest]) (*connect.Response[v1.ListTakesResponse], error)
@@ -117,6 +121,12 @@ func NewVideoServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			httpClient,
 			baseURL+VideoServiceUpdateScriptProcedure,
 			connect.WithSchema(videoServiceMethods.ByName("UpdateScript")),
+			connect.WithClientOptions(opts...),
+		),
+		generateScript: connect.NewClient[v1.GenerateScriptRequest, v1.GenerateScriptResponse](
+			httpClient,
+			baseURL+VideoServiceGenerateScriptProcedure,
+			connect.WithSchema(videoServiceMethods.ByName("GenerateScript")),
 			connect.WithClientOptions(opts...),
 		),
 		approveScript: connect.NewClient[v1.ApproveScriptRequest, v1.ApproveScriptResponse](
@@ -176,6 +186,7 @@ type videoServiceClient struct {
 	getVideo                  *connect.Client[v1.GetVideoRequest, v1.GetVideoResponse]
 	createVideo               *connect.Client[v1.CreateVideoRequest, v1.CreateVideoResponse]
 	updateScript              *connect.Client[v1.UpdateScriptRequest, v1.UpdateScriptResponse]
+	generateScript            *connect.Client[v1.GenerateScriptRequest, v1.GenerateScriptResponse]
 	approveScript             *connect.Client[v1.ApproveScriptRequest, v1.ApproveScriptResponse]
 	rejectScript              *connect.Client[v1.RejectScriptRequest, v1.RejectScriptResponse]
 	listTakes                 *connect.Client[v1.ListTakesRequest, v1.ListTakesResponse]
@@ -204,6 +215,11 @@ func (c *videoServiceClient) CreateVideo(ctx context.Context, req *connect.Reque
 // UpdateScript calls app.studio.v1.VideoService.UpdateScript.
 func (c *videoServiceClient) UpdateScript(ctx context.Context, req *connect.Request[v1.UpdateScriptRequest]) (*connect.Response[v1.UpdateScriptResponse], error) {
 	return c.updateScript.CallUnary(ctx, req)
+}
+
+// GenerateScript calls app.studio.v1.VideoService.GenerateScript.
+func (c *videoServiceClient) GenerateScript(ctx context.Context, req *connect.Request[v1.GenerateScriptRequest]) (*connect.Response[v1.GenerateScriptResponse], error) {
+	return c.generateScript.CallUnary(ctx, req)
 }
 
 // ApproveScript calls app.studio.v1.VideoService.ApproveScript.
@@ -252,6 +268,7 @@ type VideoServiceHandler interface {
 	GetVideo(context.Context, *connect.Request[v1.GetVideoRequest]) (*connect.Response[v1.GetVideoResponse], error)
 	CreateVideo(context.Context, *connect.Request[v1.CreateVideoRequest]) (*connect.Response[v1.CreateVideoResponse], error)
 	UpdateScript(context.Context, *connect.Request[v1.UpdateScriptRequest]) (*connect.Response[v1.UpdateScriptResponse], error)
+	GenerateScript(context.Context, *connect.Request[v1.GenerateScriptRequest]) (*connect.Response[v1.GenerateScriptResponse], error)
 	ApproveScript(context.Context, *connect.Request[v1.ApproveScriptRequest]) (*connect.Response[v1.ApproveScriptResponse], error)
 	RejectScript(context.Context, *connect.Request[v1.RejectScriptRequest]) (*connect.Response[v1.RejectScriptResponse], error)
 	ListTakes(context.Context, *connect.Request[v1.ListTakesRequest]) (*connect.Response[v1.ListTakesResponse], error)
@@ -291,6 +308,12 @@ func NewVideoServiceHandler(svc VideoServiceHandler, opts ...connect.HandlerOpti
 		VideoServiceUpdateScriptProcedure,
 		svc.UpdateScript,
 		connect.WithSchema(videoServiceMethods.ByName("UpdateScript")),
+		connect.WithHandlerOptions(opts...),
+	)
+	videoServiceGenerateScriptHandler := connect.NewUnaryHandler(
+		VideoServiceGenerateScriptProcedure,
+		svc.GenerateScript,
+		connect.WithSchema(videoServiceMethods.ByName("GenerateScript")),
 		connect.WithHandlerOptions(opts...),
 	)
 	videoServiceApproveScriptHandler := connect.NewUnaryHandler(
@@ -351,6 +374,8 @@ func NewVideoServiceHandler(svc VideoServiceHandler, opts ...connect.HandlerOpti
 			videoServiceCreateVideoHandler.ServeHTTP(w, r)
 		case VideoServiceUpdateScriptProcedure:
 			videoServiceUpdateScriptHandler.ServeHTTP(w, r)
+		case VideoServiceGenerateScriptProcedure:
+			videoServiceGenerateScriptHandler.ServeHTTP(w, r)
 		case VideoServiceApproveScriptProcedure:
 			videoServiceApproveScriptHandler.ServeHTTP(w, r)
 		case VideoServiceRejectScriptProcedure:
@@ -390,6 +415,10 @@ func (UnimplementedVideoServiceHandler) CreateVideo(context.Context, *connect.Re
 
 func (UnimplementedVideoServiceHandler) UpdateScript(context.Context, *connect.Request[v1.UpdateScriptRequest]) (*connect.Response[v1.UpdateScriptResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("app.studio.v1.VideoService.UpdateScript is not implemented"))
+}
+
+func (UnimplementedVideoServiceHandler) GenerateScript(context.Context, *connect.Request[v1.GenerateScriptRequest]) (*connect.Response[v1.GenerateScriptResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("app.studio.v1.VideoService.GenerateScript is not implemented"))
 }
 
 func (UnimplementedVideoServiceHandler) ApproveScript(context.Context, *connect.Request[v1.ApproveScriptRequest]) (*connect.Response[v1.ApproveScriptResponse], error) {

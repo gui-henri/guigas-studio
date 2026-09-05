@@ -3,7 +3,7 @@ import type { FormEvent } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@connectrpc/connect-query";
 
-import { getVideo, updateScript, approveScript, rejectScript } from "../gen/app/studio/v1/video-VideoService_connectquery";
+import { getVideo, generateScript, updateScript, approveScript, rejectScript } from "../gen/app/studio/v1/video-VideoService_connectquery";
 import type { Segment } from "../gen/app/studio/v1/script_pb";
 import { VideoStatus } from "../gen/app/studio/v1/video_pb";
 import SegmentCard, {
@@ -14,7 +14,12 @@ import SegmentCard, {
 import ScriptDiff from "../components/script/ScriptDiff";
 import Modal from "../components/Modal";
 import { useRpcMutation } from "../lib/rpc";
-import { presentStatus, statusGroupClasses } from "../lib/videoStatus";
+import { presentStatus } from "../lib/videoStatus";
+import { Badge } from "../components/ui/badge";
+import { Button } from "../components/ui/button";
+import { Alert, AlertDescription } from "../components/ui/alert";
+import { Skeleton } from "../components/ui/skeleton";
+import { Textarea } from "../components/ui/textarea";
 
 /** Client-side mirror of the S1-02 contract rules (server revalidates anyway). */
 function validateSegments(segments: Segment[]): Map<string, SegmentErrors> {
@@ -86,11 +91,30 @@ export default function ScriptReviewPage() {
   const { mutate: doReject, isPending: rejecting } = useRpcMutation(rejectScript, {
     invalidate: [getVideo],
     onSuccess: () => {
-      setToast("Rejeitado: o OpenCode volta a ser o próximo passo.");
+      setToast("Rejeitado: a geração automática retoma a partir do seu comentário.");
       setModal(null);
       setRejectComment("");
     },
   });
+  const {
+    mutate: doGenerate,
+    isPending: generating,
+    data: generation,
+    error: generationError,
+    reset: resetGeneration,
+  } = useRpcMutation(generateScript, {
+    invalidate: [getVideo],
+    onSuccess: (res) => {
+      if (res.errors.length === 0 && res.script) {
+        setToast("Roteiro gerado pela IA — revise abaixo.");
+      }
+    },
+  });
+  const generationErrors: string[] = generation
+    ? [...generation.errors]
+    : generationError
+      ? [generationError.message]
+      : [];
 
   // Reset local draft whenever fresh data arrives and we are not editing.
   useEffect(() => {
@@ -134,7 +158,7 @@ export default function ScriptReviewPage() {
     return (
       <div className="space-y-3" aria-busy>
         {[0, 1, 2].map((n) => (
-          <div key={n} className="h-24 animate-pulse rounded-lg bg-neutral-200/70" />
+          <Skeleton key={n} className="h-24" />
         ))}
       </div>
     );
@@ -142,33 +166,76 @@ export default function ScriptReviewPage() {
 
   if (error) {
     return (
-      <div className="rounded-lg border border-red-200 bg-red-50 p-4">
-        <p className="text-sm text-red-800">Falha ao carregar vídeo: {error.message}</p>
-        <button
-          type="button"
-          onClick={() => void refetch()}
-          disabled={isRefetching}
-          className="mt-2 rounded border border-red-300 px-3 py-1 text-xs hover:bg-red-100 disabled:opacity-50"
-        >
-          Tentar de novo
-        </button>
-      </div>
+      <Alert variant="destructive">
+        <AlertDescription>Falha ao carregar vídeo: {error.message}</AlertDescription>
+        <div className="mt-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => void refetch()}
+            disabled={isRefetching}
+          >
+            Tentar de novo
+          </Button>
+        </div>
+      </Alert>
     );
   }
 
   const video = data?.video;
   if (!video) {
-    return <p className="text-sm text-neutral-500">Vídeo não encontrado.</p>;
+    return <p className="text-sm text-muted-foreground">Vídeo não encontrado.</p>;
   }
 
   if (!script) {
+    const canGenerate =
+      video.status === VideoStatus.SCRIPT_PENDING ||
+      video.status === VideoStatus.SCRIPT_REVIEW;
     return (
-      <div className="rounded-lg border border-amber-300 bg-amber-50 p-6 text-sm text-amber-900">
-        Nenhum <code className="font-mono">script.json</code> válido ainda. Abra uma sessão
-        do OpenCode dentro de{" "}
-        <code className="font-mono">videos/{video.slug}/</code> e escreva o roteiro (ver{" "}
-        <span className="font-mono">context/AGENTS.md</span>). Esta tela atualiza sozinha
-        quando o agente salvar.
+      <div className="space-y-4">
+        <Alert>
+          <AlertDescription>
+            Nenhum <code className="font-mono">script.json</code> válido ainda. A geração
+            automática via Gemini roda após o watcher criar o vídeo; se falhar, use o
+            botão abaixo ou abra uma sessão manual dentro de{" "}
+            <code className="font-mono">videos/{video.slug}/</code> (ver{" "}
+            <span className="font-mono">context/AGENTS.md</span>). Esta tela atualiza
+            sozinha quando o roteiro for salvo.
+          </AlertDescription>
+        </Alert>
+        {canGenerate && (
+          <div className="flex flex-wrap items-center gap-3">
+            <Button
+              type="button"
+              variant="accent"
+              disabled={generating}
+              onClick={() => {
+                resetGeneration();
+                doGenerate({ videoId: id });
+              }}
+            >
+              {generating ? "Gerando roteiro… (pode levar minutos)" : "Gerar roteiro com IA"}
+            </Button>
+            {generating && (
+              <span className="text-xs text-muted-foreground">
+                A IA está escrevendo os segmentos — aguarde sem recarregar.
+              </span>
+            )}
+          </div>
+        )}
+        {generationErrors.length > 0 && (
+          <Alert variant="destructive">
+            <AlertDescription>
+              Falha na geração:
+              <ul className="mt-1 list-disc pl-5">
+                {generationErrors.map((e) => (
+                  <li key={e}>{e}</li>
+                ))}
+              </ul>
+            </AlertDescription>
+          </Alert>
+        )}
       </div>
     );
   }
@@ -176,98 +243,96 @@ export default function ScriptReviewPage() {
   return (
     <div className="space-y-5">
       <header className="flex flex-wrap items-center gap-3">
-        <Link to="/" className="text-sm text-ink/60 hover:text-ink">
+        <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">
           ← Fila
         </Link>
-        <h1 className="font-serif text-2xl font-semibold">{video.slug}</h1>
-        <span
-          className={`rounded-full border px-2 py-0.5 text-xs ${
-            statusGroupClasses[presentStatus(video.status).group]
-          }`}
-        >
+        <h1 className="font-display text-2xl font-semibold">{video.slug}</h1>
+        <Badge variant="secondary">
           {presentStatus(video.status).label}
-        </span>
+        </Badge>
         <nav className="ml-auto flex gap-2 text-sm">
-          <Link
-            to={`/videos/${video.id}/voz`}
-            className="rounded-md border border-line px-3 py-1.5 hover:border-accent hover:text-accent"
-          >
-            Voz
+          <Link to={`/videos/${video.id}/voz`}>
+            <Button variant="outline" size="sm">Voz</Button>
           </Link>
-          <Link
-            to={`/videos/${video.id}/scenes`}
-            className="rounded-md border border-line px-3 py-1.5 hover:border-accent hover:text-accent"
-          >
-            Cenas
+          <Link to={`/videos/${video.id}/scenes`}>
+            <Button variant="outline" size="sm">Cenas</Button>
           </Link>
-          <Link
-            to={`/videos/${video.id}/final`}
-            className="rounded-md border border-line px-3 py-1.5 hover:border-accent hover:text-accent"
-          >
-            Corte
+          <Link to={`/videos/${video.id}/final`}>
+            <Button variant="outline" size="sm">Corte</Button>
           </Link>
         </nav>
         {script.target && (
-          <span className="text-xs text-ink/50">alvo: {script.target.durationMin} min</span>
+          <span className="text-xs text-muted-foreground">alvo: {script.target.durationMin} min</span>
         )}
-        <span className="text-xs text-ink/50">
+        <span className="text-xs text-muted-foreground">
           {shortCount} short{shortCount === 1 ? "" : "s"}
         </span>
 
         {!editing && video.status === VideoStatus.SCRIPT_REVIEW && (
           <div className="ml-auto flex gap-2">
-            <button
+            <Button
               type="button"
-              onClick={startEditing}
-              className="rounded border border-ink/20 px-3 py-1.5 text-xs hover:bg-ink/5"
+              variant="outline"
+              size="sm"
+              disabled={generating}
+              title="Regenera o roteiro com a IA (sobrescreve o atual)"
+              onClick={() => {
+                resetGeneration();
+                doGenerate({ videoId: id });
+              }}
             >
+              {generating ? "Gerando…" : "Regenerar com IA"}
+            </Button>
+            <Button type="button" variant="outline" size="sm" onClick={startEditing}>
               Editar
-            </button>
-            <button
-              type="button"
-              onClick={() => setModal("reject")}
-              className="rounded border border-red-300 px-3 py-1.5 text-xs text-red-800 hover:bg-red-50"
-            >
+            </Button>
+            <Button type="button" variant="destructive" size="sm" onClick={() => setModal("reject")}>
               Rejeitar
-            </button>
-            <button
-              type="button"
-              onClick={() => setModal("approve")}
-              className="rounded bg-accent px-3 py-1.5 text-xs text-paper hover:opacity-90"
-            >
+            </Button>
+            <Button type="button" variant="accent" size="sm" onClick={() => setModal("approve")}>
               Aprovar
-            </button>
+            </Button>
           </div>
         )}
       </header>
 
+      {generationErrors.length > 0 && (
+        <Alert variant="destructive">
+          <AlertDescription>
+            Falha na geração:
+            <ul className="mt-1 list-disc pl-5">
+              {generationErrors.map((e) => (
+                <li key={e}>{e}</li>
+              ))}
+            </ul>
+          </AlertDescription>
+        </Alert>
+      )}
+
       {toast && (
-        <div className="rounded border border-emerald-300 bg-emerald-50 px-4 py-2 text-sm text-emerald-900">
-          {toast}
-        </div>
+        <Alert>
+          <AlertDescription>{toast}</AlertDescription>
+        </Alert>
       )}
 
       {editing && (
         <form onSubmit={handleSave} className="flex items-center gap-3">
-          <button
-            type="submit"
-            disabled={!canSave}
-            className="rounded bg-accent px-4 py-1.5 text-xs text-paper hover:opacity-90 disabled:opacity-40"
-          >
+          <Button type="submit" variant="accent" size="sm" disabled={!canSave}>
             {saving ? "Salvando…" : "Salvar alterações"}
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            variant="outline"
+            size="sm"
             onClick={() => {
               setEditing(false);
               setDrafts(null);
             }}
-            className="rounded border border-ink/20 px-3 py-1.5 text-xs hover:bg-ink/5"
           >
             Descartar
-          </button>
+          </Button>
           {fieldErrors.size > 0 && (
-            <span className="text-xs text-red-700">
+            <span className="text-xs text-destructive">
               Corrija os campos destacados antes de salvar.
             </span>
           )}
@@ -281,14 +346,12 @@ export default function ScriptReviewPage() {
               <li key={seg.id}>
                 <a
                   href={`#segment-${seg.id}`}
-                  className={`block rounded px-3 py-2 text-xs hover:bg-ink/5 ${
-                    changedIds.has(seg.id) ? "" : "text-ink/70"
-                  }`}
+                  className="block rounded px-3 py-2 text-xs hover:bg-muted text-muted-foreground"
                 >
                   {changedIds.has(seg.id) && <span title="alterado">● </span>}
                   <span className="font-mono">{seg.id}</span>
-                  <span className="ml-1 hidden text-ink/40 sm:inline">{beatLabel(seg.beat)}</span>
-                  <span className="ml-1 hidden text-ink/30 md:inline">{emotionLabel(seg.emotion)}</span>
+                  <span className="ml-1 hidden text-muted-foreground sm:inline">{beatLabel(seg.beat)}</span>
+                  <span className="ml-1 hidden text-muted-foreground/70 md:inline">{emotionLabel(seg.emotion)}</span>
                 </a>
               </li>
             ))}
@@ -296,7 +359,7 @@ export default function ScriptReviewPage() {
         </nav>
 
         <div className="min-w-0 flex-1 space-y-3">
-          <label className="flex items-center gap-2 text-sm text-ink/70">
+          <label className="flex items-center gap-2 text-sm text-muted-foreground">
             <input
               type="checkbox"
               checked={showDiff}
@@ -329,26 +392,17 @@ export default function ScriptReviewPage() {
 
       {modal === "approve" && (
         <Modal title="Aprovar roteiro?" onClose={() => setModal(null)}>
-          <p className="text-sm text-ink/70">
+          <p className="text-sm text-muted-foreground">
             O vídeo vai para <span className="font-mono">script_approved</span> e a fila de
             gravação é liberada.
           </p>
           <div className="mt-5 flex justify-end gap-2">
-            <button
-              type="button"
-              onClick={() => setModal(null)}
-              className="rounded border border-ink/20 px-3 py-1.5 text-xs hover:bg-ink/5"
-            >
+            <Button type="button" variant="outline" size="sm" onClick={() => setModal(null)}>
               Cancelar
-            </button>
-            <button
-              type="button"
-              onClick={handleApprove}
-              disabled={approving}
-              className="rounded bg-accent px-3 py-1.5 text-xs text-paper hover:opacity-90 disabled:opacity-40"
-            >
+            </Button>
+            <Button type="button" variant="accent" size="sm" onClick={handleApprove} disabled={approving}>
               {approving ? "Aprovando…" : "Confirmar aprovação"}
-            </button>
+            </Button>
           </div>
         </Modal>
       )}
@@ -356,33 +410,25 @@ export default function ScriptReviewPage() {
       {modal === "reject" && (
         <Modal title="Rejeitar roteiro" onClose={() => setModal(null)}>
           <form onSubmit={handleReject}>
-            <p className="text-sm text-ink/70">
-              O vídeo volta para <span className="font-mono">script_pending</span>: o
-              OpenCode retoma o trabalho a partir do seu comentário.
+            <p className="text-sm text-muted-foreground">
+              O vídeo volta para <span className="font-mono">script_pending</span>: a
+              geração automática retoma a partir do seu comentário.
             </p>
-            <textarea
+            <Textarea
               value={rejectComment}
               onChange={(e) => setRejectComment(e.target.value)}
               rows={4}
               required
               placeholder="O que precisa mudar no roteiro?"
-              className="mt-3 w-full rounded border border-ink/20 p-3 text-sm focus:border-ink focus:outline-none"
+              className="mt-3"
             />
             <div className="mt-4 flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => setModal(null)}
-                className="rounded border border-ink/20 px-3 py-1.5 text-xs hover:bg-ink/5"
-              >
+              <Button type="button" variant="outline" size="sm" onClick={() => setModal(null)}>
                 Cancelar
-              </button>
-              <button
-                type="submit"
-                disabled={rejecting || !rejectComment.trim()}
-                className="rounded bg-red-700 px-3 py-1.5 text-xs text-white hover:bg-red-800 disabled:opacity-40"
-              >
+              </Button>
+              <Button type="submit" variant="destructive" size="sm" disabled={rejecting || !rejectComment.trim()}>
                 {rejecting ? "Rejeitando…" : "Confirmar rejeição"}
-              </button>
+              </Button>
             </div>
           </form>
         </Modal>

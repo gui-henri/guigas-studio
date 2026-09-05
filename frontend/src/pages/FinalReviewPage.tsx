@@ -17,6 +17,13 @@ import {
   formatDuration,
   formatMB,
 } from "../lib/finalReview";
+import { Badge } from "../components/ui/badge";
+import { Button } from "../components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Alert, AlertDescription } from "../components/ui/alert";
+import { Skeleton } from "../components/ui/skeleton";
+import { Textarea } from "../components/ui/textarea";
+import Modal from "../components/Modal";
 
 interface RenderInfo {
   path: string;
@@ -77,57 +84,51 @@ export default function FinalReviewPage() {
   const [rerenderReason, setRerenderReason] = useState("");
 
   if (videoQuery.isLoading) {
-    return <div className="h-24 animate-pulse rounded bg-neutral-200/70" aria-busy />;
+    return <Skeleton className="h-24" aria-busy />;
   }
 
   if (!video || !slug) {
-    return <p className="text-sm text-ink/70">Vídeo não encontrado.</p>;
+    return <p className="text-sm text-muted-foreground">Vídeo não encontrado.</p>;
   }
 
   return (
     <div className="space-y-5" data-testid="final-review-page">
       <header className="flex flex-wrap items-center gap-3">
-        <Link to="/" className="text-sm text-ink/60 hover:text-ink">
+        <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">
           ← Fila
         </Link>
-        <h1 className="font-serif text-2xl font-semibold">Corte final · {slug}</h1>
+        <h1 className="font-display text-2xl font-semibold">Corte final · {slug}</h1>
         {deviation ? (
-          <span
+          <Badge
             data-testid="target-badge"
-            className={`rounded-full px-3 py-1 text-xs font-medium ${
-              deviation.tone === "ok"
-                ? "bg-added/10 text-added"
-                : deviation.tone === "warn"
-                  ? "bg-accent/10 text-accent"
-                  : "bg-removed/10 text-removed"
-            }`}
+            variant={deviation.tone === "ok" ? "default" : deviation.tone === "warn" ? "accent" : "destructive"}
             title={deviation.detail}
           >
             {deviation.label}: {deviation.detail}
-          </span>
+          </Badge>
         ) : null}
         <div className="ml-auto flex gap-2">
           {status === VideoStatus.FINAL_REVIEW ? (
             <>
-              <button
+              <Button
                 type="button"
+                variant="outline"
                 onClick={() => setModal("rerender")}
                 disabled={rerender.isPending}
-                className="rounded-md border border-line px-4 py-2 text-sm hover:border-removed hover:text-removed disabled:opacity-40"
               >
                 Pedir re-render
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
+                variant="accent"
                 onClick={() => setModal("approve")}
                 disabled={approve.isPending}
-                className="rounded-md bg-added px-4 py-2 text-sm font-medium text-white disabled:opacity-40"
               >
                 {approve.isPending ? "gerando release…" : "Aprovar corte"}
-              </button>
+              </Button>
             </>
           ) : (
-            <span className="self-center text-xs text-ink/60">
+            <span className="self-center text-xs text-muted-foreground">
               status atual: {status} — ações disponíveis só em final_review
             </span>
           )}
@@ -135,58 +136,58 @@ export default function FinalReviewPage() {
       </header>
 
       {approve.isSuccess ? (
-        <p className="rounded-lg border border-added/40 bg-surface px-4 py-2 text-sm text-added">
-          Release gerado ({approve.data?.generatedPaths.length ?? 0} arquivos em{" "}
-          releases/{slug}/).
-        </p>
+        <Alert>
+          <AlertDescription>
+            Release gerado ({approve.data?.generatedPaths.length ?? 0} arquivos em{" "}
+            releases/{slug}/).
+          </AlertDescription>
+        </Alert>
       ) : null}
       {approve.error ? (
-        <p className="rounded-lg border border-removed/50 bg-surface px-4 py-2 text-sm text-removed">
-          {approve.error.message}
-        </p>
+        <Alert variant="destructive">
+          <AlertDescription>{approve.error.message}</AlertDescription>
+        </Alert>
       ) : null}
 
       {long ? (
         <section>
-          <h2 className="mb-2 font-serif text-lg">Long-form</h2>
+          <h2 className="mb-2 font-display text-lg">Long-form</h2>
           <video
             controls
             preload="metadata"
             width={960}
             src={mediaUrl(id, long.path)}
-            className="w-full max-w-[960px] rounded-xl border border-line bg-black"
+            className="w-full max-w-[960px] rounded-xl border border-border bg-black"
           />
-          <p className="mt-1 text-xs text-ink/60">
+          <p className="mt-1 text-xs text-muted-foreground">
             {formatDuration(long.durationS)} · {formatMB(long.bytes)}
           </p>
         </section>
       ) : (
-        <p className="text-sm text-ink/70">
+        <p className="text-sm text-muted-foreground">
           Nenhum render registrado ainda para este vídeo.
         </p>
       )}
 
       {checklistEnabled && checklistQuery.data ? (
-        <section data-testid="release-checklist" className="rounded-xl border border-line bg-surface p-4">
-          <header className="mb-3 flex items-center gap-2">
-            <h2 className="font-serif text-lg">Lançamento</h2>
+        <Card data-testid="release-checklist">
+          <CardHeader className="flex-row items-center gap-2 space-y-0">
+            <CardTitle className="text-lg">Lançamento</CardTitle>
             {(() => {
               const items = checklistQuery.data.items;
               const done = items.filter((i) => i.published).length;
               return (
-                <span
+                <Badge
                   data-testid="checklist-progress"
-                  className={`ml-auto rounded-full px-3 py-1 text-xs font-medium ${
-                    done === items.length
-                      ? "bg-added/10 text-added"
-                      : "bg-accent/10 text-accent"
-                  }`}
+                  variant={done === items.length ? "default" : "accent"}
+                  className="ml-auto"
                 >
                   {done}/{items.length} publicados
-                </span>
+                </Badge>
               );
             })()}
-          </header>
+          </CardHeader>
+          <CardContent>
           <ul className="space-y-2">
             {checklistQuery.data.items.map((item) => (
               <li key={item.itemKey} className="flex items-center gap-3 text-sm">
@@ -210,20 +211,21 @@ export default function FinalReviewPage() {
                 >
                   {item.label || item.itemKey}
                 </a>
-                <span className="font-mono text-xs text-ink/50">{item.downloadPath}</span>
+                <span className="font-mono text-xs text-muted-foreground">{item.downloadPath}</span>
                 {publishMutation.isPending &&
                 publishMutation.variables?.itemKey === item.itemKey ? (
-                  <span className="text-xs text-ink/40">salvando…</span>
+                  <span className="text-xs text-muted-foreground">salvando…</span>
                 ) : null}
               </li>
             ))}
           </ul>
-        </section>
+          </CardContent>
+        </Card>
       ) : null}
 
       {shorts.length > 0 ? (
         <section>
-          <h2 className="mb-2 font-serif text-lg">Shorts</h2>
+          <h2 className="mb-2 font-display text-lg">Shorts</h2>
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
             {shorts.map((s) => (
               <figure key={s.path} data-testid="short-card" className="space-y-1">
@@ -231,9 +233,9 @@ export default function FinalReviewPage() {
                   controls
                   preload="metadata"
                   src={mediaUrl(id, s.path)}
-                  className="aspect-[9/16] w-full rounded-lg border border-line bg-black object-cover"
+                  className="aspect-[9/16] w-full rounded-lg border border-border bg-black object-cover"
                 />
-                <figcaption className="text-xs text-ink/60">
+                <figcaption className="text-xs text-muted-foreground">
                   {s.path.split("/").pop()} · {formatDuration(s.durationS)} ·{" "}
                   {formatMB(s.bytes)}
                 </figcaption>
@@ -262,12 +264,11 @@ export default function FinalReviewPage() {
           confirmLabel="Re-renderizar"
           busy={rerender.isPending}
           extra={
-            <textarea
+            <Textarea
               value={rerenderReason}
               onChange={(e) => setRerenderReason(e.target.value)}
               placeholder="Motivo (opcional)"
               rows={2}
-              className="w-full rounded-md border border-line p-2 text-sm"
             />
           }
           onConfirm={() =>
@@ -310,32 +311,23 @@ function ConfirmModal(props: {
   onClose: () => void;
 }) {
   return (
-    <div
-      role="dialog"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-    >
-      <div className="w-full max-w-md space-y-4 rounded-xl bg-paper p-5 shadow-xl">
-        <h3 className="font-serif text-xl">{props.title}</h3>
-        <p className="text-sm text-ink/70">{props.description}</p>
-        {props.extra}
-        <div className="flex justify-end gap-2">
-          <button
-            type="button"
-            onClick={props.onClose}
-            className="rounded-md border border-line px-3 py-1.5 text-sm"
-          >
-            Cancelar
-          </button>
-          <button
-            type="button"
-            onClick={props.onConfirm}
-            disabled={props.busy}
-            className="rounded-md bg-accent px-3 py-1.5 text-sm font-medium text-white disabled:opacity-40"
-          >
-            {props.busy ? "processando…" : props.confirmLabel}
-          </button>
-        </div>
+    <Modal title={props.title} onClose={props.onClose}>
+      <p className="text-sm text-muted-foreground">{props.description}</p>
+      {props.extra}
+      <div className="mt-5 flex justify-end gap-2">
+        <Button type="button" variant="outline" size="sm" onClick={props.onClose}>
+          Cancelar
+        </Button>
+        <Button
+          type="button"
+          variant="accent"
+          size="sm"
+          onClick={props.onConfirm}
+          disabled={props.busy}
+        >
+          {props.busy ? "processando…" : props.confirmLabel}
+        </Button>
       </div>
-    </div>
+    </Modal>
   );
 }
