@@ -18,7 +18,7 @@ import { Mic } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const SPRITE_META = spriteMetaJson as SpriteMeta;
-const SHEET_URL = new URL(sheetUrl, import.meta.url).href;
+const SHEET_URL = sheetUrl;
 
 /** Voice tab (S3-08): per-segment preview with real audio + animated avatar. */
 export default function VoicePreviewPage() {

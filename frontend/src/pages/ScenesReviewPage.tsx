@@ -39,7 +39,7 @@ import VideoPipelineNav from "../components/VideoPipelineNav";
 import { cn } from "@/lib/utils";
 
 const SPRITE_META = spriteMetaJson as SpriteMeta;
-const SHEET_URL = new URL(sheetUrl, import.meta.url).href;
+const SHEET_URL = sheetUrl;
 
 interface CardProps {
   videoId: string;

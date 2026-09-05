@@ -93,10 +93,10 @@ export const SegmentComposition: React.FC<SegmentCompositionProps> = ({
   subtitleWords,
   spriteSheetUrl,
   spriteMeta,
-  avatarScale = 1080,
+  avatarScale,
   registry,
 }) => {
-  const { fps } = useVideoConfig();
+  const { fps, width, height } = useVideoConfig();
 
   if (!avatarTimeline) {
     return <AbsoluteFill style={{ background: theme.color.paper }} />;
@@ -110,7 +110,8 @@ export const SegmentComposition: React.FC<SegmentCompositionProps> = ({
     }
   }
 
-  const decision = selectLayout(parsed ? parsed.scene.type : null, layout);
+  const isScenePresent = parsed !== null;
+  const decision = selectLayout(isScenePresent ? parsed.scene.type : null, layout);
   const resolve = registry
     ? createSceneResolver({ ...defaultSceneRegistry, ...registry })
     : resolveSceneComponent;
@@ -136,17 +137,25 @@ export const SegmentComposition: React.FC<SegmentCompositionProps> = ({
     [showSubtitles, subtitleWords, fps]
   );
 
+  const avatarComputedScale = React.useMemo(() => {
+    if (avatarScale !== undefined) {
+      return isScenePresent && decision.layout === "split"
+        ? Math.round(avatarScale * AVATAR_SPLIT_FRACTION)
+        : avatarScale;
+    }
+    if (isScenePresent && decision.layout === "split") {
+      const colWidth = width * AVATAR_SPLIT_FRACTION;
+      return Math.round(Math.min(colWidth, height) * 0.85);
+    }
+    return Math.round(Math.min(width, height) * 0.85);
+  }, [avatarScale, isScenePresent, decision.layout, width, height]);
+
   const avatar = (
     <AvatarSprite
       timeline={avatarTimeline}
       spriteSheetUrl={spriteSheetUrl}
       spriteMeta={spriteMeta}
-      scale={decision.layout === "split" ? avatarScale * AVATAR_SPLIT_FRACTION : avatarScale}
-      position={
-        decision.layout === "split"
-          ? { x: 0, y: (1 - AVATAR_SPLIT_FRACTION) * avatarScale }
-          : { x: 0, y: 0 }
-      }
+      scale={avatarComputedScale}
     />
   );
 
@@ -154,7 +163,19 @@ export const SegmentComposition: React.FC<SegmentCompositionProps> = ({
     <AbsoluteFill style={{ background: theme.color.paper }}>
       {audioSrc ? <Audio src={audioSrc} /> : null}
 
-      {decision.layout === "split" ? (
+      {!isScenePresent ? (
+        <div
+          style={{
+            width: "100%",
+            height: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          {avatar}
+        </div>
+      ) : decision.layout === "split" ? (
         <div style={{ display: "flex", width: "100%", height: "100%" }}>
           <div
             style={{
@@ -162,6 +183,9 @@ export const SegmentComposition: React.FC<SegmentCompositionProps> = ({
               height: "100%",
               position: "relative",
               overflow: "hidden",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
             }}
           >
             {avatar}
@@ -172,8 +196,19 @@ export const SegmentComposition: React.FC<SegmentCompositionProps> = ({
         </div>
       ) : (
         <>
-          {avatar}
-          {decision.layout === "overlay" && visual ? (
+          <div
+            style={{
+              width: "100%",
+              height: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "flex-start",
+              paddingLeft: "6%",
+            }}
+          >
+            {avatar}
+          </div>
+          {visual ? (
             <div
               style={{
                 position: "absolute",

@@ -20,7 +20,7 @@ export interface AvatarSpriteProps {
   spriteMeta: SpriteMeta;
   /** Rendered size of one sprite cell in px. */
   scale?: number;
-  /** Position within the composition frame (px, top-left). */
+  /** Position within the composition frame (px, top-left). If omitted, positioned relatively. */
   position?: { x: number; y: number };
 }
 
@@ -50,7 +50,7 @@ export const AvatarSprite: React.FC<AvatarSpriteProps> = ({
   spriteSheetUrl,
   spriteMeta,
   scale = 1080,
-  position = { x: 0, y: 0 },
+  position,
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
@@ -74,9 +74,9 @@ export const AvatarSprite: React.FC<AvatarSpriteProps> = ({
   return (
     <div
       style={{
-        position: "absolute",
-        left: position.x,
-        top: position.y,
+        position: position ? "absolute" : "relative",
+        left: position ? position.x : undefined,
+        top: position ? position.y : undefined,
         width: scale,
         height: scale,
         overflow: "hidden",
