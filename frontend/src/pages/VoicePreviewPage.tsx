@@ -40,10 +40,14 @@ export default function VoicePreviewPage() {
 
   const activeId = selected ?? segments.find((s) => recordedSegments.has(s.id))?.id ?? null;
   const assets = useSegmentAssets(id, activeId ?? "");
-  const timeline = useMemo<TimelineView | null>(
-    () => (assets.timelineJson ? JSON.parse(assets.timelineJson) : null),
-    [assets.timelineJson]
-  );
+  const timeline = useMemo<TimelineView | null>(() => {
+    if (!assets.timelineJson) return null;
+    try {
+      return JSON.parse(assets.timelineJson);
+    } catch {
+      return null;
+    }
+  }, [assets.timelineJson]);
 
   if (videoQuery.isLoading) {
     return <Skeleton className="h-24" aria-busy />;

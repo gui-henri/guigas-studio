@@ -67,10 +67,14 @@ function SegmentCard(props: CardProps) {
   const reviewing = props.reviewing;
   const { ref, inView } = useInView<HTMLDivElement>();
   const assets = useSegmentAssets(videoId, segmentId);
-  const timeline = useMemo(
-    () => (assets.timelineJson ? JSON.parse(assets.timelineJson) : null),
-    [assets.timelineJson]
-  );
+  const timeline = useMemo(() => {
+    if (!assets.timelineJson) return null;
+    try {
+      return JSON.parse(assets.timelineJson);
+    } catch {
+      return null;
+    }
+  }, [assets.timelineJson]);
   const [comment, setComment] = useState(decision?.comment ?? "");
   const [rejecting, setRejecting] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -158,7 +162,11 @@ function SegmentCard(props: CardProps) {
             className="flex h-44 items-center justify-center rounded-lg border border-dashed border-border text-xs text-muted-foreground"
             aria-busy={assets.loading}
           >
-            {assets.loading ? "carregando artefatos…" : "role para pré-visualizar"}
+            {assets.loading
+              ? "carregando artefatos…"
+              : !inView
+                ? "role para pré-visualizar"
+                : "timeline indisponível para este segmento"}
           </div>
         )}
       </div>

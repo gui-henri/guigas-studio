@@ -27,10 +27,10 @@ export function useSegmentAssets(videoId: string, segmentId: string): SegmentAss
     }
     const controller = new AbortController();
     let wavUrl: string | null = null;
-    let timelineUrl: string | null = null;
+    let timelineText: string | null = null;
     let cancelled = false;
 
-    async function fetchOne(relPath: string): Promise<string | null> {
+    async function fetchWav(relPath: string): Promise<string | null> {
       const token = localStorage.getItem(TOKEN_STORAGE_KEY);
       const resp = await fetch(
         `/api/v1/videos/${videoId}/artifacts/${relPath}`,
@@ -40,23 +40,32 @@ export function useSegmentAssets(videoId: string, segmentId: string): SegmentAss
       return URL.createObjectURL(await resp.blob());
     }
 
+    async function fetchJsonText(relPath: string): Promise<string | null> {
+      const token = localStorage.getItem(TOKEN_STORAGE_KEY);
+      const resp = await fetch(
+        `/api/v1/videos/${videoId}/artifacts/${relPath}`,
+        { headers: token ? { Authorization: `Bearer ${token}` } : {}, signal: controller.signal }
+      );
+      if (!resp.ok) return null;
+      return await resp.text();
+    }
+
     void (async () => {
       setState((s) => ({ ...s, loading: true }));
       try {
-        wavUrl = await fetchOne(`audio/${segmentId}.wav`);
-        timelineUrl = await fetchOne(`timelines/${segmentId}.timeline.json`);
+        wavUrl = await fetchWav(`audio/${segmentId}.wav`);
+        timelineText = await fetchJsonText(`timelines/${segmentId}.timeline.json`);
       } catch {
         /* aborted or network error → keep whatever resolved */
       }
       if (cancelled) return;
-      setState({ wavUrl, timelineJson: timelineUrl, loading: false });
+      setState({ wavUrl, timelineJson: timelineText, loading: false });
     })();
 
     return () => {
       cancelled = true;
       controller.abort();
       if (wavUrl) URL.revokeObjectURL(wavUrl);
-      if (timelineUrl) URL.revokeObjectURL(timelineUrl);
     };
   }, [videoId, segmentId]);
 
