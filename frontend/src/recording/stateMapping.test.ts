@@ -1,14 +1,17 @@
 import { describe, expect, it } from "vitest";
-
 import {
+  BLENDSHAPE_NAMES,
   bsArrayToRecord,
   DEFAULT_THRESHOLDS,
+  mapBlendshapesToMouth,
   mapBlendshapesToState,
+  mapSampleToMouth,
   mapSampleToState,
   serializeBlendshapes,
   smoothStates,
 } from "./stateMapping";
 import type { StateSample } from "./stateMapping";
+import { rowForState, type SpriteSheet } from "./spriteSheet";
 import {
   ALL_ZERO,
   BROWS_DOWN,
@@ -23,6 +26,37 @@ import {
 function state(t: number, st: StateSample["state"]): StateSample {
   return { t, state: st };
 }
+
+describe("rowForState", () => {
+  const dummySheet: SpriteSheet = {
+    img: {} as HTMLImageElement,
+    cellWidth: 256,
+    cellHeight: 256,
+    columns: 4,
+    rows: 5,
+    states: ["idle", "falando", "feliz", "pensativo", "surpreso"],
+    mouths: ["rest", "open_a", "rounded_o", "wide_e"],
+  };
+
+  it("maps Portuguese state names to the correct rows", () => {
+    expect(rowForState(dummySheet, "idle")).toBe(0);
+    expect(rowForState(dummySheet, "falando")).toBe(1);
+    expect(rowForState(dummySheet, "feliz")).toBe(2);
+    expect(rowForState(dummySheet, "pensativo")).toBe(3);
+    expect(rowForState(dummySheet, "surpreso")).toBe(4);
+  });
+
+  it("maps English state names to the correct rows", () => {
+    expect(rowForState(dummySheet, "talking")).toBe(1);
+    expect(rowForState(dummySheet, "happy")).toBe(2);
+    expect(rowForState(dummySheet, "thoughtful")).toBe(3);
+    expect(rowForState(dummySheet, "surprised")).toBe(4);
+  });
+
+  it("falls back to 0 for unknown states", () => {
+    expect(rowForState(dummySheet, "unknown_state")).toBe(0);
+  });
+});
 
 describe("mapBlendshapesToState", () => {
   it("maps all-zero and neutral vectors to idle", () => {
@@ -49,8 +83,40 @@ describe("mapBlendshapesToState", () => {
     expect(mapBlendshapesToState({ jawOpen: 0.8, mouthSmileLeft: 0.5 })).toBe("happy");
   });
 
+  it("maps dynamically when names array is provided", () => {
+    const customNames = ["_neutral", "mouthSmileLeft", "jawOpen"];
+    const customScores = [0, 0.7, 0.2];
+    expect(mapSampleToState(customScores, DEFAULT_THRESHOLDS, customNames)).toBe("happy");
+  });
+
   it("is deterministic for identical inputs", () => {
     expect(mapSampleToState(SMILE)).toBe(mapSampleToState(SMILE));
+  });
+});
+
+describe("mapBlendshapesToMouth", () => {
+  it("maps closed mouth to rest", () => {
+    expect(mapBlendshapesToMouth({})).toBe("rest");
+    expect(mapBlendshapesToMouth(bsArrayToRecord(NEUTRAL))).toBe("rest");
+  });
+
+  it("maps jaw opening to open_a", () => {
+    expect(mapBlendshapesToMouth({ jawOpen: 0.3 })).toBe("open_a");
+  });
+
+  it("maps rounded lips / pucker / funnel to rounded_o", () => {
+    expect(mapBlendshapesToMouth({ mouthPucker: 0.4 })).toBe("rounded_o");
+    expect(mapBlendshapesToMouth({ mouthFunnel: 0.35 })).toBe("rounded_o");
+  });
+
+  it("maps wide smile or stretch to wide_e", () => {
+    expect(mapBlendshapesToMouth({ mouthStretchLeft: 0.3 })).toBe("wide_e");
+    expect(mapBlendshapesToMouth({ mouthSmileLeft: 0.4, mouthSmileRight: 0.4 })).toBe("wide_e");
+  });
+
+  it("maps positional sample array to mouth shape via mapSampleToMouth", () => {
+    expect(mapSampleToMouth(JAW_OPEN)).toBe("open_a");
+    expect(mapSampleToMouth(NEUTRAL)).toBe("rest");
   });
 });
 
@@ -87,10 +153,11 @@ describe("smoothStates hysteresis", () => {
 
 describe("serializeBlendshapes", () => {
   function fiveMinuteFixture() {
-    // jawOpen at position 22 of the canonical 52-slot contract; deterministic noise elsewhere.
+    // jawOpen at canonical position in 52-slot contract; deterministic noise elsewhere.
+    const jawOpenIdx = BLENDSHAPE_NAMES.indexOf("jawOpen");
     return Array.from({ length: 9000 }, (_, i) => ({
       t: Math.round(i * 33.3333),
-      bs: JAW_OPEN.map((_, k) => (k === 22 ? 0.8 : ((i * 7 + k) % 100) / 1000)),
+      bs: JAW_OPEN.map((_, k) => (k === jawOpenIdx ? 0.8 : ((i * 7 + k) % 100) / 1000)),
     }));
   }
 

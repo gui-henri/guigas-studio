@@ -84,3 +84,18 @@ export async function uploadTakeArtifact(
     throw err;
   }
 }
+
+export async function deleteTake(videoSlug: string, segmentId: string): Promise<void> {
+  const token = localStorage.getItem(TOKEN_STORAGE_KEY);
+  if (!token) throw new Error("sem sessão: faça login");
+  const resp = await fetch(
+    `/api/v1/videos/${encodeURIComponent(videoSlug)}/takes?segment_id=${encodeURIComponent(segmentId)}`,
+    {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
+  if (!resp.ok) {
+    throw new Error(`Falha ao excluir take: status ${resp.status}`);
+  }
+}

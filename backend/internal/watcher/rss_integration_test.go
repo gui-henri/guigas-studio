@@ -47,7 +47,7 @@ func TestBaselineThenNewItem(t *testing.T) {
 	w := New(db.Queries, Config{URL: srvURL, Interval: time.Minute}, slog.Default())
 
 	// 1st poll: baseline — marks GUIDs, creates no videos.
-	if err := w.Poll(t.Context()); err != nil {
+	if _, err := w.Poll(t.Context()); err != nil {
 		t.Fatalf("baseline poll: %v", err)
 	}
 	count, err := db.Queries.CountRssItems(t.Context())
@@ -69,7 +69,7 @@ func TestBaselineThenNewItem(t *testing.T) {
 	defer srv2.Close()
 	w.cfg.URL = srv2.URL
 
-	if err := w.Poll(t.Context()); err != nil {
+	if _, err := w.Poll(t.Context()); err != nil {
 		t.Fatalf("poll with new item: %v", err)
 	}
 	videos, err = db.Queries.ListVideos(t.Context())
@@ -85,7 +85,7 @@ func TestBaselineThenNewItem(t *testing.T) {
 	}
 
 	// 3rd poll identical to the previous: nothing new.
-	if err := w.Poll(t.Context()); err != nil {
+	if _, err := w.Poll(t.Context()); err != nil {
 		t.Fatalf("re-poll: %v", err)
 	}
 	videos, err = db.Queries.ListVideos(t.Context())

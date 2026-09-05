@@ -67,42 +67,43 @@ type rssItem struct {
 }
 
 // Poll fetches, parses and processes the feed once. Exported for tests.
-func (w *Watcher) Poll(ctx context.Context) error {
+func (w *Watcher) Poll(ctx context.Context) ([]sqlc.Video, error) {
 	if w.cfg.URL == "" {
-		return errors.New("RSS_URL is empty")
+		return nil, errors.New("RSS_URL is empty")
 	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, w.cfg.URL, nil)
 	if err != nil {
-		return fmt.Errorf("build request: %w", err)
+		return nil, fmt.Errorf("build request: %w", err)
 	}
 	resp, err := w.client.Do(req)
 	if err != nil {
-		return fmt.Errorf("fetch feed: %w", err)
+		return nil, fmt.Errorf("fetch feed: %w", err)
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("fetch feed: status %d", resp.StatusCode)
+		return nil, fmt.Errorf("fetch feed: status %d", resp.StatusCode)
 	}
 	body, err := io.ReadAll(io.LimitReader(resp.Body, 10<<20))
 	if err != nil {
-		return fmt.Errorf("read feed: %w", err)
+		return nil, fmt.Errorf("read feed: %w", err)
 	}
 
 	var feed rssFeed
 	if err := xml.Unmarshal(body, &feed); err != nil {
-		return fmt.Errorf("parse feed: %w", err)
+		return nil, fmt.Errorf("parse feed: %w", err)
 	}
-	w.processItems(ctx, feed.Channel.Items)
-	return nil
+	return w.processItems(ctx, feed.Channel.Items), nil
 }
 
-func (w *Watcher) processItems(ctx context.Context, items []rssItem) {
+func (w *Watcher) processItems(ctx context.Context, items []rssItem) []sqlc.Video {
+	var createdVideos []sqlc.Video
+
 	// Baseline: while rss_items is still empty, the first successful poll marks
 	// everything as seen WITHOUT creating videos — avoids flooding from backlog.
 	baseline, err := w.queries.CountRssItems(ctx)
 	if err != nil {
 		w.logger.Error("watcher.rss.count_failed", slog.Any("error", err))
-		return
+		return nil
 	}
 	isBaseline := baseline == 0
 
@@ -145,6 +146,7 @@ func (w *Watcher) processItems(ctx context.Context, items []rssItem) {
 				slog.String("guid", guid), slog.String("slug", slug), slog.Any("error", err))
 			continue
 		}
+		createdVideos = append(createdVideos, video)
 		nullID := pgtype.UUID{Bytes: video.ID, Valid: true}
 		if err := w.queries.SetRssItemVideo(ctx, sqlc.SetRssItemVideoParams{
 			Guid:    guid,
@@ -161,6 +163,7 @@ func (w *Watcher) processItems(ctx context.Context, items []rssItem) {
 
 		w.scaffoldWorkspace(ctx, video.ID, slug, title, link)
 	}
+	return createdVideos
 }
 
 // scaffoldWorkspace materializes the context pack and moves the video to
@@ -240,7 +243,7 @@ func (w *Watcher) Run(ctx context.Context) {
 func (w *Watcher) pollLogged(ctx context.Context) {
 	pollCtx, cancel := context.WithTimeout(ctx, 20*time.Second)
 	defer cancel()
-	if err := w.Poll(pollCtx); err != nil && ctx.Err() == nil {
+	if _, err := w.Poll(pollCtx); err != nil && ctx.Err() == nil {
 		w.logger.Error("watcher.rss.poll_failed", slog.Any("error", err))
 	}
 }

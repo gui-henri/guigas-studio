@@ -45,12 +45,17 @@ vi.mock("@connectrpc/connect-query", () => ({
       refetch: vi.fn(),
     };
   }),
+  useMutation: vi.fn(() => ({
+    mutate: vi.fn(),
+    isPending: false,
+  })),
 }));
 
 vi.mock("../gen/app/studio/v1/video-VideoService_connectquery", () => ({
   approveScenes: {},
   getVideo: {},
   listTakes: { kind: "listTakes" },
+  approveScenes: {},
 }));
 
 import { VideoStatus } from "../gen/app/studio/v1/video_pb";

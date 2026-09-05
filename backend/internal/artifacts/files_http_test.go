@@ -40,7 +40,7 @@ func TestFilesHandlerAuthMatrix(t *testing.T) {
 			r.Header.Set("Authorization", "Bearer "+token)
 		}
 		r.SetPathValue("slug", "demo")
-		r.SetPathValue("path", strings.TrimPrefix(target, "/api/v1/videos/demo/files/"))
+		r.SetPathValue("path", strings.TrimPrefix(r.URL.Path, "/api/v1/videos/demo/files/"))
 		return r
 	}
 
@@ -64,6 +64,7 @@ func TestFilesHandlerAuthMatrix(t *testing.T) {
 	}
 	cases = append(cases,
 		struct{ name string; req *http.Request; want int }{"valid jwt → 200", newReq("/api/v1/videos/demo/files/script.json", jwtTok), http.StatusOK},
+		struct{ name string; req *http.Request; want int }{"valid query token → 200", newReq("/api/v1/videos/demo/files/script.json?token="+jwtTok, ""), http.StatusOK},
 	)
 
 	for _, tc := range cases {

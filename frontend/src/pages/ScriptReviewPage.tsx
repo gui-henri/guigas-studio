@@ -250,12 +250,15 @@ export default function ScriptReviewPage() {
         <Badge variant="secondary">
           {presentStatus(video.status).label}
         </Badge>
-        <nav className="ml-auto flex gap-2 text-sm">
+        <nav className="ml-auto flex items-center gap-2 text-sm">
+          {(video.status === VideoStatus.RECORDING ||
+            video.status === VideoStatus.SCRIPT_APPROVED) && (
+            <Link to={`/videos/${video.slug}/studio`}>
+              <Button variant="default" size="sm">Estúdio 🎙️</Button>
+            </Link>
+          )}
           <Link to={`/videos/${video.id}/voz`}>
             <Button variant="outline" size="sm">Voz</Button>
-          </Link>
-          <Link to={`/videos/${video.id}/scenes`}>
-            <Button variant="outline" size="sm">Cenas</Button>
           </Link>
           <Link to={`/videos/${video.id}/final`}>
             <Button variant="outline" size="sm">Corte</Button>
@@ -305,6 +308,19 @@ export default function ScriptReviewPage() {
                 <li key={e}>{e}</li>
               ))}
             </ul>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {(video.status === VideoStatus.RECORDING ||
+        video.status === VideoStatus.SCRIPT_APPROVED) && (
+        <Alert>
+          <AlertDescription>
+            <span className="font-medium">Roteiro aprovado! O estúdio de gravação está pronto. </span>
+            <span className="text-xs">Conecte seu microfone e câmera para gravar os takes e blendshapes. </span>
+            <Link to={`/videos/${video.slug}/studio`} className="ml-2 inline-block">
+              <Button variant="accent" size="sm">Abrir Estúdio de Gravação →</Button>
+            </Link>
           </AlertDescription>
         </Alert>
       )}

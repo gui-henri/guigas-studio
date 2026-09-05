@@ -1,11 +1,11 @@
 {
   "comment": "Shared Go<->TS parity fixture for the blendshape->state mapping (S3-04). Both suites must produce identical states for these named vectors.",
   "thresholds": {
-    "talkJawOpen": 0.25,
-    "smile": 0.35,
-    "surpriseBrow": 0.45,
-    "thoughtfulBrowDown": 0.3,
-    "gazeDown": 0.3
+    "talkJawOpen": 0.15,
+    "smile": 0.25,
+    "surpriseBrow": 0.25,
+    "thoughtfulBrowDown": 0.22,
+    "gazeDown": 0.25
   },
   "cases": [
     { "name": "neutral", "values": {}, "expected": "idle" },

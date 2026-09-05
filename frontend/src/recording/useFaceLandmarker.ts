@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { VideoFrameCallbackMetadata } from "./types";
 
 export interface FaceLandmarkerState {
   delegate: "webgpu" | "cpu" | null;
   fps: number;
+  faceDetected: boolean;
   error: string | null;
   start: (t0: number) => void;
   stop: () => void;
@@ -18,32 +18,47 @@ export interface BlendshapeBatchItem {
 type WorkerOut =
   | { type: "ready"; delegate: "webgpu" | "cpu" }
   | { type: "samples"; batch: BlendshapeBatchItem[] }
+  | { type: "live_sample"; bs: number[]; names?: string[]; faceDetected: boolean }
   | { type: "stats"; fps: number }
   | { type: "error"; message: string };
 
+type HTMLVideoElementWithCallback = HTMLVideoElement & {
+  requestVideoFrameCallback?: (cb: () => void) => number;
+  cancelVideoFrameCallback?: (id: number) => void;
+};
+
 /**
  * Owns the face-landmarker worker lifecycle and feeds it frames from the
- * attached <video> via requestVideoFrameCallback (transferable ImageBitmaps).
+ * attached <video> via requestVideoFrameCallback / requestAnimationFrame (transferable ImageBitmaps).
  * `onSamples` receives blendshape batches; `t` is relative to the t0 passed
  * into `start()`.
  */
 export function useFaceLandmarker(
   videoRef: React.RefObject<HTMLVideoElement | null>,
   onSamples?: (batch: BlendshapeBatchItem[]) => void,
+  onLiveSample?: (sample: { bs: number[]; names?: string[]; faceDetected: boolean }) => void,
   enabled = true
 ): FaceLandmarkerState {
   const workerRef = useRef<Worker | null>(null);
   const rafRef = useRef<number>(0);
-  const runningRef = useRef(false);
+  const rvfcRef = useRef<number | null>(null);
   const samplesRef = useRef(onSamples);
+  const liveSampleRef = useRef(onLiveSample);
   const [delegate, setDelegate] = useState<"webgpu" | "cpu" | null>(null);
   const [fps, setFps] = useState(0);
+  const [faceDetected, setFaceDetected] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     samplesRef.current = onSamples;
   }, [onSamples]);
 
+  useEffect(() => {
+    liveSampleRef.current = onLiveSample;
+  }, [onLiveSample]);
+
+  // Worker initialization
   useEffect(() => {
     if (!enabled) return;
     const worker = new Worker(
@@ -57,9 +72,14 @@ export function useFaceLandmarker(
       switch (msg.type) {
         case "ready":
           setDelegate(msg.delegate);
+          setReady(true);
           break;
         case "samples":
           samplesRef.current?.(msg.batch);
+          break;
+        case "live_sample":
+          setFaceDetected(msg.faceDetected);
+          liveSampleRef.current?.(msg);
           break;
         case "stats":
           setFps(msg.fps);
@@ -72,62 +92,85 @@ export function useFaceLandmarker(
     worker.postMessage({ type: "init" });
 
     return () => {
-      cancelAnimationFrame(rafRef.current);
-      runningRef.current = false;
+      setReady(false);
       worker.terminate();
       workerRef.current = null;
     };
   }, [enabled]);
 
-  const feedLoop = useCallback(() => {
-    const video = videoRef.current;
-    const worker = workerRef.current;
-    if (!video || !worker || !runningRef.current) return;
+  // Continuous frame pumping loop (runs whenever worker is ready and video is playing)
+  useEffect(() => {
+    if (!ready || !enabled) return;
+    let cancelled = false;
+    let inFlight = false;
+    const currentVideo = videoRef.current as HTMLVideoElementWithCallback | null;
 
-    const send = (metadata?: VideoFrameCallbackMetadata) => {
-      void metadata;
-      if (!runningRef.current || !video.videoWidth) return;
-      const bitmap = createImageBitmap(video);
-      bitmap.then((bm) => {
-        if (!runningRef.current) {
-          bm.close();
-          return;
-        }
-        worker.postMessage(
-          { type: "frame", bitmap: bm, t: performance.now() },
-          [bm]
-        );
-      });
-      if ("requestVideoFrameCallback" in video) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (video as any).requestVideoFrameCallback(send);
+    const pump = () => {
+      if (cancelled) return;
+      const video = videoRef.current;
+      const worker = workerRef.current;
+
+      if (
+        video &&
+        worker &&
+        !video.paused &&
+        !video.ended &&
+        video.readyState >= 2 &&
+        video.videoWidth > 0 &&
+        !inFlight
+      ) {
+        inFlight = true;
+        createImageBitmap(video)
+          .then((bm) => {
+            if (cancelled) {
+              bm.close();
+              return;
+            }
+            worker.postMessage(
+              { type: "frame", bitmap: bm, t: performance.now() },
+              [bm]
+            );
+          })
+          .catch((err) => {
+            console.debug("createImageBitmap skipped frame:", err);
+          })
+          .finally(() => {
+            inFlight = false;
+          });
+      }
+
+      const videoEl = videoRef.current as HTMLVideoElementWithCallback | null;
+      if (videoEl && typeof videoEl.requestVideoFrameCallback === "function") {
+        rvfcRef.current = videoEl.requestVideoFrameCallback(() => {
+          pump();
+        });
       } else {
-        rafRef.current = requestAnimationFrame(() => send());
+        rafRef.current = requestAnimationFrame(pump);
       }
     };
 
-    if ("requestVideoFrameCallback" in video) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (video as any).requestVideoFrameCallback(send);
-    } else {
-      rafRef.current = requestAnimationFrame(() => send());
-    }
-  }, [videoRef]);
+    rafRef.current = requestAnimationFrame(pump);
 
-  const start = useCallback(
-    (t0: number) => {
-      workerRef.current?.postMessage({ type: "start", t0 });
-      runningRef.current = true;
-      feedLoop();
-    },
-    [feedLoop]
-  );
+    return () => {
+      cancelled = true;
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      if (
+        rvfcRef.current !== null &&
+        currentVideo &&
+        typeof currentVideo.cancelVideoFrameCallback === "function"
+      ) {
+        currentVideo.cancelVideoFrameCallback(rvfcRef.current);
+      }
+    };
+  }, [ready, enabled, videoRef]);
+
+  const start = useCallback((t0: number) => {
+    workerRef.current?.postMessage({ type: "start", t0 });
+  }, []);
 
   const stop = useCallback(() => {
-    runningRef.current = false;
-    cancelAnimationFrame(rafRef.current);
     workerRef.current?.postMessage({ type: "stop" });
   }, []);
 
-  return { delegate, fps, error, start, stop };
+  return { delegate, fps, faceDetected, error, start, stop };
 }

@@ -277,6 +277,10 @@ func concatWavs(paths []string, outPath string) (int64, []int64, error) {
 		}
 	}
 	if err := out.Sync(); err != nil {
+		out.Close()
+		return 0, nil, err
+	}
+	if err := out.Close(); err != nil {
 		return 0, nil, err
 	}
 	if err := os.Rename(outPath+".tmp", outPath); err != nil {

@@ -41,7 +41,7 @@ func TestPollBadFeedDoesNotPanic(t *testing.T) {
 	defer srv.Close()
 
 	w := newTestWatcher(t, srv.URL)
-	if err := w.Poll(testCtx(t)); err == nil {
+	if _, err := w.Poll(testCtx(t)); err == nil {
 		t.Error("expected error for non-200 feed")
 	}
 
@@ -49,14 +49,14 @@ func TestPollBadFeedDoesNotPanic(t *testing.T) {
 		_, _ = w.Write([]byte("<rss><channel><item><guid>x</guid></item></rss>"))
 	}))
 	defer broken.Close()
-	if err := w.Poll(testCtx(t)); err == nil {
+	if _, err := w.Poll(testCtx(t)); err == nil {
 		t.Error("expected parse error for malformed feed")
 	}
 }
 
 func TestPollEmptyURLFails(t *testing.T) {
 	w := newTestWatcher(t, "")
-	if err := w.Poll(testCtx(t)); err == nil {
+	if _, err := w.Poll(testCtx(t)); err == nil {
 		t.Error("expected error for empty RSS_URL")
 	}
 }

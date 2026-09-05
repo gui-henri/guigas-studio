@@ -49,12 +49,12 @@ func TestScaffoldPipelineE2E(t *testing.T) {
 	w := New(db.Queries, Config{URL: srv.URL, Interval: minute(), DataDir: dataDir}, slog.Default())
 
 	// Baseline poll first (marks existing GUIDs without videos).
-	if err := w.Poll(t.Context()); err != nil {
+	if _, err := w.Poll(t.Context()); err != nil {
 		t.Fatalf("baseline poll: %v", err)
 	}
 
 	// Second poll brings the new post (feed changes after first request).
-	if err := w.Poll(t.Context()); err != nil {
+	if _, err := w.Poll(t.Context()); err != nil {
 		t.Fatalf("poll: %v", err)
 	}
 

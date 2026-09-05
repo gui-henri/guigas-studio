@@ -161,6 +161,14 @@ service VideoService {
   rpc ApproveFinalCut(ApproveFinalCutRequest) returns (ApproveFinalCutResponse);
   rpc GetReleaseChecklist(GetReleaseChecklistRequest) returns (GetReleaseChecklistResponse);
   rpc SetChecklistItemPublished(SetChecklistItemPublishedRequest) returns (SetChecklistItemPublishedResponse);
+  rpc TriggerRssPoll(TriggerRssPollRequest) returns (TriggerRssPollResponse);
+}
+
+message TriggerRssPollRequest {}
+
+message TriggerRssPollResponse {
+  int32 new_posts_count = 1;
+  repeated Video created_videos = 2;
 }
 
 message ChecklistItemView {

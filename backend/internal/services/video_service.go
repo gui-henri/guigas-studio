@@ -24,6 +24,7 @@ import (
 	"github.com/gui-henri/guigas-studio/backend/internal/domain/videostate"
 	"github.com/gui-henri/guigas-studio/backend/internal/events"
 	"github.com/gui-henri/guigas-studio/backend/internal/scriptgen"
+	"github.com/gui-henri/guigas-studio/backend/internal/watcher"
 	"github.com/gui-henri/guigas-studio/backend/internal/workspace"
 )
 
@@ -52,6 +53,8 @@ func statusToProto(status string) studiov1.VideoStatus {
 	return studiov1.VideoStatus_VIDEO_STATUS_UNSPECIFIED
 }
 
+var _ studiov1connect.VideoServiceHandler = (*VideoService)(nil)
+
 // VideoService implements studio.v1.VideoService, including the script review
 // flow (S1-04).
 type VideoService struct {
@@ -63,6 +66,7 @@ type VideoService struct {
 	// scriptGen drives manual GenerateScript calls; nil disables the RPC
 	// (server has no GEMINI_API_KEY). Satisfied by *gemini.Client.
 	scriptGen scriptgen.ScriptClient
+	watcher *watcher.Watcher
 }
 
 // NewVideoService returns the Connect handler for VideoService. The pool may
@@ -81,6 +85,33 @@ func NewVideoService(queries *sqlc.Queries, dataDir string, hub *events.Hub, poo
 func (s *VideoService) WithScriptGenerator(g scriptgen.ScriptClient) *VideoService {
 	s.scriptGen = g
 	return s
+}
+
+// SetWatcher configures the optional RSS watcher instance for manual polling.
+func (s *VideoService) SetWatcher(w *watcher.Watcher) {
+	s.watcher = w
+}
+
+func (s *VideoService) TriggerRssPoll(
+	ctx context.Context,
+	req *connect.Request[studiov1.TriggerRssPollRequest],
+) (*connect.Response[studiov1.TriggerRssPollResponse], error) {
+	if s.watcher == nil {
+		return nil, connect.NewError(connect.CodeFailedPrecondition, errors.New("rss watcher not configured"))
+	}
+	created, err := s.watcher.Poll(ctx)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("rss poll failed: %w", err))
+	}
+	protoVideos := make([]*studiov1.Video, 0, len(created))
+	for i := range created {
+		protoVideos = append(protoVideos, videoToProto(&created[i]))
+	}
+	return connect.NewResponse(&studiov1.TriggerRssPollResponse{
+		NewPostsCount: int32(len(created)),
+		CreatedVideos: protoVideos,
+	}), nil
+}
 }
 
 // publishStatusChanged emits video.status_changed to global + per-video topics.
@@ -142,11 +173,16 @@ func (s *VideoService) GetVideo(
 	ctx context.Context,
 	req *connect.Request[studiov1.GetVideoRequest],
 ) (*connect.Response[studiov1.GetVideoResponse], error) {
-	id, err := parseUUID(req.Msg.GetId())
-	if err != nil {
-		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("invalid video id"))
+	var (
+		video sqlc.Video
+		err   error
+	)
+	id, uErr := parseUUID(req.Msg.GetId())
+	if uErr == nil {
+		video, err = s.queries.GetVideo(ctx, id)
+	} else {
+		video, err = s.queries.GetVideoBySlug(ctx, req.Msg.GetId())
 	}
-	video, err := s.queries.GetVideo(ctx, id)
 	if err != nil {
 		if errors.Is(err, errNoRows) {
 			return nil, connect.NewError(connect.CodeNotFound, errors.New("video not found"))

@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strings"
 	"syscall"
 	"time"
 
@@ -35,10 +36,10 @@ import (
 	"github.com/gui-henri/guigas-studio/backend/internal/watcher"
 )
 
-func newHandler(cfg config.Config, db *database.DB, appHub *events.Hub) http.Handler {
+func newHandler(cfg config.Config, db *database.DB, appHub *events.Hub, watchers ...*watcher.Watcher) http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
-		body := map[string]string{"status": "ok"}
+		body := map[string]string{"status": "ok", "version": "v1.1-rss-sync"}
 		code := http.StatusOK
 		if db == nil || db.Pool == nil {
 			body["status"] = "degraded"
@@ -57,6 +58,7 @@ func newHandler(cfg config.Config, db *database.DB, appHub *events.Hub) http.Han
 			}
 		}
 		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
 		w.WriteHeader(code)
 		_ = json.NewEncoder(w).Encode(body)
 	})
@@ -84,7 +86,7 @@ func newHandler(cfg config.Config, db *database.DB, appHub *events.Hub) http.Han
 		return auth.ParseToken(cfg.Auth.JWTSecret, raw)
 	})
 	mux.Handle("GET /api/v1/videos/{videoID}/artifacts/{path...}", artifactDownload)
-	filesHandler := artifacts.NewFilesHandler(cfg.DataDir, cfg.Auth.JWTSecret)
+	filesHandler := artifacts.NewFilesHandler(filepath.Join(cfg.DataDir, "videos"), cfg.Auth.JWTSecret)
 	mux.Handle("GET /api/v1/videos/{videoSlug}/files/{path...}", filesHandler)
 	rendersUpload := artifacts.NewRendersUploadHandler(cfg.DataDir, cfg.Auth.JWTSecret, cfg.Auth.RunnerToken)
 	mux.Handle("PUT /api/v1/videos/{videoSlug}/renders/{file}/chunks", rendersUpload)
@@ -99,6 +101,7 @@ func newHandler(cfg config.Config, db *database.DB, appHub *events.Hub) http.Han
 	})
 	mux.Handle("POST /api/v1/videos/{videoSlug}/takes", takeUpload)
 	mux.Handle("GET /api/v1/videos/{videoSlug}/takes", takeUpload)
+	mux.Handle("DELETE /api/v1/videos/{videoSlug}/takes", takeUpload)
 	mux.Handle("GET /api/events", events.HTTPHandler(hub, func(raw string) (*auth.Claims, error) {
 		return auth.ParseToken(cfg.Auth.JWTSecret, raw)
 	}))
@@ -108,9 +111,55 @@ func newHandler(cfg config.Config, db *database.DB, appHub *events.Hub) http.Han
 	if gc, gerr := gemini.NewFromEnvScript(); gerr == nil {
 		videoSvc.WithScriptGenerator(gc)
 	}
+	if len(watchers) > 0 && watchers[0] != nil {
+		videoSvc.SetWatcher(watchers[0])
+	}
 	mux.Handle(studiov1connect.NewVideoServiceHandler(videoSvc, connect.WithInterceptors(interceptors...)))
+	mux.Handle(studiov1connect.NewJobServiceHandler(services.NewJobService(db.Queries, db.Pool, cfg.DataDir, hub), connect.WithInterceptors(interceptors...)))
+
+	staticDir := os.Getenv("STATIC_DIR")
+	if staticDir == "" {
+		if _, err := os.Stat("frontend/dist"); err == nil {
+			staticDir = "frontend/dist"
+		}
+	}
+	if staticDir != "" {
+		if _, err := os.Stat(staticDir); err == nil {
+			mux.Handle("/", spaHandler(staticDir))
+		}
+	}
 
 	return h2c.NewHandler(mux, &http2.Server{})
+}
+
+func spaHandler(staticDir string) http.Handler {
+	fs := http.Dir(staticDir)
+	fileServer := http.FileServer(fs)
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		cleanPath := filepath.Clean(filepath.ToSlash(r.URL.Path))
+		if cleanPath == "/" || cleanPath == "" || cleanPath == "." {
+			w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+			http.ServeFile(w, r, filepath.Join(staticDir, "index.html"))
+			return
+		}
+
+		f, err := fs.Open(cleanPath)
+		if err == nil {
+			defer f.Close()
+			stat, err := f.Stat()
+			if err == nil && !stat.IsDir() {
+				if strings.HasPrefix(cleanPath, "/assets/") {
+					w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+				}
+				fileServer.ServeHTTP(w, r)
+				return
+			}
+		}
+
+		w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+		http.ServeFile(w, r, filepath.Join(staticDir, "index.html"))
+	})
 }
 
 func main() {
@@ -211,7 +260,7 @@ func main() {
 
 	server := &http.Server{
 		Addr:    ":" + cfg.Port,
-		Handler: newHandler(cfg, db, appHub),
+		Handler: newHandler(cfg, db, appHub, rssWatcher),
 	}
 
 	errCh := make(chan error, 1)

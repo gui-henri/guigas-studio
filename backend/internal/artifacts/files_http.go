@@ -29,6 +29,9 @@ func NewFilesHandler(root string, jwtSecret string) *FilesHandler {
 		authorize: func(r *http.Request) bool {
 			raw := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer ")
 			if raw == "" {
+				raw = r.URL.Query().Get("token")
+			}
+			if raw == "" {
 				return false
 			}
 			if _, err := auth.ParseToken(jwtSecret, raw); err == nil {
@@ -99,7 +102,10 @@ func (h *FilesHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	slug := r.PathValue("slug")
+	slug := r.PathValue("videoSlug")
+	if slug == "" {
+		slug = r.PathValue("slug")
+	}
 	rel := r.PathValue("path")
 	if slug == "" || rel == "" || strings.Contains(rel, "\\") {
 		http.Error(w, "invalid path", http.StatusBadRequest)

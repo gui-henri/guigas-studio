@@ -69,6 +69,9 @@ const (
 	// VideoServiceSetChecklistItemPublishedProcedure is the fully-qualified name of the VideoService's
 	// SetChecklistItemPublished RPC.
 	VideoServiceSetChecklistItemPublishedProcedure = "/app.studio.v1.VideoService/SetChecklistItemPublished"
+	// VideoServiceTriggerRssPollProcedure is the fully-qualified name of the VideoService's
+	// TriggerRssPoll RPC.
+	VideoServiceTriggerRssPollProcedure = "/app.studio.v1.VideoService/TriggerRssPoll"
 )
 
 // VideoServiceClient is a client for the app.studio.v1.VideoService service.
@@ -86,6 +89,7 @@ type VideoServiceClient interface {
 	ApproveFinalCut(context.Context, *connect.Request[v1.ApproveFinalCutRequest]) (*connect.Response[v1.ApproveFinalCutResponse], error)
 	GetReleaseChecklist(context.Context, *connect.Request[v1.GetReleaseChecklistRequest]) (*connect.Response[v1.GetReleaseChecklistResponse], error)
 	SetChecklistItemPublished(context.Context, *connect.Request[v1.SetChecklistItemPublishedRequest]) (*connect.Response[v1.SetChecklistItemPublishedResponse], error)
+	TriggerRssPoll(context.Context, *connect.Request[v1.TriggerRssPollRequest]) (*connect.Response[v1.TriggerRssPollResponse], error)
 }
 
 // NewVideoServiceClient constructs a client for the app.studio.v1.VideoService service. By default,
@@ -177,6 +181,12 @@ func NewVideoServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			connect.WithSchema(videoServiceMethods.ByName("SetChecklistItemPublished")),
 			connect.WithClientOptions(opts...),
 		),
+		triggerRssPoll: connect.NewClient[v1.TriggerRssPollRequest, v1.TriggerRssPollResponse](
+			httpClient,
+			baseURL+VideoServiceTriggerRssPollProcedure,
+			connect.WithSchema(videoServiceMethods.ByName("TriggerRssPoll")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -195,6 +205,7 @@ type videoServiceClient struct {
 	approveFinalCut           *connect.Client[v1.ApproveFinalCutRequest, v1.ApproveFinalCutResponse]
 	getReleaseChecklist       *connect.Client[v1.GetReleaseChecklistRequest, v1.GetReleaseChecklistResponse]
 	setChecklistItemPublished *connect.Client[v1.SetChecklistItemPublishedRequest, v1.SetChecklistItemPublishedResponse]
+	triggerRssPoll            *connect.Client[v1.TriggerRssPollRequest, v1.TriggerRssPollResponse]
 }
 
 // ListVideos calls app.studio.v1.VideoService.ListVideos.
@@ -262,6 +273,11 @@ func (c *videoServiceClient) SetChecklistItemPublished(ctx context.Context, req 
 	return c.setChecklistItemPublished.CallUnary(ctx, req)
 }
 
+// TriggerRssPoll calls app.studio.v1.VideoService.TriggerRssPoll.
+func (c *videoServiceClient) TriggerRssPoll(ctx context.Context, req *connect.Request[v1.TriggerRssPollRequest]) (*connect.Response[v1.TriggerRssPollResponse], error) {
+	return c.triggerRssPoll.CallUnary(ctx, req)
+}
+
 // VideoServiceHandler is an implementation of the app.studio.v1.VideoService service.
 type VideoServiceHandler interface {
 	ListVideos(context.Context, *connect.Request[v1.ListVideosRequest]) (*connect.Response[v1.ListVideosResponse], error)
@@ -277,6 +293,7 @@ type VideoServiceHandler interface {
 	ApproveFinalCut(context.Context, *connect.Request[v1.ApproveFinalCutRequest]) (*connect.Response[v1.ApproveFinalCutResponse], error)
 	GetReleaseChecklist(context.Context, *connect.Request[v1.GetReleaseChecklistRequest]) (*connect.Response[v1.GetReleaseChecklistResponse], error)
 	SetChecklistItemPublished(context.Context, *connect.Request[v1.SetChecklistItemPublishedRequest]) (*connect.Response[v1.SetChecklistItemPublishedResponse], error)
+	TriggerRssPoll(context.Context, *connect.Request[v1.TriggerRssPollRequest]) (*connect.Response[v1.TriggerRssPollResponse], error)
 }
 
 // NewVideoServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -364,6 +381,12 @@ func NewVideoServiceHandler(svc VideoServiceHandler, opts ...connect.HandlerOpti
 		connect.WithSchema(videoServiceMethods.ByName("SetChecklistItemPublished")),
 		connect.WithHandlerOptions(opts...),
 	)
+	videoServiceTriggerRssPollHandler := connect.NewUnaryHandler(
+		VideoServiceTriggerRssPollProcedure,
+		svc.TriggerRssPoll,
+		connect.WithSchema(videoServiceMethods.ByName("TriggerRssPoll")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/app.studio.v1.VideoService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case VideoServiceListVideosProcedure:
@@ -392,6 +415,8 @@ func NewVideoServiceHandler(svc VideoServiceHandler, opts ...connect.HandlerOpti
 			videoServiceGetReleaseChecklistHandler.ServeHTTP(w, r)
 		case VideoServiceSetChecklistItemPublishedProcedure:
 			videoServiceSetChecklistItemPublishedHandler.ServeHTTP(w, r)
+		case VideoServiceTriggerRssPollProcedure:
+			videoServiceTriggerRssPollHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -451,4 +476,8 @@ func (UnimplementedVideoServiceHandler) GetReleaseChecklist(context.Context, *co
 
 func (UnimplementedVideoServiceHandler) SetChecklistItemPublished(context.Context, *connect.Request[v1.SetChecklistItemPublishedRequest]) (*connect.Response[v1.SetChecklistItemPublishedResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("app.studio.v1.VideoService.SetChecklistItemPublished is not implemented"))
+}
+
+func (UnimplementedVideoServiceHandler) TriggerRssPoll(context.Context, *connect.Request[v1.TriggerRssPollRequest]) (*connect.Response[v1.TriggerRssPollResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("app.studio.v1.VideoService.TriggerRssPoll is not implemented"))
 }

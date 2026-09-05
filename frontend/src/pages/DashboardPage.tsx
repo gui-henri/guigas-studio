@@ -1,9 +1,15 @@
+import { useState } from "react";
 import { useQuery } from "@connectrpc/connect-query";
 import { useNavigate } from "react-router-dom";
+import { RefreshCw } from "lucide-react";
 
-import { listVideos } from "../gen/app/studio/v1/video-VideoService_connectquery";
+import {
+  listVideos,
+  triggerRssPoll,
+} from "../gen/app/studio/v1/video-VideoService_connectquery";
 import { VideoStatus } from "../gen/app/studio/v1/video_pb";
 import type { Video } from "../gen/app/studio/v1/video_pb";
+import { useRpcMutation } from "../lib/rpc";
 import {
   presentStatus,
   relativeTime,
@@ -42,54 +48,118 @@ function VideoCard({ video }: { video: Video }) {
 }
 
 export default function DashboardPage() {
+  const [feedback, setFeedback] = useState<{
+    type: "success" | "info" | "error";
+    text: string;
+  } | null>(null);
+
   const { data, isLoading, error, refetch, isRefetching } = useQuery(listVideos);
 
-  if (isLoading) {
-    return (
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3" aria-busy>
-        {[0, 1, 2].map((n) => (
-          <Skeleton key={n} className="h-28" />
-        ))}
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <Alert variant="destructive">
-        <AlertDescription>
-          Falha ao carregar vídeos: {error.message}
-        </AlertDescription>
-        <div className="mt-2">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => void refetch()}
-            disabled={isRefetching}
-          >
-            {isRefetching ? "Tentando…" : "Tentar de novo"}
-          </Button>
-        </div>
-      </Alert>
-    );
-  }
+  const { mutate: syncRss, isPending: isSyncing } = useRpcMutation(triggerRssPoll, {
+    invalidate: [listVideos],
+    onSuccess: (res) => {
+      if (res.newPostsCount > 0) {
+        setFeedback({
+          type: "success",
+          text: `${res.newPostsCount} novo(s) post(s) importado(s) com sucesso!`,
+        });
+      } else {
+        setFeedback({
+          type: "info",
+          text: "O feed RSS foi verificado e já está atualizado (nenhum post novo).",
+        });
+      }
+    },
+    onError: (err) => {
+      setFeedback({
+        type: "error",
+        text: `Falha ao buscar feed RSS: ${err.message}`,
+      });
+    },
+  });
 
   const videos = data?.videos ?? [];
-  if (videos.length === 0) {
-    return (
-      <p className="mt-16 text-center text-sm text-muted-foreground">
-        Nenhum vídeo ainda. Quando um post sair no blog, o watcher cria o card
-        automaticamente.
-      </p>
-    );
-  }
 
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-      {videos.map((video) => (
-        <VideoCard key={video.id} video={video} />
-      ))}
+    <div className="space-y-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-border pb-4">
+        <div>
+          <h1 className="font-display text-xl font-semibold">Pipeline de Vídeos</h1>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {videos.length} vídeo(s) no pipeline
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            onClick={() => {
+              setFeedback(null);
+              syncRss({});
+            }}
+            disabled={isSyncing}
+          >
+            <RefreshCw className={isSyncing ? "animate-spin" : ""} />
+            {isSyncing ? "Buscando feed RSS…" : "Sincronizar RSS"}
+          </Button>
+        </div>
+      </div>
+
+      {feedback && (
+        <Alert variant={feedback.type === "error" ? "destructive" : "default"}>
+          <AlertDescription>
+            <span>{feedback.text}</span>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setFeedback(null)}
+              className="ml-2"
+            >
+              ✕
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {isLoading ? (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3" aria-busy>
+          {[0, 1, 2].map((n) => (
+            <Skeleton key={n} className="h-28" />
+          ))}
+        </div>
+      ) : error ? (
+        <Alert variant="destructive">
+          <AlertDescription>
+            Falha ao carregar vídeos: {error.message}
+          </AlertDescription>
+          <div className="mt-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => void refetch()}
+              disabled={isRefetching}
+            >
+              {isRefetching ? "Tentando…" : "Tentar de novo"}
+            </Button>
+          </div>
+        </Alert>
+      ) : videos.length === 0 ? (
+        <Card>
+          <CardContent className="p-12 text-center">
+            <p className="text-sm text-muted-foreground">Nenhum vídeo no pipeline no momento.</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Clique em "Sincronizar RSS" acima ou aguarde o watcher automático detectar novos posts.
+            </p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {videos.map((video) => (
+            <VideoCard key={video.id} video={video} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

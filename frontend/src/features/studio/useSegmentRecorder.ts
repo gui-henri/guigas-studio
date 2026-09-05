@@ -1,10 +1,13 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { startMicCapture } from "../../audio/micCapture";
 import {
+  mapSampleToMouth,
+  mapSampleToState,
   serializeBlendshapes,
   type BlendshapeSample,
+  type MouthShape,
   type SpriteState,
 } from "../../recording/stateMapping";
 import { useFaceLandmarker } from "../../recording/useFaceLandmarker";
@@ -30,7 +33,12 @@ export interface SegmentRecorderState {
   error: string | null;
   localPair: RecordedPair | null; // kept when uploads fail (manual retry)
   fps: number;
+  faceDetected: boolean;
   delegate: "webgpu" | "cpu" | null;
+  audioLevel: number;
+  samplesCount: number;
+  elapsedMs: number;
+  lastSavedAudioUrl: string | null;
   start: () => Promise<void>;
   stop: () => Promise<void>;
   retryUploads: () => Promise<void>;
@@ -46,31 +54,51 @@ export function useSegmentRecorder(
   segmentId: string,
   videoRef: React.RefObject<HTMLVideoElement | null>,
   streamRef: React.RefObject<MediaStream | null>
-): SegmentRecorderState & { stateRef: React.MutableRefObject<SpriteState> } {
+): SegmentRecorderState & {
+  stateRef: React.MutableRefObject<SpriteState>;
+  mouthRef: React.MutableRefObject<MouthShape>;
+} {
   const [phase, setPhase] = useState<RecorderPhase>("idle");
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [localPair, setLocalPair] = useState<RecordedPair | null>(null);
+  const [audioLevel, setAudioLevel] = useState(0);
+  const [samplesCount, setSamplesCount] = useState(0);
+  const [elapsedMs, setElapsedMs] = useState(0);
+  const [lastSavedAudioUrl, setLastSavedAudioUrl] = useState<string | null>(null);
 
   const samplesRef = useRef<BlendshapeSample[]>([]);
   const captureRef = useRef<Awaited<ReturnType<typeof startMicCapture>> | null>(null);
   const abortRef = useRef(false);
   const awaitingFlush = useRef<(() => void) | null>(null);
   const stateRef = useRef<SpriteState>("idle");
+  const mouthRef = useRef<MouthShape>("rest");
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const startedAtRef = useRef(0);
   const queryClient = useQueryClient();
 
-  const landmarker = useFaceLandmarker(videoRef, (batch) => {
-    if (abortRef.current) return;
-    samplesRef.current.push(...batch);
-    // Coarse live avatar state from the freshest sample.
-    void batch;
-    stateRef.current = deriveCoarseState(samplesRef.current);
-    const flush = awaitingFlush.current;
-    if (flush) {
-      awaitingFlush.current = null;
-      flush();
+  const landmarker = useFaceLandmarker(
+    videoRef,
+    (batch) => {
+      if (abortRef.current) return;
+      samplesRef.current.push(...batch);
+      setSamplesCount(samplesRef.current.length);
+      const flush = awaitingFlush.current;
+      if (flush) {
+        awaitingFlush.current = null;
+        flush();
+      }
+    },
+    (live) => {
+      if (live.faceDetected && live.bs.length > 0) {
+        stateRef.current = mapSampleToState(live.bs, undefined, live.names);
+        mouthRef.current = mapSampleToMouth(live.bs, live.names);
+      } else {
+        stateRef.current = "idle";
+        mouthRef.current = "rest";
+      }
     }
-  });
+  );
 
   const guard = useCallback(
     async (stream: MediaStream | null) => {
@@ -84,9 +112,21 @@ export function useSegmentRecorder(
     []
   );
 
+  // Clean up previous blob URL on unmount or new record
+  useEffect(() => {
+    return () => {
+      if (lastSavedAudioUrl) URL.revokeObjectURL(lastSavedAudioUrl);
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [lastSavedAudioUrl]);
+
   const doStop = useCallback(async (): Promise<void> => {
     if (phase !== "recording") return;
     setPhase("encoding");
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
 
     const capture = captureRef.current;
     captureRef.current = null;
@@ -104,6 +144,7 @@ export function useSegmentRecorder(
       return;
     }
     const audio = await capture.stop();
+    setAudioLevel(0);
 
     if (abortRef.current) {
       samplesRef.current = [];
@@ -120,6 +161,9 @@ export function useSegmentRecorder(
     };
     samplesRef.current = [];
     setLocalPair(pair);
+
+    const audioUrl = URL.createObjectURL(pair.wavBlob);
+    setLastSavedAudioUrl(audioUrl);
 
     try {
       setPhase("uploading");
@@ -152,17 +196,31 @@ export function useSegmentRecorder(
     }
     setError(null);
     setProgress(0);
+    setSamplesCount(0);
+    setElapsedMs(0);
     samplesRef.current = [];
     abortRef.current = false;
-    stateRef.current = "idle";
 
     const t0 = performance.now(); // shared clock for both pipelines
+    startedAtRef.current = t0;
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => {
+      setElapsedMs(performance.now() - startedAtRef.current);
+    }, 100);
+
     const stream = streamRef.current;
     landmarker.start(t0);
     try {
-      captureRef.current = await startMicCapture({});
+      captureRef.current = await startMicCapture({
+        onLevel: (dbfs) => {
+          // Normalize -60 dBFS .. 0 dBFS to 0.0 .. 1.0
+          const clamped = Math.max(0, Math.min(1, (dbfs + 60) / 60));
+          setAudioLevel(clamped);
+        },
+      });
     } catch (err: unknown) {
       landmarker.stop();
+      if (timerRef.current) clearInterval(timerRef.current);
       setError(String((err as Error).message ?? err));
       setPhase("error");
       return;
@@ -170,6 +228,7 @@ export function useSegmentRecorder(
     if (await guard(stream)) {
       await captureRef.current?.stop();
       landmarker.stop();
+      if (timerRef.current) clearInterval(timerRef.current);
       setPhase("idle");
       return;
     }
@@ -204,19 +263,16 @@ export function useSegmentRecorder(
     error,
     localPair,
     fps: landmarker.fps,
+    faceDetected: landmarker.faceDetected,
     delegate: landmarker.delegate,
+    audioLevel,
+    samplesCount,
+    elapsedMs,
+    lastSavedAudioUrl,
     start: doStart,
     stop: doStop,
     retryUploads,
     stateRef,
+    mouthRef,
   };
-}
-
-// Minimal inline derivation so the live avatar reacts without importing the
-// full mapping here (full timeline mapping happens in serializeBlendshapes).
-function deriveCoarseState(samples: BlendshapeSample[]): SpriteState {
-  const last = samples[samples.length - 1];
-  if (!last) return "idle";
-  const jawOpen = last.bs[22] ?? 0;
-  return jawOpen > 0.25 ? "talking" : "idle";
 }

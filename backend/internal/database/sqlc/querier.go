@@ -22,6 +22,7 @@ type Querier interface {
 	CountUnpublishedItems(ctx context.Context, videoID uuid.UUID) (int64, error)
 	CreateUserIfNotExists(ctx context.Context, arg CreateUserIfNotExistsParams) (int64, error)
 	CreateVideo(ctx context.Context, arg CreateVideoParams) (Video, error)
+	DeleteTakesBySegment(ctx context.Context, arg DeleteTakesBySegmentParams) error
 	EnqueueJob(ctx context.Context, arg EnqueueJobParams) (Job, error)
 	// FailJob increments attempts; below max_attempts the job returns to pending
 	// with exponential backoff (2^attempts × 30 s), otherwise it settles failed.
