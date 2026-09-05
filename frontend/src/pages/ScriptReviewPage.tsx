@@ -8,15 +8,12 @@ import type { Segment } from "../gen/app/studio/v1/script_pb";
 import { VideoStatus } from "../gen/app/studio/v1/video_pb";
 import SegmentCard, {
   beatLabel,
-  emotionLabel,
   type SegmentErrors,
 } from "../components/script/SegmentCard";
 import ScriptDiff from "../components/script/ScriptDiff";
 import Modal from "../components/Modal";
 import VideoPipelineNav from "../components/VideoPipelineNav";
 import { useRpcMutation } from "../lib/rpc";
-import { presentStatus } from "../lib/videoStatus";
-import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Alert, AlertDescription } from "../components/ui/alert";
 import { Skeleton } from "../components/ui/skeleton";

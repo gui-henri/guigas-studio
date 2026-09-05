@@ -5,7 +5,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   ArrowRight,
   Headphones,
-  Mic,
   Radio,
   Square,
   Trash2,
@@ -20,7 +19,6 @@ import {
 import LiveAvatar from "../components/LiveAvatar";
 import Teleprompter from "../features/studio/Teleprompter";
 import { useSegmentRecorder } from "../features/studio/useSegmentRecorder";
-import { presentStatus } from "../lib/videoStatus";
 import { deleteTake } from "../lib/uploadClient";
 import { TOKEN_STORAGE_KEY } from "../lib/transport";
 import { Badge } from "../components/ui/badge";

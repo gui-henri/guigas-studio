@@ -7,7 +7,7 @@ import { login } from "../gen/app/studio/v1/auth-AuthService_connectquery";
 import { useRpcMutation } from "../lib/rpc";
 import { useAuth } from "../context/AuthContext";
 import { Button } from "../components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 
