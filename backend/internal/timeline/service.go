@@ -14,6 +14,7 @@ import (
 	studiov1 "github.com/gui-henri/guigas-studio/backend/gen/app/studio/v1"
 	sqlc "github.com/gui-henri/guigas-studio/backend/internal/database/sqlc"
 	"github.com/gui-henri/guigas-studio/backend/internal/domain/videostate"
+	"github.com/gui-henri/guigas-studio/backend/internal/visemes"
 	"github.com/gui-henri/guigas-studio/backend/internal/workspace"
 )
 
@@ -25,13 +26,20 @@ type Notifier interface {
 // Service processes every segment of a voice_processing video into timelines
 // and advances the machine exactly once when the last one lands.
 type Service struct {
-	queries *sqlc.Queries
-	dataDir string
-	hub     Notifier
+	queries      *sqlc.Queries
+	dataDir      string
+	hub          Notifier
+	visemeEngine visemes.Engine
 }
 
 func NewService(queries *sqlc.Queries, dataDir string, hub Notifier) *Service {
 	return &Service{queries: queries, dataDir: dataDir, hub: hub}
+}
+
+// WithVisemeEngine configures an explicit lip-sync engine (e.g. for testing).
+func (s *Service) WithVisemeEngine(engine visemes.Engine) *Service {
+	s.visemeEngine = engine
+	return s
 }
 
 // blendshapesFile mirrors the S2-03 serializer output.
@@ -82,7 +90,7 @@ func (s *Service) Run(ctx context.Context, slug string) {
 			continue // idempotent skip
 		}
 
-		tl, buildErr := s.buildSegment(root, seg.ID)
+		tl, buildErr := s.buildSegment(ctx, root, seg.ID)
 		if buildErr != nil {
 			s.block(ctx, video.ID, slug,
 				fmt.Sprintf("segment %s: %s", seg.ID, buildErr.Error()))
@@ -133,23 +141,10 @@ func (s *Service) Run(ctx context.Context, slug string) {
 	}
 }
 
-func (s *Service) buildSegment(root, segmentID string) (*studiov1.AvatarTimeline, error) {
+func (s *Service) buildSegment(ctx context.Context, root, segmentID string) (*studiov1.AvatarTimeline, error) {
 	audioDir := filepath.Join(root, "audio")
 
-	// 1. Visemes sidecar from S3-03.
-	visemesRaw, err := os.ReadFile(filepath.Join(audioDir, segmentID+".visemes.json"))
-	if err != nil {
-		return nil, fmt.Errorf("visemes sidecar missing: %w", err)
-	}
-	var sidecar struct {
-		WavSha256 string       `json:"wav_sha256"`
-		Cues      []MouthCueIn `json:"cues"`
-	}
-	if err := json.Unmarshal(visemesRaw, &sidecar); err != nil {
-		return nil, fmt.Errorf("visemes parse: %w", err)
-	}
-
-	// 2. Blendshapes with names from S2-07 file.
+	// 1. Blendshapes with names from S2-07 file.
 	bsRaw, err := os.ReadFile(filepath.Join(audioDir, segmentID+".blendshapes.json"))
 	if err != nil {
 		return nil, fmt.Errorf("blendshapes missing: %w", err)
@@ -180,6 +175,19 @@ func (s *Service) buildSegment(root, segmentID string) (*studiov1.AvatarTimeline
 		durationMs = samples[n-1].T
 	}
 
+	// 2. Visemes sidecar from S3-03 (load existing, recognize via engine, or graceful fallback).
+	visemesRaw, err := s.loadOrGenerateVisemes(ctx, audioDir, segmentID, durationMs)
+	if err != nil {
+		return nil, fmt.Errorf("visemes sidecar missing: %w", err)
+	}
+	var sidecar struct {
+		WavSha256 string       `json:"wav_sha256"`
+		Cues      []MouthCueIn `json:"cues"`
+	}
+	if err := json.Unmarshal(visemesRaw, &sidecar); err != nil {
+		return nil, fmt.Errorf("visemes parse: %w", err)
+	}
+
 	// 3. Word timings (optional; S3-02 output persisted by orchestrator).
 	var words []WordTimingIn
 	if wordsRaw, err := os.ReadFile(filepath.Join(timelinesDirOf(root), segmentID+".words.json")); err == nil {
@@ -206,6 +214,72 @@ func (s *Service) buildSegment(root, segmentID string) (*studiov1.AvatarTimeline
 		}}
 	}
 	return tl, nil
+}
+
+func (s *Service) loadOrGenerateVisemes(ctx context.Context, audioDir, segmentID string, durationMs int64) ([]byte, error) {
+	sidecarPath := filepath.Join(audioDir, segmentID+".visemes.json")
+	if raw, err := os.ReadFile(sidecarPath); err == nil {
+		return raw, nil
+	}
+	// Legacy naming: <segment-id>.wav.visemes.json
+	legacyPath := filepath.Join(audioDir, segmentID+".wav.visemes.json")
+	if raw, err := os.ReadFile(legacyPath); err == nil {
+		return raw, nil
+	}
+
+	wavPath := filepath.Join(audioDir, segmentID+".wav")
+	if _, statErr := os.Stat(wavPath); statErr != nil {
+		return nil, fmt.Errorf("neither sidecar nor %s found: %w", filepath.Base(wavPath), statErr)
+	}
+
+	maxDuration := int(durationMs)
+	if maxDuration <= 0 {
+		maxDuration = 1 << 30
+	}
+
+	engine := s.visemeEngine
+	if engine == nil {
+		engine = visemes.NewExecEngineFromEnv("")
+	}
+
+	cues, rErr := visemes.RecognizeWithCache(ctx, engine, wavPath, "", maxDuration)
+	if rErr == nil {
+		if raw, err := os.ReadFile(sidecarPath); err == nil {
+			return raw, nil
+		}
+		sha, _ := visemes.FileSHA256(wavPath)
+		body, _ := json.MarshalIndent(map[string]any{
+			"wav_sha256": sha,
+			"cues":       cues,
+		}, "", "  ")
+		return body, nil
+	}
+
+	// Rhubarb engine unavailable or recognition failed: fallback to neutral mouth shape without blocking.
+	slog.Warn("timeline.visemes_fallback",
+		slog.String("segment", segmentID),
+		slog.Any("reason", rErr),
+	)
+
+	sha, _ := visemes.FileSHA256(wavPath)
+	type fallbackSidecar struct {
+		WavSha256 string       `json:"wav_sha256"`
+		Cues      []MouthCueIn `json:"cues"`
+	}
+	fb := fallbackSidecar{
+		WavSha256: sha,
+		Cues:      []MouthCueIn{},
+	}
+	body, mErr := json.MarshalIndent(fb, "", "  ")
+	if mErr != nil {
+		return nil, fmt.Errorf("marshal fallback visemes: %w", mErr)
+	}
+	body = append(body, '\n')
+	if wErr := os.WriteFile(sidecarPath, body, 0o644); wErr != nil {
+		slog.Warn("timeline.write_fallback_visemes_failed",
+			slog.String("segment", segmentID), slog.Any("error", wErr))
+	}
+	return body, nil
 }
 
 func timelinesDirOf(root string) string { return filepath.Join(root, "timelines") }

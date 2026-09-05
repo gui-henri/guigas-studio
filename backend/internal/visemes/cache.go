@@ -10,12 +10,19 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // sidecar is the on-disk cache contract: audio/<segment-id>.visemes.json.
 type sidecar struct {
 	WavSha256 string     `json:"wav_sha256"`
 	Cues      []MouthCue `json:"cues"`
+}
+
+// SidecarPath derives the standard on-disk cache path (audio/<segment-id>.visemes.json)
+// from a WAV file path (audio/<segment-id>.wav).
+func SidecarPath(wavPath string) string {
+	return strings.TrimSuffix(wavPath, ".wav") + ".visemes.json"
 }
 
 // RecognizeWithCache runs engine.Recognize unless the sidecar cache already
@@ -29,15 +36,19 @@ func RecognizeWithCache(
 	wavDurationMs int,
 ) ([]MouthCue, error) {
 	_ = dialogText
-	sidecarPath := wavPath + ".visemes.json"
+	sidecarPath := SidecarPath(wavPath)
 
-	wavSum, err := fileSHA256(wavPath)
+	wavSum, err := FileSHA256(wavPath)
 	if err != nil {
 		return nil, fmt.Errorf("hash wav: %w", err)
 	}
 
 	if cached, ok := readSidecar(sidecarPath); ok && cached.WavSha256 == wavSum {
 		slog.Debug("visemes.cache_hit", slog.String("wav", filepath.Base(wavPath)))
+		return Validate(cached.Cues, wavDurationMs)
+	}
+	if cached, ok := readSidecar(wavPath + ".visemes.json"); ok && cached.WavSha256 == wavSum {
+		slog.Debug("visemes.cache_hit_legacy", slog.String("wav", filepath.Base(wavPath)))
 		return Validate(cached.Cues, wavDurationMs)
 	}
 
@@ -71,7 +82,8 @@ func readSidecar(path string) (sidecar, bool) {
 	return sc, true
 }
 
-func fileSHA256(path string) (string, error) {
+// FileSHA256 computes the sha256 hex digest of a file.
+func FileSHA256(path string) (string, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return "", err
@@ -82,4 +94,8 @@ func fileSHA256(path string) (string, error) {
 		return "", err
 	}
 	return hex.EncodeToString(h.Sum(nil)), nil
+}
+
+func fileSHA256(path string) (string, error) {
+	return FileSHA256(path)
 }

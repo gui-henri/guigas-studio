@@ -197,6 +197,73 @@ func TestTimelinePartialFailureBlocks(t *testing.T) {
 	}
 }
 
+func TestTimelineServiceAutoGeneratesVisemesFallback(t *testing.T) {
+	ctx := context.Background()
+	url := testutil.DatabaseURL(t, "timeline")
+	if url == "" {
+		t.Skip("STUDIO_TEST_DATABASE_URL not set; skipping integration test")
+	}
+	db, err := database.Connect(ctx, url)
+	if err != nil {
+		t.Fatalf("connect: %v", err)
+	}
+	defer db.Pool.Close()
+	if _, err := db.Pool.Exec(ctx,
+		`TRUNCATE takes, video_artifact_parses, video_status_history, rss_items, videos, users CASCADE`); err != nil {
+		t.Fatal(err)
+	}
+
+	dataDir := t.TempDir()
+	slug := "timeline-fallback-demo"
+	root := filepath.Join(dataDir, "videos", slug)
+	if _, err := workspace.Scaffold(dataDir, slug, []byte("# x")); err != nil {
+		t.Fatal(err)
+	}
+
+	video, err := db.Queries.CreateVideo(ctx, sqlc.CreateVideoParams{Slug: slug, Title: "Fallback"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := db.Queries.UpdateVideoStatus(ctx, sqlc.UpdateVideoStatusParams{
+		ID: video.ID, Status: string(videostate.StateVoiceProcess),
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	script := `{"post":"f","segments":[{"id":"seg-auto"}]}`
+	if err := os.WriteFile(filepath.Join(root, "script.json"), []byte(script), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	audioDir := filepath.Join(root, "audio")
+	_ = os.MkdirAll(audioDir, 0o755)
+
+	// Write blendshapes and wav, but purposely DO NOT write .visemes.json
+	bs := `{"version":1,"approx_fps":10,"names":["_neutral","jawOpen"],"samples":[[0,0,0],[100,0,0.5]],"state_changes":[]}`
+	if err := os.WriteFile(filepath.Join(audioDir, "seg-auto.blendshapes.json"), []byte(bs), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(audioDir, "seg-auto.wav"), []byte("RIFFfakeaudio"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	svc := NewService(db.Queries, dataDir, noopHub{})
+	svc.Run(ctx, slug)
+
+	// Verify fallback sidecar and timeline were generated
+	if _, err := os.Stat(filepath.Join(audioDir, "seg-auto.visemes.json")); err != nil {
+		t.Fatalf("seg-auto.visemes.json was not generated: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(root, "timelines", "seg-auto.timeline.json")); err != nil {
+		t.Fatalf("seg-auto.timeline.json was not generated: %v", err)
+	}
+
+	v, _ := db.Queries.GetVideoBySlug(ctx, slug)
+	if v.Status != string(videostate.StateScenesPending) {
+		t.Fatalf("status = %q, want scenes_pending", v.Status)
+	}
+}
+
 func jsonValid(b []byte) bool {
 	var m map[string]any
 	return jsonUnmarshalInto(b, &m) == nil

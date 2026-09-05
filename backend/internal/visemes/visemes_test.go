@@ -103,7 +103,10 @@ func TestCacheHitAvoidsReprocessing(t *testing.T) {
 	}
 
 	// Sidecar exists with the wav checksum.
-	raw, rErr := os.ReadFile(wav + ".visemes.json")
+	raw, rErr := os.ReadFile(SidecarPath(wav))
+	if rErr != nil {
+		raw, rErr = os.ReadFile(wav + ".visemes.json")
+	}
 	if rErr != nil {
 		t.Fatalf("sidecar missing: %v", rErr)
 	}
