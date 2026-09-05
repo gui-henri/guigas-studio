@@ -111,7 +111,7 @@ export const SegmentComposition: React.FC<SegmentCompositionProps> = ({
   }
 
   const isScenePresent = parsed !== null;
-  const decision = selectLayout(isScenePresent ? parsed.scene.type : null, layout);
+  const decision = selectLayout(parsed ? parsed.scene.type : null, layout);
   const resolve = registry
     ? createSceneResolver({ ...defaultSceneRegistry, ...registry })
     : resolveSceneComponent;
