@@ -37,6 +37,21 @@ describe("scene grammar — valid cases", () => {
       expect(result.ok).toBe(true);
     });
   }
+
+  it("accepts scenes with protobuf-es $typeName metadata without error", () => {
+    const protoScene = {
+      $typeName: "app.studio.v1.SceneRef",
+      type: "callout",
+      props: {
+        $typeName: "google.protobuf.Struct",
+        variant: "info",
+        title: "Note",
+        body: "Read this.",
+      },
+    };
+    const result = parseScene(protoScene);
+    expect(result.ok).toBe(true);
+  });
 });
 
 function expectIssue(raw: unknown, path: string, message: string) {

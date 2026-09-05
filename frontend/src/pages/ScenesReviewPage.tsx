@@ -373,7 +373,7 @@ export default function ScenesReviewPage() {
             key={s.id}
             videoId={id}
             segmentId={s.id}
-            scene={s.scene ?? null}
+            scene={s.scene ? { type: s.scene.type, props: s.scene.props } : null}
             sceneType={s.scene?.type ?? null}
             narration={s.narrationPt}
             hasAudio={recordedSegments.has(s.id)}

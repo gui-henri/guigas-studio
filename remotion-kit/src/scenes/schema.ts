@@ -257,13 +257,29 @@ function formatIssues(error: z.ZodError): SceneParseIssue[] {
   return issues;
 }
 
+function stripProtoFields(val: unknown): unknown {
+  if (val === null || typeof val !== "object") {
+    return val;
+  }
+  if (Array.isArray(val)) {
+    return val.map(stripProtoFields);
+  }
+  const clean: Record<string, unknown> = {};
+  for (const [key, v] of Object.entries(val as Record<string, unknown>)) {
+    if (key.startsWith("$")) continue;
+    clean[key] = stripProtoFields(v);
+  }
+  return clean;
+}
+
 /**
  * Parses a raw `scene` value (the protojson SceneRef of a StudioScript
  * segment) against the closed grammar. Returns readable issues with exact
  * prop paths on failure — never throws.
  */
 export function parseScene(raw: unknown): ParseSceneResult {
-  const result = sceneSchema.safeParse(raw);
+  const clean = stripProtoFields(raw);
+  const result = sceneSchema.safeParse(clean);
   if (!result.success) {
     return { ok: false, issues: formatIssues(result.error) };
   }
